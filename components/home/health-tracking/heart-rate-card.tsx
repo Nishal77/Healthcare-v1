@@ -1,32 +1,77 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
-import Svg, { Path, Polyline } from 'react-native-svg';
 
-// ECG-style waveform path
+// Pure RN ECG waveform — each segment is an absolutely-positioned rotated View
+const RAW_PTS: [number, number][] = [
+  [0, 26], [28, 26], [34, 26], [38, 14], [42, 38],
+  [46, 10], [52, 42], [56, 26], [80, 26], [86, 26],
+  [90, 14], [94, 38], [98, 10], [104, 42], [108, 26],
+  [132, 26], [138, 26], [142, 14], [146, 38], [150, 10],
+  [156, 42], [160, 26], [185, 26], [220, 26],
+];
+const ECG_H = 52;
+const ECG_SOURCE_W = 220;
+
 function EcgLine() {
+  const [containerW, setContainerW] = useState(0);
+
+  const segments = containerW > 0
+    ? RAW_PTS.slice(1).map((p2, i) => {
+        const p1 = RAW_PTS[i];
+        const scale = containerW / ECG_SOURCE_W;
+        const x1 = p1[0] * scale;
+        const y1 = p1[1];
+        const x2 = p2[0] * scale;
+        const y2 = p2[1];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 0.5) return null;
+        const angle = Math.atan2(dy, dx);
+        const cx = (x1 + x2) / 2;
+        const cy = (y1 + y2) / 2;
+        return { key: i, len, angle, cx, cy };
+      }).filter(Boolean)
+    : [];
+
   return (
-    <Svg width="100%" height="52" viewBox="0 0 220 52" preserveAspectRatio="none">
-      {/* Faint grid line */}
-      <Polyline
-        points="0,26 220,26"
-        stroke="rgba(255,255,255,0.08)"
-        strokeWidth="1"
+    <View
+      style={{ height: ECG_H, width: '100%', position: 'relative', overflow: 'hidden' }}
+      onLayout={(e) => setContainerW(e.nativeEvent.layout.width)}>
+      {/* Baseline */}
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: ECG_H / 2 - 0.5,
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.06)',
+        }}
       />
-      {/* ECG waveform */}
-      <Path
-        d="M0,26 L28,26 L34,26 L38,14 L42,38 L46,10 L52,42 L56,26 L80,26 L86,26 L90,14 L94,38 L98,10 L104,42 L108,26 L132,26 L138,26 L142,14 L146,38 L150,10 L156,42 L160,26 L185,26 L220,26"
-        stroke="#4ADE80"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
+      {segments.map((s) =>
+        s ? (
+          <View
+            key={s.key}
+            style={{
+              position: 'absolute',
+              width: s.len,
+              height: 2,
+              backgroundColor: '#4ADE80',
+              borderRadius: 1,
+              left: s.cx - s.len / 2,
+              top: s.cy - 1,
+              transform: [{ rotate: `${s.angle}rad` }],
+            }}
+          />
+        ) : null
+      )}
+    </View>
   );
 }
 
-// Pulsing dot
+// Pulsing LIVE dot
 function PulseDot() {
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(0.6)).current;
@@ -83,7 +128,7 @@ export function HeartRateCard({ bpm = 72, status = 'normal' }: HeartRateCardProp
         elevation: 12,
       }}>
 
-      {/* Subtle green glow overlay */}
+      {/* Subtle glow */}
       <View
         style={{
           position: 'absolute',
@@ -123,7 +168,7 @@ export function HeartRateCard({ bpm = 72, status = 'normal' }: HeartRateCardProp
           </View>
         </View>
 
-        {/* BPM display */}
+        {/* BPM */}
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginTop: 12, marginBottom: 4 }}>
           <Text style={{ fontSize: 56, fontWeight: '800', color: '#FFFFFF', lineHeight: 60, letterSpacing: -2 }}>
             {bpm}
@@ -144,12 +189,12 @@ export function HeartRateCard({ bpm = 72, status = 'normal' }: HeartRateCardProp
           </View>
         </View>
 
-        {/* ECG line */}
+        {/* ECG (pure RN) */}
         <View style={{ marginTop: 4, marginBottom: 8, marginHorizontal: -4 }}>
           <EcgLine />
         </View>
 
-        {/* Footer stats */}
+        {/* Footer */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
           {[
             { label: 'Min', value: '62 bpm' },

@@ -1,10 +1,13 @@
-import Svg, { Defs, Line, LinearGradient, Stop } from 'react-native-svg';
+import { View } from 'react-native';
 
+// Pure React Native semi-gauge — no react-native-svg dependency
 const TICKS = 52;
 const CX = 108;
 const CY = 98;
 const OUTER_R = 86;
 const INNER_R = 68;
+const TICK_LEN = OUTER_R - INNER_R; // 18
+const R_MID = (OUTER_R + INNER_R) / 2; // 77
 
 interface SemiGaugeProps {
   progress: number; // 0–1
@@ -14,44 +17,38 @@ export function SemiGauge({ progress }: SemiGaugeProps) {
   const activeCount = Math.round(Math.min(progress, 1) * TICKS);
 
   return (
-    <Svg width="216" height="106" viewBox="0 0 216 106">
-      <Defs>
-        <LinearGradient id="activeGrad" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0" stopColor="#F59E0B" />
-          <Stop offset="0.5" stopColor="#84CC16" />
-          <Stop offset="1" stopColor="#2C6E49" />
-        </LinearGradient>
-      </Defs>
-
+    <View style={{ width: 216, height: 106 }}>
       {Array.from({ length: TICKS }, (_, i) => {
         const a = Math.PI - (i / (TICKS - 1)) * Math.PI;
-        const x1 = CX + INNER_R * Math.cos(a);
-        const y1 = CY - INNER_R * Math.sin(a);
-        const x2 = CX + OUTER_R * Math.cos(a);
-        const y2 = CY - OUTER_R * Math.sin(a);
-
+        const cx_tick = CX + R_MID * Math.cos(a);
+        const cy_tick = CY - R_MID * Math.sin(a);
         const isActive = i < activeCount;
+        const thickness = isActive ? 4 : 2.5;
 
-        // Gradient-like manual color across active ticks
-        let stroke = '#E9EAEC';
+        let bg = '#DDDFE3';
         if (isActive) {
           const ratio = i / Math.max(activeCount - 1, 1);
-          if (ratio < 0.35) stroke = '#F59E0B';      // amber
-          else if (ratio < 0.65) stroke = '#84CC16'; // lime
-          else stroke = '#2C6E49';                   // deep green
+          if (ratio < 0.35) bg = '#F59E0B';      // amber
+          else if (ratio < 0.65) bg = '#84CC16'; // lime
+          else bg = '#2C6E49';                   // deep green
         }
 
         return (
-          <Line
+          <View
             key={i}
-            x1={x1} y1={y1}
-            x2={x2} y2={y2}
-            stroke={stroke}
-            strokeWidth={isActive ? 3.8 : 2.8}
-            strokeLinecap="round"
+            style={{
+              position: 'absolute',
+              width: TICK_LEN,
+              height: thickness,
+              backgroundColor: bg,
+              borderRadius: thickness / 2,
+              left: cx_tick - TICK_LEN / 2,
+              top: cy_tick - thickness / 2,
+              transform: [{ rotate: `${-(a * 180) / Math.PI}deg` }],
+            }}
           />
         );
       })}
-    </Svg>
+    </View>
   );
 }

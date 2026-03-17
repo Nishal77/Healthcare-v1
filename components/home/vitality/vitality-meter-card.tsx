@@ -4,7 +4,8 @@ import { Text, View } from 'react-native';
 import { SemiGauge } from './semi-gauge';
 
 interface Macro {
-  emoji: string;
+  iconName: string;
+  iconColor: string;
   label: string;
   current: number;
   goal: number;
@@ -20,9 +21,9 @@ interface VitalityMeterCardProps {
 }
 
 const DEFAULT_MACROS: Macro[] = [
-  { emoji: '🥩', label: 'Protein', current: 34, goal: 80, color: '#EF4444' },
-  { emoji: '🌾', label: 'Carbs',   current: 62, goal: 160, color: '#F59E0B' },
-  { emoji: '🥑', label: 'Fat',     current: 18, goal: 55, color: '#8B5CF6' },
+  { iconName: 'barbell-outline', iconColor: '#EF4444', label: 'Protein', current: 34, goal: 80, color: '#EF4444' },
+  { iconName: 'leaf-outline',    iconColor: '#F59E0B', label: 'Carbs',   current: 62, goal: 160, color: '#F59E0B' },
+  { iconName: 'water-outline',   iconColor: '#8B5CF6', label: 'Fat',     current: 18, goal: 55, color: '#8B5CF6' },
 ];
 
 export function VitalityMeterCard({
@@ -130,7 +131,7 @@ export function VitalityMeterCard({
                 bottom: 2,
                 alignItems: 'center',
               }}>
-              <Text style={{ fontSize: 22 }}>🔥</Text>
+              <Ionicons name="flame" size={22} color="#F97316" />
               <Text style={{ fontSize: 26, fontWeight: '900', color: '#111827', lineHeight: 28, letterSpacing: -1 }}>
                 {caloriesLeft}
               </Text>
@@ -160,7 +161,7 @@ export function VitalityMeterCard({
 
       {/* Macros Row */}
       <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingVertical: 14, gap: 8 }}>
-        {macros.map(({ emoji, label, current, goal, color }) => (
+        {macros.map(({ iconName, iconColor, label, current, goal, color }) => (
           <View
             key={label}
             style={{
@@ -168,7 +169,7 @@ export function VitalityMeterCard({
               alignItems: 'center',
               gap: 4,
             }}>
-            <Text style={{ fontSize: 20 }}>{emoji}</Text>
+            <Ionicons name={iconName as any} size={20} color={iconColor} />
             {/* Macro progress bar */}
             <View style={{ width: '80%', height: 3, backgroundColor: '#F3F4F6', borderRadius: 2 }}>
               <View

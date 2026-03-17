@@ -79,7 +79,7 @@ export function PredictiveInsightCard({
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Text style={{ fontSize: 18 }}>🌿</Text>
+            <Ionicons name="leaf-outline" size={18} color="#4ADE80" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: '600', letterSpacing: 0.8 }}>

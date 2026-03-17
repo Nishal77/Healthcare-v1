@@ -1,7 +1,9 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
 interface MetricCardProps {
-  icon: string;
+  iconName: string;
+  iconColor: string;
   label: string;
   value: string;
   unit: string;
@@ -10,12 +12,13 @@ interface MetricCardProps {
   bgColor: string;
   iconBgColor: string;
   valueColor: string;
-  progress?: number; // 0–1
+  progress?: number;
   progressColor?: string;
 }
 
 export function MetricCard({
-  icon,
+  iconName,
+  iconColor,
   label,
   value,
   unit,
@@ -40,7 +43,6 @@ export function MetricCard({
         shadowRadius: 8,
         elevation: 3,
       }}>
-      {/* Icon */}
       <View
         style={{
           width: 38,
@@ -51,10 +53,8 @@ export function MetricCard({
           justifyContent: 'center',
           marginBottom: 12,
         }}>
-        <Text style={{ fontSize: 18 }}>{icon}</Text>
+        <Ionicons name={iconName as any} size={20} color={iconColor} />
       </View>
-
-      {/* Value + unit */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3, marginBottom: 2 }}>
         <Text style={{ fontSize: 26, fontWeight: '800', color: valueColor, lineHeight: 30, letterSpacing: -0.5 }}>
           {value}
@@ -63,18 +63,14 @@ export function MetricCard({
           {unit}
         </Text>
       </View>
-
-      {/* Label */}
       <Text style={{ fontSize: 12, color: valueColor, opacity: 0.55, fontWeight: '500', marginBottom: 8 }}>
         {label}
       </Text>
-
-      {/* Progress bar */}
       {progress !== undefined && progressColor && (
-        <View style={{ height: 4, backgroundColor: `${progressColor}30`, borderRadius: 2, marginBottom: 8 }}>
+        <View style={{ height: 4, backgroundColor: progressColor + '30', borderRadius: 2, marginBottom: 8 }}>
           <View
             style={{
-              width: `${Math.min(progress * 100, 100)}%`,
+              width: (Math.min(progress * 100, 100)).toString() + '%',
               height: 4,
               backgroundColor: progressColor,
               borderRadius: 2,
@@ -82,11 +78,9 @@ export function MetricCard({
           />
         </View>
       )}
-
-      {/* Trend */}
       {trend && (
         <Text style={{ fontSize: 11, color: trendUp ? '#16A34A' : '#DC2626', fontWeight: '600' }}>
-          {trendUp ? '▲' : '▼'} {trend}
+          {trendUp ? '\u25B2' : '\u25BC'} {trend}
         </Text>
       )}
     </View>
