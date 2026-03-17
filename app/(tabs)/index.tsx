@@ -1,6 +1,7 @@
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HealthDashboard } from '@/components/home/health-tracking/health-dashboard';
 import { HeroSection } from '@/components/home/hero-section';
 
 export default function HomeScreen() {
@@ -13,7 +14,8 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled">
 
-      <HeroSection userName="Sajibur Rahman" />
+      <HeroSection userName="Nishal N Poojary" />
+      <HealthDashboard />
 
     </ScrollView>
   );
