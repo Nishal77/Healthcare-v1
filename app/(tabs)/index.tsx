@@ -8,9 +8,10 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-gray-50"
+      style={{ flex: 1, backgroundColor: '#F7F6F2' }}
       contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
-      showsVerticalScrollIndicator={false}>
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled">
 
       {/* ── Hero: greeting + search ─────────────────────── */}
       <HeroSection userName="Sajibur Rahman" />

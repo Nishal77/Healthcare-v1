@@ -7,37 +7,30 @@ import { SearchBar } from './search-bar';
 
 interface HeroSectionProps {
   userName?: string;
+  onAiQuery?: (text: string) => void;
 }
 
-export function HeroSection({ userName = 'Sajibur Rahman' }: HeroSectionProps) {
+export function HeroSection({ userName = 'Guest', onAiQuery }: HeroSectionProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View
-      className="bg-blue-50 overflow-hidden"
-      style={{ paddingTop: insets.top + 8, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
-
-      {/* ── Decorative blobs ─────────────────────────────────── */}
-      <View
-        className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-blue-100"
-        style={{ opacity: 0.6 }}
-      />
-      <View
-        className="absolute top-24 -right-6 w-28 h-28 rounded-full bg-blue-200"
-        style={{ opacity: 0.35 }}
-      />
-      <View
-        className="absolute -top-6 left-32 w-20 h-20 rounded-full bg-sky-200"
-        style={{ opacity: 0.3 }}
-      />
-
-      {/* ── Content ──────────────────────────────────────────── */}
+      style={{
+        backgroundColor: '#FFFFFF',
+        paddingTop: insets.top + 8,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        // Subtle card shadow at the bottom edge
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 4,
+      }}>
       <HomeHeader name={userName} hasNotification />
       <FeelingPrompt />
-      <SearchBar />
-
-      {/* Bottom breathing room */}
-      <View className="h-6" />
+      <SearchBar onSubmit={onAiQuery} />
+      <View style={{ height: 24 }} />
     </View>
   );
 }
