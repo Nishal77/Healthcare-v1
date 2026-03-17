@@ -14,19 +14,7 @@ export function HeroSection({ userName = 'Guest', onAiQuery }: HeroSectionProps)
   const insets = useSafeAreaInsets();
 
   return (
-    <View
-      style={{
-        backgroundColor: '#FFFFFF',
-        paddingTop: insets.top + 8,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-        // Subtle card shadow at the bottom edge
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 4,
-      }}>
+    <View style={{ backgroundColor: '#FFFFFF', paddingTop: insets.top + 8 }}>
       <HomeHeader name={userName} hasNotification />
       <FeelingPrompt />
       <SearchBar onSubmit={onAiQuery} />
