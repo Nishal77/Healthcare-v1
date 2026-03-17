@@ -1,9 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { HealthPillars } from './health-pillars';
-import { VitalityMeterCard } from './vitality-meter-card';
-
 interface VitalitySectionProps {
   onSeeMore?: () => void;
 }
@@ -44,11 +41,6 @@ export function VitalitySection({ onSeeMore }: VitalitySectionProps) {
         </TouchableOpacity>
       </View>
 
-      {/* Fuel meter */}
-      <VitalityMeterCard />
-
-      {/* Health pillars */}
-      <HealthPillars />
     </View>
   );
 }
