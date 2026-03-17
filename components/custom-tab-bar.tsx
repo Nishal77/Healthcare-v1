@@ -60,7 +60,7 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     <View
       style={[
         styles.container,
-        { bottom: insets.bottom + (Platform.OS === 'ios' ? 12 : 16) },
+        { bottom: insets.bottom + 4 },
       ]}
       pointerEvents="box-none">
 

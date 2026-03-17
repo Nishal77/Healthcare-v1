@@ -7,7 +7,7 @@ export default function HomeScreen() {
   return (
     <View
       className="flex-1 items-center justify-center bg-white"
-      style={{ paddingBottom: insets.bottom + 90 }}>
+      style={{ paddingBottom: insets.bottom + 72 }}>
       <Text className="text-blue-500 text-3xl font-bold">Hello</Text>
     </View>
   );
