@@ -13,7 +13,7 @@ export function FeelingPrompt() {
       <Text
         style={{
           fontSize: 32,
-          fontWeight: '800',
+          fontWeight: '600',
           color: '#111827',
           lineHeight: 42,
           letterSpacing: -0.5,

@@ -37,10 +37,10 @@ export function HomeHeader({
         </View>
 
         <View>
-          <Text className="text-sm font-medium" style={{ color: '#6B7280' }}>
+          <Text className="text-sm font-normal" style={{ color: '#6B7280' }}>
             {getGreeting()}
           </Text>
-          <Text className="text-base font-bold" style={{ color: '#1A1A1A' }}>
+          <Text className="text-base font-medium" style={{ color: '#1A1A1A' }}>
             {name}
           </Text>
         </View>
