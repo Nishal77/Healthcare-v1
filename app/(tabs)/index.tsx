@@ -9,23 +9,35 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled">
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 
-      <HeroSection userName="Nishal N Poojary" />
+      {/* Fixed white cover behind the Dynamic Island / status bar */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: insets.top,
+          backgroundColor: '#FFFFFF',
+          zIndex: 100,
+        }}
+        pointerEvents="none"
+      />
 
-      {/* Vitality / Fuel-meter section */}
-      <VitalitySection />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+        showsVerticalScrollIndicator={false}
+        scrollIndicatorInsets={{ top: insets.top }}
+        keyboardShouldPersistTaps="handled"
+        bounces={false}>
 
-      {/* Spacer between sections */}
-      <View style={{ height: 8 }} />
-
-      {/* Heart rate + metrics + AI insight */}
-      <HealthDashboard />
-
-    </ScrollView>
+        <HeroSection userName="Nishal N Poojary" />
+        <VitalitySection />
+        <View style={{ height: 8 }} />
+        <HealthDashboard />
+      </ScrollView>
+    </View>
   );
 }

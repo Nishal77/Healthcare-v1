@@ -9,26 +9,49 @@ export default function AccountScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
-      showsVerticalScrollIndicator={false}>
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 
-      <ProfileHeader
-        name="Nishal N Poojary"
-        handle="@nishal.poojary"
-        email="nishal@vedarogya.in"
-        tier="Premium Member"
+      {/*
+       * Fixed white bar that sits on top of the scroll content.
+       * Covers the Dynamic Island / status bar so nothing bleeds through
+       * when the user scrolls upward.
+       */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: insets.top,
+          backgroundColor: '#FFFFFF',
+          zIndex: 100,
+        }}
+        pointerEvents="none"
       />
 
-      {/* Thin divider */}
-      <View style={{ height: 1, backgroundColor: '#F3F4F6', marginHorizontal: 20, marginBottom: 20 }} />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        showsVerticalScrollIndicator={false}
+        scrollIndicatorInsets={{ top: insets.top }}
+        bounces={false}>
 
-      <UpgradeBanner />
+        <ProfileHeader
+          name="Nishal N Poojary"
+          handle="@nishal.poojary"
+          email="nishal@vedarogya.in"
+          tier="Premium Member"
+        />
 
-      <View style={{ height: 24 }} />
+        {/* Thin divider */}
+        <View style={{ height: 1, backgroundColor: '#F3F4F6', marginHorizontal: 20, marginBottom: 20 }} />
 
-      <SettingsMenu />
-    </ScrollView>
+        <UpgradeBanner />
+
+        <View style={{ height: 24 }} />
+
+        <SettingsMenu />
+      </ScrollView>
+    </View>
   );
 }

@@ -30,7 +30,7 @@ export function ProfileHeader({
     .toUpperCase();
 
   return (
-    <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 24, backgroundColor: '#FFFFFF' }}>
+    <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: 24, backgroundColor: '#FFFFFF' }}>
 
       {/* Top bar */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
