@@ -46,9 +46,9 @@ export default function AccountScreen() {
         {/* Thin divider */}
         <View style={{ height: 1, backgroundColor: '#F3F4F6', marginHorizontal: 20, marginBottom: 20 }} />
 
-        <UpgradeBanner />
+        {/* <UpgradeBanner /> */}
 
-        <View style={{ height: 24 }} />
+        <View style={{ height: 8 }} />
 
         <SettingsMenu />
       </ScrollView>

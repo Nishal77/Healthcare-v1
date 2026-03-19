@@ -27,14 +27,20 @@ export function ProfileHeader({
 
       {/* Top bar */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
-        <Text style={{ fontSize: 24, fontWeight: '800', color: '#111827', letterSpacing: -0.5 }}>
+        <Text style={{ fontSize: 26, fontWeight: '700', color: '#111827', letterSpacing: -0.4 }}>
           Profile
         </Text>
         <TouchableOpacity
           onPress={onLogout}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#6B7280' }}>Logout</Text>
-          <Ionicons name="log-out-outline" size={18} color="#9CA3AF" />
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 19,
+            backgroundColor: '#FFF1F2',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
         </TouchableOpacity>
       </View>
 
@@ -90,7 +96,7 @@ export function ProfileHeader({
         <Text style={{ fontSize: 13, color: '#9CA3AF', fontWeight: '500' }}>{handle}</Text>
 
         {/* Name */}
-        <Text style={{ fontSize: 22, fontWeight: '800', color: '#111827', letterSpacing: -0.4, marginTop: -4 }}>
+        <Text style={{ fontSize: 22, fontWeight: '600', color: '#111827', marginTop: -4 }}>
           {name}
         </Text>
 
