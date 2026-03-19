@@ -54,8 +54,6 @@ export function ProfileHeader({
               width: 100,
               height: 100,
               borderRadius: 50,
-              borderWidth: 3,
-              borderColor: '#111827',
               overflow: 'hidden',
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 6 },
@@ -70,26 +68,6 @@ export function ProfileHeader({
               resizeMode="cover"
             />
           </View>
-
-          {/* Premium star badge */}
-          {isPremium && (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 2,
-                right: 2,
-                width: 26,
-                height: 26,
-                borderRadius: 13,
-                backgroundColor: '#F59E0B',
-                borderWidth: 2.5,
-                borderColor: '#FFFFFF',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Ionicons name="star" size={12} color="#FFFFFF" />
-            </View>
-          )}
         </View>
 
         {/* Handle */}
