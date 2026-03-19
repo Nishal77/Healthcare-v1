@@ -10,36 +10,24 @@ export default function AccountScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: '#F9FAFB' }}
+      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
       contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       showsVerticalScrollIndicator={false}>
 
-      {/* White card behind header */}
-      <View
-        style={{
-          backgroundColor: '#FFFFFF',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 12,
-          elevation: 3,
-          marginBottom: 20,
-        }}>
-        <ProfileHeader
-          name="Nishal N Poojary"
-          handle="@nishal.poojary"
-          email="nishal@vedarogya.in"
-          tier="Premium Member"
-        />
-      </View>
+      <ProfileHeader
+        name="Nishal N Poojary"
+        handle="@nishal.poojary"
+        email="nishal@vedarogya.in"
+        tier="Premium Member"
+      />
 
-      {/* Upgrade banner */}
+      {/* Thin divider */}
+      <View style={{ height: 1, backgroundColor: '#F3F4F6', marginHorizontal: 20, marginBottom: 20 }} />
+
       <UpgradeBanner />
 
-      {/* Spacer */}
-      <View style={{ height: 20 }} />
+      <View style={{ height: 24 }} />
 
-      {/* Settings sections */}
       <SettingsMenu />
     </ScrollView>
   );
