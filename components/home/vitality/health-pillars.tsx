@@ -70,7 +70,7 @@ function PillarCard({
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Ionicons name="arrow-up-forward" size={13} color={accentColor} />
+          <Ionicons name="arrow-forward-outline" size={13} color={accentColor} />
         </View>
       </View>
 

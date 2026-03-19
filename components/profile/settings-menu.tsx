@@ -97,7 +97,7 @@ const SECTIONS: Section[] = [
         iconBg: '#F5F3FF',
         iconColor: '#7C3AED',
         title: 'Prescription Reminders',
-        subtitle: 'Get notified when it's time for medication',
+        subtitle: "Get notified when it's time for medication",
         type: 'toggle',
         toggleKey: 'prescriptionReminders',
       },
