@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ProfileHeaderProps {
@@ -22,18 +22,11 @@ export function ProfileHeader({
   const insets = useSafeAreaInsets();
   const isPremium = tier.toLowerCase().includes('premium') || tier.toLowerCase().includes('pro');
 
-  const initials = name
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-
   return (
-    <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: 24, backgroundColor: '#FFFFFF' }}>
+    <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: 28, backgroundColor: '#FFFFFF' }}>
 
       {/* Top bar */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
         <Text style={{ fontSize: 24, fontWeight: '800', color: '#111827', letterSpacing: -0.5 }}>
           Profile
         </Text>
@@ -46,30 +39,39 @@ export function ProfileHeader({
       </View>
 
       {/* Avatar + info */}
-      <View style={{ alignItems: 'center', gap: 8 }}>
-        {/* Avatar */}
+      <View style={{ alignItems: 'center', gap: 10 }}>
+
+        {/* Photo avatar */}
         <View style={{ marginBottom: 4 }}>
           <View
             style={{
-              width: 96,
-              height: 96,
-              borderRadius: 48,
-              backgroundColor: '#1A3C2E',
-              alignItems: 'center',
-              justifyContent: 'center',
+              width: 100,
+              height: 100,
+              borderRadius: 50,
               borderWidth: 3,
-              borderColor: '#2C6E49',
+              borderColor: '#111827',
+              overflow: 'hidden',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.18,
+              shadowRadius: 14,
+              elevation: 10,
+              backgroundColor: '#F3F4F6',
             }}>
-            <Text style={{ fontSize: 30, fontWeight: '800', color: '#FFFFFF', letterSpacing: 1 }}>
-              {initials}
-            </Text>
+            <Image
+              source={require('@/assets/images/avatar-sample.jpg')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
           </View>
+
+          {/* Premium star badge */}
           {isPremium && (
             <View
               style={{
                 position: 'absolute',
-                bottom: 0,
-                right: 0,
+                bottom: 2,
+                right: 2,
                 width: 26,
                 height: 26,
                 borderRadius: 13,
@@ -88,7 +90,7 @@ export function ProfileHeader({
         <Text style={{ fontSize: 13, color: '#9CA3AF', fontWeight: '500' }}>{handle}</Text>
 
         {/* Name */}
-        <Text style={{ fontSize: 22, fontWeight: '800', color: '#111827', letterSpacing: -0.4, marginTop: -2 }}>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: '#111827', letterSpacing: -0.4, marginTop: -4 }}>
           {name}
         </Text>
 
@@ -106,13 +108,13 @@ export function ProfileHeader({
             flexDirection: 'row',
             alignItems: 'center',
             gap: 6,
-            backgroundColor: '#2C6E49',
+            backgroundColor: '#111827',
             paddingHorizontal: 28,
-            paddingVertical: 11,
+            paddingVertical: 12,
             borderRadius: 24,
           }}>
           <Text style={{ fontSize: 14, fontWeight: '700', color: '#FFFFFF' }}>Edit Profile</Text>
-          <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.65)" />
+          <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.5)" />
         </TouchableOpacity>
       </View>
     </View>

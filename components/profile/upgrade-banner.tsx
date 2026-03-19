@@ -1,6 +1,46 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, TouchableOpacity, View } from 'react-native';
 
+// Dot-grid texture rendered with pure Views — no SVG, no images
+function DotTexture() {
+  const COLS = 14;
+  const ROWS = 4;
+  const dots = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      dots.push(
+        <View
+          key={`${r}-${c}`}
+          style={{
+            width: 3,
+            height: 3,
+            borderRadius: 1.5,
+            backgroundColor: 'rgba(255,255,255,0.07)',
+            margin: 5,
+          }}
+        />
+      );
+    }
+  }
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '55%',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        overflow: 'hidden',
+        alignContent: 'flex-start',
+      }}
+      pointerEvents="none">
+      {dots}
+    </View>
+  );
+}
+
 interface UpgradeBannerProps {
   onUpgrade?: () => void;
 }
@@ -10,36 +50,93 @@ export function UpgradeBanner({ onUpgrade }: UpgradeBannerProps) {
     <View style={{ paddingHorizontal: 20 }}>
       <View
         style={{
-          borderRadius: 20,
-          backgroundColor: '#1A3C2E',
+          borderRadius: 22,
+          backgroundColor: '#0A0A0A',
           overflow: 'hidden',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.25,
+          shadowRadius: 20,
+          elevation: 10,
         }}>
-        {/* Decorative circles */}
-        <View style={{ position: 'absolute', top: -28, right: -18, width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(44,110,73,0.45)' }} />
-        <View style={{ position: 'absolute', bottom: -16, left: 30, width: 70, height: 70, borderRadius: 35, backgroundColor: 'rgba(74,222,128,0.07)' }} />
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, gap: 14 }}>
-          <View style={{ width: 46, height: 46, borderRadius: 14, backgroundColor: 'rgba(245,158,11,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="flash" size={22} color="#F59E0B" />
+        {/* Dot-grid texture on the right half */}
+        <DotTexture />
+
+        {/* Gold top accent line */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 24,
+            right: 24,
+            height: 1.5,
+            backgroundColor: 'rgba(245,158,11,0.45)',
+            borderRadius: 1,
+          }}
+        />
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 20, gap: 16 }}>
+
+          {/* Flash icon — square tile */}
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              backgroundColor: '#F59E0B',
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#F59E0B',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.5,
+              shadowRadius: 8,
+              elevation: 6,
+            }}>
+            <Ionicons name="flash" size={22} color="#000000" />
           </View>
 
+          {/* Text block */}
           <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <Text style={{ fontSize: 15, fontWeight: '800', color: '#FFFFFF' }}>Become an</Text>
-              <View style={{ backgroundColor: '#F59E0B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
-                <Text style={{ fontSize: 11, fontWeight: '900', color: '#FFFFFF', letterSpacing: 0.8 }}>PRO</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: '#FFFFFF' }}>
+                Become an
+              </Text>
+              <View
+                style={{
+                  backgroundColor: '#F59E0B',
+                  paddingHorizontal: 9,
+                  paddingVertical: 3,
+                  borderRadius: 6,
+                }}>
+                <Text style={{ fontSize: 11, fontWeight: '900', color: '#000000', letterSpacing: 1 }}>
+                  PRO
+                </Text>
               </View>
             </View>
-            <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 17 }}>
-              AI insights, unlimited tracking & Vaidya sessions
+            <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 18 }}>
+              AI insights, unlimited tracking{'\n'}& Vaidya sessions
             </Text>
           </View>
 
+          {/* Choose button */}
           <TouchableOpacity
             onPress={onUpgrade}
             activeOpacity={0.85}
-            style={{ backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 }}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: '#1A3C2E' }}>Choose</Text>
+            style={{
+              backgroundColor: '#FFFFFF',
+              paddingHorizontal: 18,
+              paddingVertical: 11,
+              borderRadius: 14,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 6,
+              elevation: 4,
+            }}>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: '#0A0A0A', letterSpacing: 0.2 }}>
+              Choose
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
