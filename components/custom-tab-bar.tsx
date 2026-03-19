@@ -1,6 +1,7 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import { Fragment } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -27,6 +28,46 @@ const ICONS: Record<string, React.ComponentProps<typeof IconSymbol>['name']> = {
   records: 'doc.text.fill',
   providers: 'person.2.fill',
 };
+
+// ─── Bottom fade gradient (pure View, no extra deps) ─────────────────────────
+// Simulates a white fade from transparent → opaque going bottom-to-top
+// so content behind/below the tab bar softly disappears
+const GRADIENT_HEIGHT = 140;
+const STOPS = 12;
+
+function BottomFade({ bottomInset }: { bottomInset: number }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: GRADIENT_HEIGHT + bottomInset,
+      }}>
+      {Array.from({ length: STOPS }, (_, i) => {
+        // i=0 → bottom of screen (fully white), i=STOPS-1 → top (transparent)
+        const t = i / (STOPS - 1); // 0 at bottom, 1 at top
+        const opacity = Math.pow(1 - t, 1.6) * 0.97; // smooth ease-in curve
+        const sliceHeight = (GRADIENT_HEIGHT + bottomInset) / STOPS;
+        return (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              bottom: i * sliceHeight,
+              left: 0,
+              right: 0,
+              height: sliceHeight + 1, // +1 prevents hairline gaps
+              backgroundColor: `rgba(255,255,255,${opacity.toFixed(3)})`,
+            }}
+          />
+        );
+      })}
+    </View>
+  );
+}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
@@ -57,56 +98,55 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const isAccountFocused = focusedName === ACCOUNT_ROUTE;
 
   return (
-    <View
-      style={[styles.container, { bottom: insets.bottom + 4 }]}
-      pointerEvents="box-none">
+    <Fragment>
+      {/* ── Soft white fade behind the tab bar ───────────────────── */}
+      <BottomFade bottomInset={insets.bottom} />
 
-      {/* ── Pill ─────────────────────────────────────────────────── */}
-      <View style={styles.pill}>
-        {pillRoutes.map(route => {
-          const isFocused = focusedName === route.name;
-          const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
+      {/* ── Tab bar row ──────────────────────────────────────────── */}
+      <View
+        style={[styles.container, { bottom: insets.bottom + 4 }]}
+        pointerEvents="box-none">
 
-          return (
-            <Pressable
-              key={route.key}
-              onPress={() => handlePress(route.name, route.key)}
-              style={styles.pillTab}
-              accessibilityRole="button"
-              accessibilityLabel={LABELS[route.name]}>
-              <View style={[styles.activeWrap, isFocused && styles.activeWrapVisible]}>
-                <IconSymbol name={ICONS[route.name]} size={26} color={color} />
-                <Text style={[styles.label, { color }]}>
-                  {LABELS[route.name]}
-                </Text>
+        {/* Pill */}
+        <View style={styles.pill}>
+          {pillRoutes.map(route => {
+            const isFocused = focusedName === route.name;
+            const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
+
+            return (
+              <Pressable
+                key={route.key}
+                onPress={() => handlePress(route.name, route.key)}
+                style={styles.pillTab}
+                accessibilityRole="button"
+                accessibilityLabel={LABELS[route.name]}>
+                <View style={[styles.activeWrap, isFocused && styles.activeWrapVisible]}>
+                  <IconSymbol name={ICONS[route.name]} size={26} color={color} />
+                  <Text style={[styles.label, { color }]}>{LABELS[route.name]}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* Account circle */}
+        {accountRoute && (
+          <Pressable
+            onPress={() => handlePress(ACCOUNT_ROUTE, accountRoute.key)}
+            style={[styles.accountCircle, isAccountFocused && styles.accountCircleActive]}
+            accessibilityRole="button"
+            accessibilityLabel="Account">
+            {isAccountFocused ? (
+              <View style={styles.avatarInner}>
+                <Text style={styles.avatarText}>YN</Text>
               </View>
-            </Pressable>
-          );
-        })}
+            ) : (
+              <IconSymbol name="person.fill" size={26} color={INACTIVE_COLOR} />
+            )}
+          </Pressable>
+        )}
       </View>
-
-      {/* ── Account circle ───────────────────────────────────────── */}
-      {accountRoute && (
-        <Pressable
-          onPress={() => handlePress(ACCOUNT_ROUTE, accountRoute.key)}
-          style={[styles.accountCircle, isAccountFocused && styles.accountCircleActive]}
-          accessibilityRole="button"
-          accessibilityLabel="Account">
-          {isAccountFocused ? (
-            /* Avatar initials when active */
-            <View style={styles.avatarInner}>
-              <Text style={styles.avatarText}>YN</Text>
-            </View>
-          ) : (
-            <IconSymbol
-              name="person.fill"
-              size={26}
-              color={INACTIVE_COLOR}
-            />
-          )}
-        </Pressable>
-      )}
-    </View>
+    </Fragment>
   );
 }
 
