@@ -8,14 +8,12 @@ type RowType = 'arrow' | 'toggle' | 'value' | 'badge' | 'destructive';
 interface Row {
   id: string;
   icon: React.ComponentProps<typeof Ionicons>['name'];
-  iconBg: string;
-  iconColor: string;
   title: string;
   subtitle?: string;
   type: RowType;
   value?: string;
   badge?: string;
-  badgeColor?: string;
+  badgeType?: 'alert' | 'neutral' | 'action';
   toggleKey?: string;
 }
 
@@ -24,264 +22,62 @@ interface Section {
   rows: Row[];
 }
 
-// ─── Section definitions ─────────────────────────────────────────────────────
-const SECTIONS: Section[] = [
-  {
-    title: 'Account',
-    rows: [
-      {
-        id: 'account-details',
-        icon: 'person-outline',
-        iconBg: '#EFF6FF',
-        iconColor: '#3B82F6',
-        title: 'Account Details',
-        subtitle: 'Personal info & patient ID',
-        type: 'arrow',
-      },
-      {
-        id: 'wearables',
-        icon: 'watch-outline',
-        iconBg: '#F0FDF4',
-        iconColor: '#2C6E49',
-        title: 'Linked Wearables',
-        subtitle: 'Sync data from smartwatch & fitness bands',
-        type: 'value',
-        value: '1 Device',
-      },
-      {
-        id: 'health-prefs',
-        icon: 'leaf-outline',
-        iconBg: '#FAFAF0',
-        iconColor: '#65A30D',
-        title: 'Health Preferences',
-        subtitle: 'Dosha type, diet & wellness goals',
-        type: 'arrow',
-      },
-      {
-        id: 'insurance',
-        icon: 'card-outline',
-        iconBg: '#FFF7ED',
-        iconColor: '#D97706',
-        title: 'Insurance Information',
-        subtitle: 'Link your health insurance provider',
-        type: 'arrow',
-      },
-    ],
-  },
-  {
-    title: 'Health & Medical',
-    rows: [
-      {
-        id: 'medical-id',
-        icon: 'medkit-outline',
-        iconBg: '#FFF1F2',
-        iconColor: '#F43F5E',
-        title: 'Medical ID & Vitals',
-        subtitle: 'Blood type, allergies & critical conditions',
-        type: 'badge',
-        badge: 'Important',
-        badgeColor: '#F43F5E',
-      },
-      {
-        id: 'emergency-contact',
-        icon: 'call-outline',
-        iconBg: '#FFF7ED',
-        iconColor: '#EA580C',
-        title: 'Emergency Contact',
-        subtitle: 'Who to call in case of emergency',
-        type: 'arrow',
-      },
-      {
-        id: 'prescription-reminders',
-        icon: 'alarm-outline',
-        iconBg: '#F5F3FF',
-        iconColor: '#7C3AED',
-        title: 'Prescription Reminders',
-        subtitle: "Get notified when it's time for medication",
-        type: 'toggle',
-        toggleKey: 'prescriptionReminders',
-      },
-      {
-        id: 'ayurveda-consult',
-        icon: 'flower-outline',
-        iconBg: '#F0FDF4',
-        iconColor: '#2C6E49',
-        title: 'Ayurveda Consultation Prefs',
-        subtitle: 'Language, session type & Vaidya preference',
-        type: 'arrow',
-      },
-    ],
-  },
-  {
-    title: 'Care Team',
-    rows: [
-      {
-        id: 'doctors',
-        icon: 'people-outline',
-        iconBg: '#EFF6FF',
-        iconColor: '#3B82F6',
-        title: 'My Doctors & Providers',
-        subtitle: 'View and manage your care team',
-        type: 'value',
-        value: '3 Providers',
-      },
-      {
-        id: 'pharmacy',
-        icon: 'storefront-outline',
-        iconBg: '#F0FDF4',
-        iconColor: '#16A34A',
-        title: 'Pharmacy Preferences',
-        subtitle: 'Set default pharmacy for prescriptions',
-        type: 'arrow',
-      },
-      {
-        id: 'telemedicine',
-        icon: 'videocam-outline',
-        iconBg: '#F5F3FF',
-        iconColor: '#7C3AED',
-        title: 'Telemedicine Settings',
-        subtitle: 'Camera, mic & connection preferences',
-        type: 'arrow',
-      },
-    ],
-  },
-  {
-    title: 'Security',
-    rows: [
-      {
-        id: 'password',
-        icon: 'lock-closed-outline',
-        iconBg: '#EFF6FF',
-        iconColor: '#3B82F6',
-        title: 'Change Password',
-        type: 'arrow',
-      },
-      {
-        id: 'face-id',
-        icon: 'scan-outline',
-        iconBg: '#F0FDF4',
-        iconColor: '#2C6E49',
-        title: 'Face ID / Biometric',
-        subtitle: 'Use biometrics for quick login',
-        type: 'toggle',
-        toggleKey: 'faceId',
-      },
-      {
-        id: 'smart-auth',
-        icon: 'shield-half-outline',
-        iconBg: '#F5F3FF',
-        iconColor: '#7C3AED',
-        title: 'Smart Authentication',
-        subtitle: 'Skip login within 15 sec of device unlock',
-        type: 'toggle',
-        toggleKey: 'smartAuth',
-      },
-      {
-        id: 'two-fa',
-        icon: 'key-outline',
-        iconBg: '#FFF7ED',
-        iconColor: '#D97706',
-        title: 'Two-Factor Authentication',
-        type: 'badge',
-        badge: 'Set Up',
-        badgeColor: '#D97706',
-      },
-    ],
-  },
-  {
-    title: 'App Preferences',
-    rows: [
-      {
-        id: 'notifications',
-        icon: 'notifications-outline',
-        iconBg: '#FFF7ED',
-        iconColor: '#F97316',
-        title: 'Notifications',
-        subtitle: 'Appointments, reminders & health alerts',
-        type: 'value',
-        value: 'On',
-      },
-      {
-        id: 'appointment-reminders',
-        icon: 'calendar-outline',
-        iconBg: '#EFF6FF',
-        iconColor: '#3B82F6',
-        title: 'Appointment Reminders',
-        subtitle: 'Get reminded before scheduled visits',
-        type: 'toggle',
-        toggleKey: 'appointmentReminders',
-      },
-      {
-        id: 'language',
-        icon: 'language-outline',
-        iconBg: '#EFF6FF',
-        iconColor: '#6366F1',
-        title: 'Language',
-        type: 'value',
-        value: 'English',
-      },
-      {
-        id: 'dark-mode',
-        icon: 'moon-outline',
-        iconBg: '#F5F3FF',
-        iconColor: '#7C3AED',
-        title: 'Dark Mode',
-        type: 'toggle',
-        toggleKey: 'darkMode',
-      },
-      {
-        id: 'units',
-        icon: 'speedometer-outline',
-        iconBg: '#F0FDF4',
-        iconColor: '#16A34A',
-        title: 'Measurement Units',
-        type: 'value',
-        value: 'Metric',
-      },
-    ],
-  },
-  {
-    title: 'Privacy & Data',
-    rows: [
-      {
-        id: 'data-sharing',
-        icon: 'share-social-outline',
-        iconBg: '#F0FDF4',
-        iconColor: '#2C6E49',
-        title: 'Health Data Sharing',
-        subtitle: 'Control which providers can view your data',
-        type: 'arrow',
-      },
-      {
-        id: 'provider-access',
-        icon: 'eye-outline',
-        iconBg: '#EFF6FF',
-        iconColor: '#3B82F6',
-        title: 'Provider Access Control',
-        subtitle: 'Manage doctor access to your records',
-        type: 'arrow',
-      },
-      {
-        id: 'export',
-        icon: 'download-outline',
-        iconBg: '#F5F3FF',
-        iconColor: '#7C3AED',
-        title: 'Export My Health Data',
-        subtitle: 'Download a copy of your records',
-        type: 'arrow',
-      },
-      {
-        id: 'delete',
-        icon: 'trash-outline',
-        iconBg: '#FFF1F2',
-        iconColor: '#F43F5E',
-        title: 'Delete Account',
-        subtitle: 'Permanently remove your account & data',
-        type: 'destructive',
-      },
-    ],
-  },
-];
+// ─── Premium textured icon tile ───────────────────────────────────────────────
+// Monochrome matte tile with micro-highlight — brushed-surface effect
+function IconTile({ name }: { name: React.ComponentProps<typeof Ionicons>['name'] }) {
+  return (
+    <View
+      style={{
+        width: 42,
+        height: 42,
+        borderRadius: 13,
+        backgroundColor: '#EFEFEF',
+        borderWidth: 0.5,
+        borderColor: 'rgba(0,0,0,0.09)',
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+      {/* Top-edge light reflection — simulates matte surface catch */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 5,
+          right: 5,
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.95)',
+        }}
+      />
+      {/* Soft center glow — depth without gradient */}
+      <View
+        style={{
+          position: 'absolute',
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: 'rgba(255,255,255,0.45)',
+          top: 7,
+          left: 7,
+        }}
+      />
+      {/* Icon */}
+      <Ionicons name={name} size={19} color="#0A0A0A" />
+    </View>
+  );
+}
+
+// ─── Section header with rule ─────────────────────────────────────────────────
+function SectionLabel({ title }: { title: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, marginBottom: 10 }}>
+      <Text style={{ fontSize: 10, fontWeight: '700', color: '#AEAEB2', letterSpacing: 1.5 }}>
+        {title.toUpperCase()}
+      </Text>
+      <View style={{ flex: 1, height: 0.5, backgroundColor: 'rgba(0,0,0,0.07)' }} />
+    </View>
+  );
+}
 
 // ─── Single row ───────────────────────────────────────────────────────────────
 function SettingsRow({
@@ -299,29 +95,33 @@ function SettingsRow({
 
   return (
     <TouchableOpacity
-      onPress={row.type !== 'toggle' ? undefined : undefined}
-      activeOpacity={row.type === 'toggle' ? 1 : 0.6}
+      activeOpacity={row.type === 'toggle' ? 1 : 0.55}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 13,
         paddingHorizontal: 16,
-        borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: '#F3F4F6',
+        borderBottomWidth: isLast ? 0 : 0.5,
+        borderBottomColor: 'rgba(0,0,0,0.06)',
       }}>
 
-      {/* Icon */}
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
-          backgroundColor: isDestructive ? '#FFF1F2' : row.iconBg,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginRight: 14,
-        }}>
-        <Ionicons name={row.icon} size={19} color={isDestructive ? '#F43F5E' : row.iconColor} />
+      {/* Icon tile */}
+      <View style={{ marginRight: 14 }}>
+        {isDestructive ? (
+          <View
+            style={{
+              width: 42, height: 42, borderRadius: 13,
+              backgroundColor: '#FFF0F0',
+              borderWidth: 0.5,
+              borderColor: 'rgba(220,38,38,0.12)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Ionicons name={row.icon} size={19} color="#DC2626" />
+          </View>
+        ) : (
+          <IconTile name={row.icon} />
+        )}
       </View>
 
       {/* Text */}
@@ -330,13 +130,16 @@ function SettingsRow({
           style={{
             fontSize: 15,
             fontWeight: '600',
-            color: isDestructive ? '#F43F5E' : '#111827',
+            color: isDestructive ? '#DC2626' : '#0A0A0A',
+            letterSpacing: -0.2,
             marginBottom: row.subtitle ? 2 : 0,
           }}>
           {row.title}
         </Text>
         {row.subtitle ? (
-          <Text style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 17 }}>{row.subtitle}</Text>
+          <Text style={{ fontSize: 12, color: '#AEAEB2', lineHeight: 17, fontWeight: '400' }}>
+            {row.subtitle}
+          </Text>
         ) : null}
       </View>
 
@@ -345,46 +148,49 @@ function SettingsRow({
         <Switch
           value={toggleValue}
           onValueChange={val => onToggle(row.toggleKey!, val)}
-          trackColor={{ false: '#E5E7EB', true: '#2C6E49' }}
+          trackColor={{ false: '#D1D5DB', true: '#2C6E49' }}
           thumbColor="#FFFFFF"
-          ios_backgroundColor="#E5E7EB"
+          ios_backgroundColor="#D1D5DB"
         />
       )}
+
       {row.type === 'value' && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Text style={{ fontSize: 14, color: '#9CA3AF', fontWeight: '500' }}>{row.value}</Text>
-          <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+          <Text style={{ fontSize: 14, color: '#AEAEB2', fontWeight: '500' }}>{row.value}</Text>
+          <Ionicons name="chevron-forward" size={15} color="#C7C7CC" />
         </View>
       )}
+
       {row.type === 'badge' && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View
             style={{
-              backgroundColor: `${row.badgeColor ?? '#D97706'}18`,
+              backgroundColor: row.badgeType === 'alert' ? '#FF3B30' : '#0A0A0A',
               paddingHorizontal: 10,
               paddingVertical: 4,
               borderRadius: 8,
             }}>
-            <Text style={{ fontSize: 12, fontWeight: '700', color: row.badgeColor ?? '#D97706' }}>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.3 }}>
               {row.badge}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+          <Ionicons name="chevron-forward" size={15} color="#C7C7CC" />
         </View>
       )}
+
       {(row.type === 'arrow' || row.type === 'destructive') && (
         <Ionicons
           name="chevron-forward"
-          size={16}
-          color={isDestructive ? '#FECDD3' : '#D1D5DB'}
+          size={15}
+          color={isDestructive ? '#FECACA' : '#C7C7CC'}
         />
       )}
     </TouchableOpacity>
   );
 }
 
-// ─── Section block ────────────────────────────────────────────────────────────
-function SectionBlock({
+// ─── Section card ─────────────────────────────────────────────────────────────
+function SectionCard({
   section,
   toggles,
   onToggle,
@@ -394,41 +200,91 @@ function SectionBlock({
   onToggle: (key: string, val: boolean) => void;
 }) {
   return (
-    <View style={{ paddingHorizontal: 20 }}>
-      <Text
-        style={{
-          fontSize: 11,
-          fontWeight: '700',
-          color: '#9CA3AF',
-          letterSpacing: 1,
-          marginBottom: 10,
-          marginLeft: 4,
-        }}>
-        {section.title.toUpperCase()}
-      </Text>
-      <View
-        style={{
-          borderRadius: 18,
-          overflow: 'hidden',
-          borderWidth: 1,
-          borderColor: '#F0F0F0',
-          backgroundColor: '#FFFFFF',
-        }}>
-        {section.rows.map((row, idx) => (
-          <SettingsRow
-            key={row.id}
-            row={row}
-            isLast={idx === section.rows.length - 1}
-            toggleValue={row.toggleKey ? (toggles[row.toggleKey] ?? false) : false}
-            onToggle={onToggle}
-          />
-        ))}
+    <View>
+      <SectionLabel title={section.title} />
+      <View style={{ paddingHorizontal: 20 }}>
+        <View
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: 18,
+            overflow: 'hidden',
+            borderWidth: 0.5,
+            borderColor: 'rgba(0,0,0,0.07)',
+          }}>
+          {section.rows.map((row, idx) => (
+            <SettingsRow
+              key={row.id}
+              row={row}
+              isLast={idx === section.rows.length - 1}
+              toggleValue={row.toggleKey ? (toggles[row.toggleKey] ?? false) : false}
+              onToggle={onToggle}
+            />
+          ))}
+        </View>
       </View>
     </View>
   );
 }
 
-// ─── Main export ─────────────────────────────────────────────────────────────
+// ─── Section data ─────────────────────────────────────────────────────────────
+const SECTIONS: Section[] = [
+  {
+    title: 'Account',
+    rows: [
+      { id: 'account-details', icon: 'person-outline', title: 'Account Details', subtitle: 'Personal info & patient ID', type: 'arrow' },
+      { id: 'wearables', icon: 'watch-outline', title: 'Linked Wearables', subtitle: 'Sync data from smartwatch & fitness bands', type: 'value', value: '1 Device' },
+      { id: 'health-prefs', icon: 'leaf-outline', title: 'Health Preferences', subtitle: 'Dosha type, diet & wellness goals', type: 'arrow' },
+      { id: 'insurance', icon: 'card-outline', title: 'Insurance Information', subtitle: 'Link your health insurance provider', type: 'arrow' },
+    ],
+  },
+  {
+    title: 'Health & Medical',
+    rows: [
+      { id: 'medical-id', icon: 'medkit-outline', title: 'Medical ID & Vitals', subtitle: 'Blood type, allergies & critical conditions', type: 'badge', badge: 'Important', badgeType: 'alert' },
+      { id: 'emergency', icon: 'call-outline', title: 'Emergency Contact', subtitle: 'Who to call in case of emergency', type: 'arrow' },
+      { id: 'prescriptions', icon: 'alarm-outline', title: 'Prescription Reminders', subtitle: "Get notified when it's time for medication", type: 'toggle', toggleKey: 'prescriptionReminders' },
+      { id: 'ayurveda', icon: 'flower-outline', title: 'Ayurveda Consultation Prefs', subtitle: 'Language, session type & Vaidya preference', type: 'arrow' },
+    ],
+  },
+  {
+    title: 'Care Team',
+    rows: [
+      { id: 'doctors', icon: 'people-outline', title: 'My Doctors & Providers', subtitle: 'View and manage your care team', type: 'value', value: '3 Providers' },
+      { id: 'pharmacy', icon: 'storefront-outline', title: 'Pharmacy Preferences', subtitle: 'Set default pharmacy for prescriptions', type: 'arrow' },
+      { id: 'telemedicine', icon: 'videocam-outline', title: 'Telemedicine Settings', subtitle: 'Camera, mic & connection preferences', type: 'arrow' },
+    ],
+  },
+  {
+    title: 'Security',
+    rows: [
+      { id: 'password', icon: 'lock-closed-outline', title: 'Change Password', type: 'arrow' },
+      { id: 'face-id', icon: 'scan-outline', title: 'Face ID / Biometric', subtitle: 'Use biometrics for quick login', type: 'toggle', toggleKey: 'faceId' },
+      { id: 'smart-auth', icon: 'shield-half-outline', title: 'Smart Authentication', subtitle: 'Skip login within 15 sec of device unlock', type: 'toggle', toggleKey: 'smartAuth' },
+      { id: 'two-fa', icon: 'key-outline', title: 'Two-Factor Authentication', type: 'badge', badge: 'Set Up', badgeType: 'neutral' },
+    ],
+  },
+  {
+    title: 'App Preferences',
+    rows: [
+      { id: 'notifications', icon: 'notifications-outline', title: 'Notifications', subtitle: 'Appointments, reminders & health alerts', type: 'value', value: 'On' },
+      { id: 'appt-reminders', icon: 'calendar-outline', title: 'Appointment Reminders', subtitle: 'Get reminded before scheduled visits', type: 'toggle', toggleKey: 'appointmentReminders' },
+      { id: 'language', icon: 'language-outline', title: 'Language', type: 'value', value: 'English' },
+      { id: 'dark-mode', icon: 'moon-outline', title: 'Dark Mode', type: 'toggle', toggleKey: 'darkMode' },
+      { id: 'units', icon: 'speedometer-outline', title: 'Measurement Units', type: 'value', value: 'Metric' },
+    ],
+  },
+  {
+    title: 'Privacy & Data',
+    rows: [
+      { id: 'data-sharing', icon: 'share-social-outline', title: 'Health Data Sharing', subtitle: 'Control which providers can view your data', type: 'arrow' },
+      { id: 'provider-access', icon: 'eye-outline', title: 'Provider Access Control', subtitle: 'Manage doctor access to your records', type: 'arrow' },
+      { id: 'export', icon: 'download-outline', title: 'Export My Health Data', subtitle: 'Download a copy of your records', type: 'arrow' },
+      { id: 'delete', icon: 'trash-outline', title: 'Delete Account', subtitle: 'Permanently remove your account & data', type: 'destructive' },
+    ],
+  },
+];
+
+// ─── Export ───────────────────────────────────────────────────────────────────
 export function SettingsMenu() {
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     faceId: true,
@@ -438,18 +294,14 @@ export function SettingsMenu() {
     appointmentReminders: true,
   });
 
-  function handleToggle(key: string, val: boolean) {
-    setToggles(prev => ({ ...prev, [key]: val }));
-  }
-
   return (
     <View style={{ gap: 24 }}>
       {SECTIONS.map(section => (
-        <SectionBlock
+        <SectionCard
           key={section.title}
           section={section}
           toggles={toggles}
-          onToggle={handleToggle}
+          onToggle={(key, val) => setToggles(prev => ({ ...prev, [key]: val }))}
         />
       ))}
     </View>
