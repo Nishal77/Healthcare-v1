@@ -12,7 +12,7 @@ const INACTIVE_COLOR = '#1C1C1E';
 const ACTIVE_BG = '#E8E8ED';
 
 const PILL_ROUTES = ['index', 'appointments', 'records', 'providers'];
-const SEARCH_ROUTE = 'search';
+const ACCOUNT_ROUTE = 'account';
 
 const LABELS: Record<string, string> = {
   index: 'Today',
@@ -53,15 +53,12 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   }
 
   const pillRoutes = state.routes.filter(r => PILL_ROUTES.includes(r.name));
-  const searchRoute = state.routes.find(r => r.name === SEARCH_ROUTE);
-  const isSearchFocused = focusedName === SEARCH_ROUTE;
+  const accountRoute = state.routes.find(r => r.name === ACCOUNT_ROUTE);
+  const isAccountFocused = focusedName === ACCOUNT_ROUTE;
 
   return (
     <View
-      style={[
-        styles.container,
-        { bottom: insets.bottom + 4 },
-      ]}
+      style={[styles.container, { bottom: insets.bottom + 4 }]}
       pointerEvents="box-none">
 
       {/* ── Pill ─────────────────────────────────────────────────── */}
@@ -88,18 +85,25 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         })}
       </View>
 
-      {/* ── Separate search circle ───────────────────────────────── */}
-      {searchRoute && (
+      {/* ── Account circle ───────────────────────────────────────── */}
+      {accountRoute && (
         <Pressable
-          onPress={() => handlePress(SEARCH_ROUTE, searchRoute.key)}
-          style={styles.searchCircle}
+          onPress={() => handlePress(ACCOUNT_ROUTE, accountRoute.key)}
+          style={[styles.accountCircle, isAccountFocused && styles.accountCircleActive]}
           accessibilityRole="button"
-          accessibilityLabel="Search">
-          <IconSymbol
-            name="magnifyingglass"
-            size={26}
-            color={isSearchFocused ? ACTIVE_COLOR : INACTIVE_COLOR}
-          />
+          accessibilityLabel="Account">
+          {isAccountFocused ? (
+            /* Avatar initials when active */
+            <View style={styles.avatarInner}>
+              <Text style={styles.avatarText}>YN</Text>
+            </View>
+          ) : (
+            <IconSymbol
+              name="person.fill"
+              size={26}
+              color={INACTIVE_COLOR}
+            />
+          )}
         </Pressable>
       )}
     </View>
@@ -144,8 +148,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // Active tab inner circle (wraps icon + label)
   activeWrap: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -158,15 +160,14 @@ const styles = StyleSheet.create({
   activeWrapVisible: {
     backgroundColor: ACTIVE_BG,
   },
-
   label: {
     fontSize: 11,
     fontWeight: '500',
     letterSpacing: -0.2,
   },
 
-  // ── Search circle ──────────────────────────────────────────────
-  searchCircle: {
+  // ── Account circle ─────────────────────────────────────────────
+  accountCircle: {
     width: 62,
     height: 62,
     borderRadius: 31,
@@ -174,5 +175,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOW,
+  },
+  accountCircleActive: {
+    backgroundColor: '#2C6E49',
+  },
+  avatarInner: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
 });

@@ -15,7 +15,7 @@ export default function TabLayout() {
       <Tabs.Screen name="appointments" />
       <Tabs.Screen name="records" />
       <Tabs.Screen name="providers" />
-      <Tabs.Screen name="search" />
+      <Tabs.Screen name="account" />
       {/* explore accessible via route but not shown in tab bar */}
       <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>

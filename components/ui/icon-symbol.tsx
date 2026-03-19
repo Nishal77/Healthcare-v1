@@ -18,6 +18,7 @@ const MAPPING = {
   'calendar': 'event',
   'doc.text.fill': 'description',
   'person.2.fill': 'people',
+  'person.fill': 'person',
   'magnifyingglass': 'search',
   // misc
   'heart.fill': 'favorite',
