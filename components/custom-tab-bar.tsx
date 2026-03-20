@@ -32,10 +32,14 @@ const ICONS: Record<string, React.ComponentProps<typeof IconSymbol>['name']> = {
 // ─── Bottom fade gradient (pure View, no extra deps) ─────────────────────────
 // Simulates a white fade from transparent → opaque going bottom-to-top
 // so content behind/below the tab bar softly disappears
-const GRADIENT_HEIGHT = 140;
-const STOPS = 12;
+// More stops + taller area = smoother fade, no visible band at the top edge
+const GRADIENT_HEIGHT = 180;
+const STOPS = 30;
 
 function BottomFade({ bottomInset }: { bottomInset: number }) {
+  const totalHeight = GRADIENT_HEIGHT + bottomInset;
+  const sliceHeight = totalHeight / STOPS;
+
   return (
     <View
       pointerEvents="none"
@@ -44,13 +48,14 @@ function BottomFade({ bottomInset }: { bottomInset: number }) {
         bottom: 0,
         left: 0,
         right: 0,
-        height: GRADIENT_HEIGHT + bottomInset,
+        height: totalHeight,
       }}>
       {Array.from({ length: STOPS }, (_, i) => {
-        // i=0 → bottom of screen (fully white), i=STOPS-1 → top (transparent)
-        const t = i / (STOPS - 1); // 0 at bottom, 1 at top
-        const opacity = Math.pow(1 - t, 1.6) * 0.97; // smooth ease-in curve
-        const sliceHeight = (GRADIENT_HEIGHT + bottomInset) / STOPS;
+        // i=0 → bottom (opaque white), i=STOPS-1 → top (fully transparent)
+        const t = i / (STOPS - 1);
+        // Power 2.4 — steep curve keeps top slices truly invisible,
+        // concentrates the white in the lower half where the pill sits
+        const opacity = Math.pow(1 - t, 2.4) * 0.98;
         return (
           <View
             key={i}
@@ -59,8 +64,8 @@ function BottomFade({ bottomInset }: { bottomInset: number }) {
               bottom: i * sliceHeight,
               left: 0,
               right: 0,
-              height: sliceHeight + 1, // +1 prevents hairline gaps
-              backgroundColor: `rgba(255,255,255,${opacity.toFixed(3)})`,
+              height: sliceHeight + 0.5,
+              backgroundColor: `rgba(255,255,255,${opacity.toFixed(4)})`,
             }}
           />
         );
