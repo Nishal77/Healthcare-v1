@@ -12,10 +12,10 @@ export default function TabLayout() {
         tabBarStyle: { display: 'none' },
       }}>
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="appointments" />
-      <Tabs.Screen name="records" />
-      <Tabs.Screen name="providers" />
-      <Tabs.Screen name="account" />
+      <Tabs.Screen name="track" />
+      <Tabs.Screen name="learn" />
+      <Tabs.Screen name="care" />
+      <Tabs.Screen name="profile" />
       {/* explore accessible via route but not shown in tab bar */}
       <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>

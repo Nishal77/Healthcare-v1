@@ -20,6 +20,11 @@ const MAPPING = {
   'person.2.fill': 'people',
   'person.fill': 'person',
   'magnifyingglass': 'search',
+  'plus.circle.fill': 'add-circle',
+  'stethoscope': 'medical-services',
+  'sparkles': 'auto-awesome',
+  'play.circle.fill': 'play-circle',
+  'waveform.path.ecg': 'monitor-heart',
   // misc
   'heart.fill': 'favorite',
   'bell.fill': 'notifications',

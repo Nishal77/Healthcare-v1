@@ -99,7 +99,7 @@ export function UpgradeBanner({ onUpgrade }: UpgradeBannerProps) {
           {/* Text block */}
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-              <Text style={{ fontSize: 15, fontWeight: '700', color: '#FFFFFF' }}>
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#FFFFFF' }}>
                 Become an
               </Text>
               <View
@@ -109,13 +109,13 @@ export function UpgradeBanner({ onUpgrade }: UpgradeBannerProps) {
                   paddingVertical: 3,
                   borderRadius: 6,
                 }}>
-                <Text style={{ fontSize: 11, fontWeight: '900', color: '#000000', letterSpacing: 1 }}>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: '#000000'}}>
                   PRO
                 </Text>
               </View>
             </View>
-            <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 18 }}>
-              AI insights, unlimited tracking{'\n'}& Vaidya sessions
+            <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+              AI insights, unlimited tracking & Vaidya sessions
             </Text>
           </View>
 
@@ -127,14 +127,14 @@ export function UpgradeBanner({ onUpgrade }: UpgradeBannerProps) {
               backgroundColor: '#FFFFFF',
               paddingHorizontal: 18,
               paddingVertical: 11,
-              borderRadius: 14,
+              borderRadius: 10,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.15,
               shadowRadius: 6,
               elevation: 4,
             }}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: '#0A0A0A', letterSpacing: 0.2 }}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: '#0A0A0A'}}>
               Choose
             </Text>
           </TouchableOpacity>

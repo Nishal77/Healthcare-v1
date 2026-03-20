@@ -71,8 +71,8 @@ function IconTile({ name }: { name: React.ComponentProps<typeof Ionicons>['name'
 function SectionLabel({ title }: { title: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, marginBottom: 10 }}>
-      <Text style={{ fontSize: 10, fontWeight: '700', color: '#AEAEB2', letterSpacing: 1.5 }}>
-        {title.toUpperCase()}
+      <Text style={{ fontSize: 14, fontWeight: '600', color: '#212122ff'}}>
+        {title}
       </Text>
       <View style={{ flex: 1, height: 0.5, backgroundColor: 'rgba(0,0,0,0.07)' }} />
     </View>

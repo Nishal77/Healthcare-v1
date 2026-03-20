@@ -111,7 +111,7 @@ export function PredictiveInsightCard({
             marginBottom: 16,
             fontStyle: 'italic',
           }}>
-          "{insight}"
+          &quot;{insight}&quot;
         </Text>
 
         {/* Insight points */}

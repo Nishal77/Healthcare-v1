@@ -3,7 +3,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileHeader } from '@/components/profile/profile-header';
 import { SettingsMenu } from '@/components/profile/settings-menu';
-import { UpgradeBanner } from '@/components/profile/upgrade-banner';
 
 export default function AccountScreen() {
   const insets = useSafeAreaInsets();

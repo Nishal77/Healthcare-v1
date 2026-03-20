@@ -20,7 +20,6 @@ export function ProfileHeader({
   onLogout,
 }: ProfileHeaderProps) {
   const insets = useSafeAreaInsets();
-  const isPremium = tier.toLowerCase().includes('premium') || tier.toLowerCase().includes('pro');
 
   return (
     <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: 28, backgroundColor: '#FFFFFF' }}>

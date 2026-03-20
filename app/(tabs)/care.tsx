@@ -1,9 +1,9 @@
 import { Text, View } from 'react-native';
 
-export default function AppointmentsTab() {
+export default function CareTab() {
   return (
     <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-gray-400 text-base">Appointments coming soon</Text>
+      <Text className="text-gray-400 text-base">Care coming soon</Text>
     </View>
   );
 }

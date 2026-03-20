@@ -8,25 +8,25 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-const ACTIVE_COLOR = '#007AFF';
-const INACTIVE_COLOR = '#1C1C1E';
-const ACTIVE_BG = '#E8E8ED';
+const ACTIVE_COLOR = '#2C6E49'; // Brand deep green
+const INACTIVE_COLOR = '#1C1C1E'; // Premium dark black
+const ACTIVE_BG = '#E9F0EC'; // Very light green background
 
-const PILL_ROUTES = ['index', 'appointments', 'records', 'providers'];
-const ACCOUNT_ROUTE = 'account';
+const PILL_ROUTES = ['index', 'track', 'learn', 'care'];
+const ACCOUNT_ROUTE = 'profile';
 
 const LABELS: Record<string, string> = {
-  index: 'Today',
-  appointments: 'Appts',
-  records: 'Records',
-  providers: 'Care',
+  index: 'Home',
+  track: 'Track',
+  learn: 'Learn',
+  care: 'Care',
 };
 
 const ICONS: Record<string, React.ComponentProps<typeof IconSymbol>['name']> = {
   index: 'house.fill',
-  appointments: 'calendar',
-  records: 'doc.text.fill',
-  providers: 'person.2.fill',
+  track: 'sparkles',
+  learn: 'play.circle.fill',
+  care: 'waveform.path.ecg',
 };
 
 // ─── Bottom fade gradient (pure View, no extra deps) ─────────────────────────
@@ -135,14 +135,12 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
             onPress={() => handlePress(ACCOUNT_ROUTE, accountRoute.key)}
             style={[styles.accountCircle, isAccountFocused && styles.accountCircleActive]}
             accessibilityRole="button"
-            accessibilityLabel="Account">
-            {isAccountFocused ? (
-              <View style={styles.avatarInner}>
-                <Text style={styles.avatarText}>YN</Text>
-              </View>
-            ) : (
-              <IconSymbol name="person.fill" size={26} color={INACTIVE_COLOR} />
-            )}
+            accessibilityLabel="Me">
+            <IconSymbol
+              name="person.fill"
+              size={26}
+              color={isAccountFocused ? '#FFFFFF' : INACTIVE_COLOR}
+            />
           </Pressable>
         )}
       </View>
@@ -218,19 +216,5 @@ const styles = StyleSheet.create({
   },
   accountCircleActive: {
     backgroundColor: '#2C6E49',
-  },
-  avatarInner: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
   },
 });
