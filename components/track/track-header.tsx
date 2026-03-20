@@ -37,21 +37,19 @@ export function TrackHeader() {
         <View>
           <Text
             style={{
-              fontSize: 32,
-              fontWeight: '800',
+              fontSize: 22,
+              fontWeight: '700',
               color: '#0D1117',
-              letterSpacing: -0.8,
               lineHeight: 36,
             }}>
             Track
           </Text>
           <Text
             style={{
-              fontSize: 13,
+              fontSize: 12,
               color: '#9CA3AF',
               fontWeight: '500',
               marginTop: 3,
-              letterSpacing: 0.1,
             }}>
             Daily Health Journal
           </Text>
@@ -71,15 +69,15 @@ export function TrackHeader() {
           {/* Time on one line — all black "wow" premium normal weight */}
           <Text
             style={{
-              fontSize: 26,
+              fontSize: 18,
               fontWeight: '500',
               color: '#111827',
               letterSpacing: -0.6,
               fontVariant: ['tabular-nums'],
             }}>
             {clock}
-            <Text style={{ fontWeight: '400' }}>:{seconds}</Text>
-            <Text style={{ fontSize: 14, fontWeight: '500', letterSpacing: 0.2 }}> {ampm}</Text>
+            <Text>:{seconds}</Text>
+            <Text style={{ fontWeight: '400', letterSpacing: 0.2 }}> {ampm}</Text>
           </Text>
         </View>
 

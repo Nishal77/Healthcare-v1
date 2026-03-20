@@ -133,8 +133,8 @@ export function SummaryCard() {
           <View>
             <Text
               style={{
-                fontSize: 52,
-                fontWeight: '800',
+                fontSize: 48,
+                fontWeight: '700',
                 color: '#0D1117',
                 letterSpacing: -2.5,
                 lineHeight: 56,

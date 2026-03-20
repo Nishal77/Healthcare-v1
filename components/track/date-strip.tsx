@@ -59,18 +59,13 @@ export function DateStrip({ onDateChange }: DateStripProps) {
                 borderRadius: 999,          // pill shape — matches reference
                 paddingVertical: 10,
                 paddingHorizontal: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
                 elevation: 4,
               }}>
               <Text
                 style={{
                   fontSize: 14,
-                  fontWeight: '700',
+                  fontWeight: '500',
                   color: '#0D1117',
-                  letterSpacing: -0.1,
                 }}>
                 {label}
               </Text>
