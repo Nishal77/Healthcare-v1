@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { ENTRY_TYPE_CONFIG, type TrackEntry } from '../care-data';
+import { ENTRY_TYPE_CONFIG, type TrackEntry } from '../track-data';
 
 interface EntryCardProps {
   entry: TrackEntry;

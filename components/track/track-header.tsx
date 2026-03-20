@@ -2,15 +2,15 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-interface CareHeaderProps {
+interface TrackHeaderProps {
   hasNotification?: boolean;
   onNotificationPress?: () => void;
 }
 
-export function CareHeader({
+export function TrackHeader({
   hasNotification = true,
   onNotificationPress,
-}: CareHeaderProps) {
+}: TrackHeaderProps) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -29,7 +29,6 @@ export function CareHeader({
     <View style={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 20 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
 
-        {/* Title */}
         <View>
           <Text
             style={{
@@ -39,7 +38,7 @@ export function CareHeader({
               letterSpacing: -0.6,
               lineHeight: 34,
             }}>
-            Care
+            Track
           </Text>
           <Text
             style={{
@@ -53,7 +52,6 @@ export function CareHeader({
           </Text>
         </View>
 
-        {/* Right: bell + live clock */}
         <View style={{ alignItems: 'flex-end', gap: 8 }}>
           <TouchableOpacity
             onPress={onNotificationPress}
@@ -101,7 +99,6 @@ export function CareHeader({
               borderWidth: 1,
               borderColor: 'rgba(0,0,0,0.07)',
             }}>
-            {/* Pulsing live dot */}
             <View
               style={{
                 width: 6,
@@ -115,7 +112,6 @@ export function CareHeader({
                 fontSize: 11,
                 fontWeight: '600',
                 color: '#4B5563',
-                // tabular-nums keeps digits fixed-width so clock doesn't jitter
                 fontVariant: ['tabular-nums'],
               }}>
               {timeStr}

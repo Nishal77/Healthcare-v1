@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
-import { DAY_SUMMARY } from '../care-data';
+import { DAY_SUMMARY } from '../track-data';
 
 // ─── Single metric column ──────────────────────────────────────────────────────
 interface MetricProps {

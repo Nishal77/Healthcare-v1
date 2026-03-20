@@ -8,7 +8,7 @@ import {
   getEntriesForPeriod,
   type EntryType,
   type Period,
-} from '../care-data';
+} from '../track-data';
 import { EntryCard } from './entry-card';
 
 // ─── Period icons ──────────────────────────────────────────────────────────────

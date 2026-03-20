@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ScrollView, Text, TouchableOpacity } from 'react-native';
 
-import { ENTRY_TYPE_CONFIG, type EntryType } from '../care-data';
+import { ENTRY_TYPE_CONFIG, type EntryType } from '../track-data';
 
 const QUICK_TYPES: EntryType[] = ['meal', 'water', 'mood', 'exercise', 'medicine', 'note'];
 
