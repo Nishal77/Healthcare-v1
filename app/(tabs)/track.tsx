@@ -59,7 +59,7 @@ export default function TrackTab() {
         bounces={false}>
 
         <TrackHeader />
-        <DateStrip />
+        <DateStrip onDateChange={() => {}} />
         <SummaryCard />
 
         {/* Quick add row — each pill opens the sheet with that type pre-selected */}

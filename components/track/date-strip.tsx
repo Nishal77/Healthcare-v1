@@ -24,96 +24,77 @@ export function DateStrip({ onDateChange }: DateStripProps) {
     <View
       style={{
         marginHorizontal: 20,
-        marginBottom: 20,
+        marginBottom: 22,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F3F4F6',
-        borderRadius: 20,
-        padding: 6,
+        backgroundColor: '#F0F0F5',
+        borderRadius: 999,      // full pill container — exact match to reference
+        padding: 5,
       }}>
       {offsets.map(offset => {
         const d = new Date();
         d.setDate(d.getDate() + offset);
         const isSelected = offset === selectedOffset;
-        const isToday = offset === 0;
-        const dayNum = d.getDate();
-        const monthStr = MONTH_SHORT[d.getMonth()];
-        const dayStr = DAY_SHORT[d.getDay()];
+        const isToday    = offset === 0;
+        const dayNum     = d.getDate();
+        const monthStr   = MONTH_SHORT[d.getMonth()];
+        const dayStr     = DAY_SHORT[d.getDay()];
 
+        // ── Active pill ─────────────────────────────────────────────────────
         if (isSelected) {
-          // ── Active pill ────────────────────────────────────────
+          const label = isToday
+            ? `Today, ${dayNum} ${monthStr}`
+            : `${dayStr}, ${dayNum} ${monthStr}`;
+
           return (
             <TouchableOpacity
               key={offset}
               onPress={() => handleSelect(offset)}
+              activeOpacity={0.85}
               style={{
-                flex: 2,
+                flex: 2,                    // wider than plain numbers
                 alignItems: 'center',
+                justifyContent: 'center',
                 backgroundColor: '#FFFFFF',
-                borderRadius: 14,
+                borderRadius: 999,          // pill shape — matches reference
                 paddingVertical: 10,
-                paddingHorizontal: 6,
+                paddingHorizontal: 10,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.1,
                 shadowRadius: 8,
                 elevation: 4,
-                borderWidth: 1,
-                borderColor: 'rgba(0,0,0,0.07)',
               }}>
               <Text
                 style={{
-                  fontSize: 9,
+                  fontSize: 14,
                   fontWeight: '700',
-                  color: '#2C6E49',
-                  letterSpacing: 0.6,
-                  marginBottom: 1,
-                }}>
-                {isToday ? 'TODAY' : dayStr}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 22,
-                  fontWeight: '800',
                   color: '#0D1117',
-                  letterSpacing: -0.5,
-                  lineHeight: 26,
+                  letterSpacing: -0.1,
                 }}>
-                {dayNum}
-              </Text>
-              <Text style={{ fontSize: 9, fontWeight: '600', color: '#6B7280', marginTop: 1 }}>
-                {monthStr}
+                {label}
               </Text>
             </TouchableOpacity>
           );
         }
 
-        // ── Inactive date ──────────────────────────────────────────
+        // ── Inactive date — plain number only, no day name ──────────────────
         return (
           <TouchableOpacity
             key={offset}
             onPress={() => handleSelect(offset)}
+            activeOpacity={0.7}
             style={{
               flex: 1,
               alignItems: 'center',
+              justifyContent: 'center',
               paddingVertical: 10,
             }}>
             <Text
               style={{
-                fontSize: 9,
-                fontWeight: '500',
-                color: '#C4C4C6',
-                letterSpacing: 0.3,
-                marginBottom: 2,
-              }}>
-              {dayStr}
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: '600',
                 color: '#9CA3AF',
-                lineHeight: 20,
               }}>
               {dayNum}
             </Text>
