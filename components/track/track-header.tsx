@@ -1,13 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { Animated, Text, View } from 'react-native';
 
 export function TrackHeader() {
   const [now, setNow] = useState(new Date());
+  const dotOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(dotOpacity, { toValue: 0.15, duration: 800, useNativeDriver: true }),
+        Animated.timing(dotOpacity, { toValue: 1, duration: 800, useNativeDriver: true })
+      ])
+    ).start();
+  }, [dotOpacity]);
 
   // Split time into parts for styled rendering
   const hhmm = now.toLocaleTimeString('en-US', {
@@ -47,68 +57,30 @@ export function TrackHeader() {
           </Text>
         </View>
 
-        {/* ── Right: premium live clock badge ── */}
-        <View
-          style={{
-            backgroundColor: '#0D1117',
-            borderRadius: 20,
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            alignItems: 'flex-end',
-            shadowColor: '#0D1117',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.22,
-            shadowRadius: 12,
-            elevation: 8,
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.07)',
-          }}>
-
-          {/* Live indicator */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 3 }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#2C6E49' }} />
-            <Text style={{ fontSize: 9, fontWeight: '700', color: '#4ADE80', letterSpacing: 1 }}>
+        {/* ── Right: premium live clock (no bg, one line) ── */}
+        <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+          
+          {/* Live indicator with blink */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <Animated.View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#2C6E49', opacity: dotOpacity }} />
+            <Text style={{ fontSize: 10, fontWeight: '700', color: '#2C6E49', letterSpacing: 1.2 }}>
               LIVE
             </Text>
           </View>
 
-          {/* HH:MM large */}
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
-            <Text
-              style={{
-                fontSize: 26,
-                fontWeight: '800',
-                color: '#FFFFFF',
-                letterSpacing: -0.5,
-                lineHeight: 30,
-                fontVariant: ['tabular-nums'],
-              }}>
-              {clock}
-            </Text>
-
-            {/* Seconds + AM/PM stacked small */}
-            <View style={{ alignItems: 'flex-start', paddingBottom: 2 }}>
-              <Text
-                style={{
-                  fontSize: 11,
-                  fontWeight: '700',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontVariant: ['tabular-nums'],
-                  lineHeight: 13,
-                }}>
-                :{seconds}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 11,
-                  fontWeight: '600',
-                  color: 'rgba(255,255,255,0.4)',
-                  lineHeight: 13,
-                }}>
-                {ampm}
-              </Text>
-            </View>
-          </View>
+          {/* Time on one line — all black "wow" premium normal weight */}
+          <Text
+            style={{
+              fontSize: 26,
+              fontWeight: '500',
+              color: '#111827',
+              letterSpacing: -0.6,
+              fontVariant: ['tabular-nums'],
+            }}>
+            {clock}
+            <Text style={{ fontWeight: '400' }}>:{seconds}</Text>
+            <Text style={{ fontSize: 14, fontWeight: '500', letterSpacing: 0.2 }}> {ampm}</Text>
+          </Text>
         </View>
 
       </View>
