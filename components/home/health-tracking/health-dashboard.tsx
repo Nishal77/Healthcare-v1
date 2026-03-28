@@ -12,12 +12,23 @@ interface HealthDashboardProps {
 
 export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps) {
   return (
-    <View style={{ gap: 16 }}>
+    <View style={{ paddingHorizontal: 20, gap: 12 }}>
       <HealthSectionHeader onSeeAll={onSeeAll} />
-      <HeartRateCard bpm={72} status="normal" />
-      <MetricsGrid spo2={98} steps={6240} sleepHours={7.2} calories={1840} />
-      <PredictiveInsightCard onLearnMore={onLearnMore} />
-      {/* Bottom breathing room */}
+
+      {/* Main grid: Heart Rate (left, wider) + Steps & Water (right) */}
+      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
+        {/* Heart Rate card — takes ~57% */}
+        <View style={{ flex: 1.35 }}>
+          <HeartRateCard bpm={123} status="normal" />
+        </View>
+
+        {/* Steps + Water stacked — takes ~43% */}
+        <MetricsGrid steps={2316} waterLiters={1.8} />
+      </View>
+
+      {/* Goals banner */}
+      <PredictiveInsightCard goalsCompleted={2} onLearnMore={onLearnMore} />
+
       <View style={{ height: 8 }} />
     </View>
   );

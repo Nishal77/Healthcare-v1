@@ -1,84 +1,100 @@
-import { View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Text, View } from 'react-native';
 
-import { MetricCard } from './metric-card';
+function StepsCard({ steps = 2316 }: { steps?: number }) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 24,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.07,
+        shadowRadius: 16,
+        elevation: 6,
+      }}>
+      {/* Icon + label row */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <Text style={{ fontSize: 20 }}>👣</Text>
+        <Text style={{ fontSize: 13, fontWeight: '600', color: '#9CA3AF' }}>Steps</Text>
+      </View>
 
-interface MetricsGridProps {
-  spo2?: number;      // e.g. 98
-  steps?: number;     // e.g. 6240
-  sleepHours?: number; // e.g. 7.2
-  calories?: number;  // e.g. 1840
+      {/* Value */}
+      <Text
+        style={{
+          fontSize: 34,
+          fontWeight: '800',
+          color: '#1C1C1E',
+          lineHeight: 38,
+          letterSpacing: -1,
+        }}>
+        {steps.toLocaleString()}
+      </Text>
+
+      {/* Sublabel */}
+      <Text style={{ fontSize: 12, color: '#D1D5DB', fontWeight: '500', marginTop: 3 }}>
+        Steps
+      </Text>
+    </View>
+  );
 }
 
-export function MetricsGrid({
-  spo2 = 98,
-  steps = 6240,
-  sleepHours = 7.2,
-  calories = 1840,
-}: MetricsGridProps) {
-  const stepsGoal = 10000;
-  const caloriesGoal = 2200;
-
+function WaterCard({ liters = 1.8 }: { liters?: number }) {
   return (
-    <View style={{ paddingHorizontal: 20, gap: 12 }}>
-      {/* Row 1: SpO2 + Steps */}
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <MetricCard
-          icon="🫁"
-          label="Blood Oxygen"
-          value={`${spo2}`}
-          unit="%"
-          trend="Optimal range"
-          trendUp
-          bgColor="#EFF6FF"
-          iconBgColor="#DBEAFE"
-          valueColor="#1E40AF"
-          progress={spo2 / 100}
-          progressColor="#3B82F6"
-        />
-        <MetricCard
-          icon="👟"
-          label="Steps Today"
-          value={steps >= 1000 ? `${(steps / 1000).toFixed(1)}k` : `${steps}`}
-          unit="steps"
-          trend={`${Math.round((steps / stepsGoal) * 100)}% of goal`}
-          trendUp={steps >= stepsGoal * 0.5}
-          bgColor="#F0FDF4"
-          iconBgColor="#DCFCE7"
-          valueColor="#14532D"
-          progress={steps / stepsGoal}
-          progressColor="#22C55E"
-        />
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 24,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.07,
+        shadowRadius: 16,
+        elevation: 6,
+      }}>
+      {/* Icon + label row */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <Ionicons name="water" size={20} color="#8B5CF6" />
+        <Text style={{ fontSize: 13, fontWeight: '600', color: '#9CA3AF' }}>Water</Text>
       </View>
 
-      {/* Row 2: Sleep + Calories */}
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <MetricCard
-          icon="🌙"
-          label="Sleep Last Night"
-          value={`${sleepHours}`}
-          unit="hrs"
-          trend={sleepHours >= 7 ? 'Well rested' : 'Below target'}
-          trendUp={sleepHours >= 7}
-          bgColor="#FDF4FF"
-          iconBgColor="#F3E8FF"
-          valueColor="#581C87"
-          progress={sleepHours / 9}
-          progressColor="#A855F7"
-        />
-        <MetricCard
-          icon="🔥"
-          label="Calories Burned"
-          value={calories >= 1000 ? `${(calories / 1000).toFixed(1)}k` : `${calories}`}
-          unit="kcal"
-          trend={`${Math.round((calories / caloriesGoal) * 100)}% of goal`}
-          trendUp={calories >= caloriesGoal * 0.7}
-          bgColor="#FFF7ED"
-          iconBgColor="#FFEDD5"
-          valueColor="#7C2D12"
-          progress={calories / caloriesGoal}
-          progressColor="#F97316"
-        />
+      {/* Value + unit */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
+        <Text
+          style={{
+            fontSize: 34,
+            fontWeight: '800',
+            color: '#1C1C1E',
+            lineHeight: 38,
+            letterSpacing: -1,
+          }}>
+          {liters}
+        </Text>
+        <Text style={{ fontSize: 13, color: '#9CA3AF', fontWeight: '500', marginBottom: 4 }}>
+          Liters
+        </Text>
       </View>
+    </View>
+  );
+}
+
+interface MetricsGridProps {
+  steps?: number;
+  waterLiters?: number;
+  // legacy props kept for compatibility
+  spo2?: number;
+  sleepHours?: number;
+  calories?: number;
+}
+
+export function MetricsGrid({ steps = 2316, waterLiters = 1.8 }: MetricsGridProps) {
+  return (
+    <View style={{ flex: 1, gap: 12 }}>
+      <StepsCard steps={steps} />
+      <WaterCard liters={waterLiters} />
     </View>
   );
 }
