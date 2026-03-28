@@ -1,42 +1,59 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
 
-function HeartRateGraph() {
+// Simulated 14-point BPM history — no SVG needed
+const PULSE_BARS = [58, 64, 70, 68, 76, 72, 80, 95, 110, 123, 115, 108, 98, 90];
+const MAX_BPM = Math.max(...PULSE_BARS);
+const MIN_BPM = Math.min(...PULSE_BARS);
+const CHART_HEIGHT = 52;
+
+function PulseChart() {
   return (
-    <Svg width="100%" height="72" viewBox="0 0 200 72" preserveAspectRatio="none">
-      {/* Green wave — left portion rising to peak */}
-      <Path
-        d="M0,42 C12,30 22,54 40,42 C54,30 64,54 80,42 C90,34 98,48 112,36 C120,30 127,26 138,18"
-        stroke="#22C55E"
-        strokeWidth="2.5"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Yellow glow halo around peak dot */}
-      <Circle cx="138" cy="18" r="10" fill="rgba(251,191,36,0.22)" />
-      {/* Yellow peak dot */}
-      <Circle cx="138" cy="18" r="5.5" fill="#FBBF24" />
-      {/* Purple/violet wave — right portion from peak */}
-      <Path
-        d="M138,18 C146,34 156,54 172,42 C186,30 194,54 200,44"
-        stroke="#8B5CF6"
-        strokeWidth="2.5"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        gap: 3,
+        height: CHART_HEIGHT,
+      }}>
+      {PULSE_BARS.map((val, i) => {
+        const normalized = ((val - MIN_BPM) / (MAX_BPM - MIN_BPM)) * CHART_HEIGHT * 0.82 + CHART_HEIGHT * 0.12;
+        const isPeak = val === MAX_BPM;
+        // Left portion green, peak yellow, right portion purple
+        const barColor = isPeak ? '#FBBF24' : i < 9 ? '#22C55E' : '#8B5CF6';
+        const barOpacity = isPeak ? 1 : i < 9 ? 0.7 + (i / 9) * 0.3 : 1 - (i - 9) * 0.08;
+
+        return (
+          <View
+            key={i}
+            style={{
+              flex: 1,
+              height: normalized,
+              borderRadius: 4,
+              backgroundColor: barColor,
+              opacity: barOpacity,
+            }}
+          />
+        );
+      })}
+    </View>
   );
 }
 
 interface HeartRateCardProps {
   bpm?: number;
   status?: 'normal' | 'elevated' | 'low';
+  nadiType?: string;
 }
 
-export function HeartRateCard({ bpm = 123, status = 'normal' }: HeartRateCardProps) {
+export function HeartRateCard({
+  bpm = 123,
+  status = 'normal',
+  nadiType = 'Vataja',
+}: HeartRateCardProps) {
+  const statusColor = status === 'elevated' ? '#F97316' : status === 'low' ? '#60A5FA' : '#22C55E';
+  const statusLabel = status === 'elevated' ? 'Elevated' : status === 'low' ? 'Low' : 'Normal';
+
   return (
     <View
       style={{
@@ -50,8 +67,9 @@ export function HeartRateCard({ bpm = 123, status = 'normal' }: HeartRateCardPro
         shadowRadius: 16,
         elevation: 6,
       }}>
-      {/* Header: icon + label */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+
+      {/* Header row: icon + label + live dot */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <View
           style={{
             width: 40,
@@ -63,37 +81,65 @@ export function HeartRateCard({ bpm = 123, status = 'normal' }: HeartRateCardPro
           }}>
           <Ionicons name="heart" size={20} color="#EF4444" />
         </View>
-        <Text style={{ fontSize: 14, fontWeight: '700', color: '#1C1C1E', letterSpacing: -0.2 }}>
+        <Text style={{ fontSize: 13, fontWeight: '700', color: '#1C1C1E', flex: 1, letterSpacing: -0.1 }}>
           Heart Rate
         </Text>
+        {/* Live indicator */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#22C55E' }} />
+          <Text style={{ fontSize: 10, fontWeight: '700', color: '#22C55E', letterSpacing: 0.3 }}>LIVE</Text>
+        </View>
       </View>
 
-      {/* SVG graph */}
-      <View style={{ marginHorizontal: -4, marginBottom: 20 }}>
-        <HeartRateGraph />
+      {/* Bar chart — no SVG */}
+      <View style={{ marginBottom: 14 }}>
+        <PulseChart />
       </View>
 
-      {/* BPM number */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 5 }}>
+      {/* BPM reading */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginBottom: 12 }}>
         <Text
           style={{
-            fontSize: 52,
+            fontSize: 48,
             fontWeight: '800',
             color: '#1C1C1E',
-            lineHeight: 56,
+            lineHeight: 52,
             letterSpacing: -2,
           }}>
           {bpm}
         </Text>
-        <Text
-          style={{
-            fontSize: 15,
-            color: '#9CA3AF',
-            fontWeight: '500',
-            marginBottom: 7,
-          }}>
+        <Text style={{ fontSize: 14, color: '#9CA3AF', fontWeight: '500', marginBottom: 6 }}>
           Bpm
         </Text>
+      </View>
+
+      {/* Ayurveda insight row */}
+      <View
+        style={{
+          backgroundColor: '#F8F9FA',
+          borderRadius: 12,
+          paddingHorizontal: 10,
+          paddingVertical: 8,
+          gap: 6,
+        }}>
+        {/* Nadi Pariksha (pulse type) */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '600', letterSpacing: 0.3 }}>
+            NADI (PULSE)
+          </Text>
+          <Text style={{ fontSize: 11, fontWeight: '700', color: '#6366F1' }}>{nadiType}</Text>
+        </View>
+
+        {/* Status */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '600', letterSpacing: 0.3 }}>
+            STATUS
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: statusColor }} />
+            <Text style={{ fontSize: 11, fontWeight: '700', color: statusColor }}>{statusLabel}</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
