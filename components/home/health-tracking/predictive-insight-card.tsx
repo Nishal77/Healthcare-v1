@@ -8,56 +8,58 @@ interface GoalsBannerProps {
 
 export function PredictiveInsightCard({ goalsCompleted = 2, onLearnMore }: GoalsBannerProps) {
   return (
-    <View
+    <TouchableOpacity
+      onPress={onLearnMore}
+      activeOpacity={0.92}
       style={{
-        backgroundColor: '#F4F4F4',
-        borderRadius: 24,
+        backgroundColor: '#F8F7F4',
+        borderRadius: 20,
         paddingHorizontal: 16,
         paddingVertical: 14,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 14,
+        gap: 13,
       }}>
-      {/* Crown icon in white circle */}
+      {/* Trophy circle */}
       <View
         style={{
-          width: 46,
-          height: 46,
-          borderRadius: 23,
+          width: 42,
+          height: 42,
+          borderRadius: 21,
           backgroundColor: '#FFFFFF',
           alignItems: 'center',
           justifyContent: 'center',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-          elevation: 4,
+          shadowColor: '#0F1923',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.07,
+          shadowRadius: 6,
+          elevation: 3,
         }}>
-        <Ionicons name="trophy" size={22} color="#22C55E" />
+        <Ionicons name="trophy-outline" size={20} color="#C4860A" />
       </View>
 
-      {/* Text block */}
+      {/* Text */}
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1C1C1E', letterSpacing: -0.2 }}>
-          Completed {goalsCompleted} goals
+        <Text style={{ fontSize: 14, fontWeight: '700', color: '#0F1923', letterSpacing: -0.2 }}>
+          {goalsCompleted} goals completed today
         </Text>
-        <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2, fontWeight: '500' }}>
-          Keep upgrading to get benefits
+        <Text style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2, fontWeight: '500' }}>
+          Keep going — view your progress
         </Text>
       </View>
 
-      {/* Detail button */}
-      <TouchableOpacity
-        onPress={onLearnMore}
-        activeOpacity={0.8}
+      {/* Chevron */}
+      <View
         style={{
-          backgroundColor: '#1C1C1E',
-          borderRadius: 22,
-          paddingHorizontal: 18,
-          paddingVertical: 10,
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          backgroundColor: '#0F1923',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}>
-        <Text style={{ fontSize: 13, fontWeight: '700', color: '#FFFFFF' }}>Detail</Text>
-      </TouchableOpacity>
-    </View>
+        <Ionicons name="chevron-forward" size={14} color="#FFFFFF" />
+      </View>
+    </TouchableOpacity>
   );
 }

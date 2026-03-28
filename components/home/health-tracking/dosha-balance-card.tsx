@@ -1,53 +1,50 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
+// Dosha color system aligned with Ayurvedic tradition
+const DOSHA = {
+  vata:  { color: '#4B5569', bg: '#F1F2F5', label: 'Vata',  sub: 'Ether · Air'   },
+  pitta: { color: '#C4860A', bg: '#FEF8EE', label: 'Pitta', sub: 'Fire · Water'   },
+  kapha: { color: '#2C6E49', bg: '#F0F7F3', label: 'Kapha', sub: 'Earth · Water'  },
+} as const;
+
 interface DoshaBarProps {
-  label: string;
-  sublabel: string;
+  type: keyof typeof DOSHA;
   percentage: number;
-  color: string;
-  bgColor: string;
-  isDominant?: boolean;
+  isDominant: boolean;
 }
 
-function DoshaBar({ label, sublabel, percentage, color, bgColor, isDominant }: DoshaBarProps) {
+function DoshaBar({ type, percentage, isDominant }: DoshaBarProps) {
+  const d = DOSHA[type];
   return (
-    <View style={{ gap: 5 }}>
+    <View style={{ gap: 6 }}>
+      {/* Label row */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: '#1C1C1E' }}>{label}</Text>
-          <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '500' }}>{sublabel}</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: '#0F1923' }}>{d.label}</Text>
+          <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '500' }}>{d.sub}</Text>
           {isDominant && (
-            <View
-              style={{
-                backgroundColor: color + '20',
-                borderRadius: 6,
-                paddingHorizontal: 6,
-                paddingVertical: 2,
-              }}>
-              <Text style={{ fontSize: 9, fontWeight: '800', color, letterSpacing: 0.4 }}>
-                DOMINANT
+            <View style={{ backgroundColor: d.bg, borderRadius: 5, paddingHorizontal: 5, paddingVertical: 2 }}>
+              <Text style={{ fontSize: 9, fontWeight: '800', color: d.color, letterSpacing: 0.5 }}>
+                HIGH
               </Text>
             </View>
           )}
         </View>
-        <Text style={{ fontSize: 13, fontWeight: '800', color }}>{percentage}%</Text>
+        <Text style={{ fontSize: 13, fontWeight: '800', color: d.color, letterSpacing: -0.3 }}>
+          {percentage}%
+        </Text>
       </View>
 
-      {/* Track */}
-      <View
-        style={{
-          height: 7,
-          backgroundColor: '#F3F4F6',
-          borderRadius: 4,
-          overflow: 'hidden',
-        }}>
+      {/* Progress track */}
+      <View style={{ height: 6, backgroundColor: '#F0EFEC', borderRadius: 3, overflow: 'hidden' }}>
         <View
           style={{
             width: `${percentage}%`,
             height: '100%',
-            backgroundColor: color,
-            borderRadius: 4,
+            backgroundColor: d.color,
+            borderRadius: 3,
+            opacity: isDominant ? 1 : 0.6,
           }}
         />
       </View>
@@ -74,32 +71,32 @@ export function DoshaBalanceCard({
     <View
       style={{
         backgroundColor: '#FFFFFF',
-        borderRadius: 24,
+        borderRadius: 22,
         padding: 18,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.07,
-        shadowRadius: 16,
-        elevation: 6,
-        gap: 14,
+        shadowColor: '#0F1923',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 14,
+        elevation: 5,
+        gap: 16,
       }}>
 
       {/* Header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 11,
-              backgroundColor: '#F0FDF4',
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              backgroundColor: '#F0F7F3',
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Ionicons name="leaf" size={18} color="#2C6E49" />
+            <Ionicons name="leaf" size={17} color="#2C6E49" />
           </View>
           <View>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1C1C1E', letterSpacing: -0.3 }}>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: '#0F1923', letterSpacing: -0.3 }}>
               Dosha Balance
             </Text>
             <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '500', marginTop: 1 }}>
@@ -110,76 +107,47 @@ export function DoshaBalanceCard({
 
         <View
           style={{
-            backgroundColor: '#F0FDF4',
-            borderRadius: 10,
-            paddingHorizontal: 9,
-            paddingVertical: 4,
             flexDirection: 'row',
             alignItems: 'center',
             gap: 4,
+            backgroundColor: '#F0F7F3',
+            borderRadius: 8,
+            paddingHorizontal: 8,
+            paddingVertical: 5,
           }}>
-          <Ionicons name="sparkles" size={11} color="#2C6E49" />
-          <Text style={{ fontSize: 10, fontWeight: '800', color: '#2C6E49', letterSpacing: 0.3 }}>
-            AI INSIGHT
+          <Ionicons name="sparkles" size={10} color="#2C6E49" />
+          <Text style={{ fontSize: 10, fontWeight: '700', color: '#2C6E49', letterSpacing: 0.5 }}>
+            AI
           </Text>
         </View>
       </View>
 
       {/* Three dosha bars */}
-      <View style={{ gap: 11 }}>
-        <DoshaBar
-          label="Vata"
-          sublabel="Ether · Air"
-          percentage={vata}
-          color="#6366F1"
-          bgColor="#EEF2FF"
-          isDominant={dominant === 'vata'}
-        />
-        <DoshaBar
-          label="Pitta"
-          sublabel="Fire · Water"
-          percentage={pitta}
-          color="#F97316"
-          bgColor="#FFF7ED"
-          isDominant={dominant === 'pitta'}
-        />
-        <DoshaBar
-          label="Kapha"
-          sublabel="Earth · Water"
-          percentage={kapha}
-          color="#22C55E"
-          bgColor="#F0FDF4"
-          isDominant={dominant === 'kapha'}
-        />
+      <View style={{ gap: 13 }}>
+        <DoshaBar type="vata"  percentage={vata}  isDominant={dominant === 'vata'}  />
+        <DoshaBar type="pitta" percentage={pitta} isDominant={dominant === 'pitta'} />
+        <DoshaBar type="kapha" percentage={kapha} isDominant={dominant === 'kapha'} />
       </View>
 
-      {/* Divider */}
-      <View style={{ height: 1, backgroundColor: '#F3F4F6' }} />
-
-      {/* AI insight text */}
-      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-        <View
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            backgroundColor: '#FFF7ED',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: 1,
-          }}>
-          <Text style={{ fontSize: 14 }}>🌿</Text>
+      {/* Divider + Insight */}
+      <View style={{ borderTopWidth: 1, borderTopColor: '#F0EFEC', paddingTop: 14 }}>
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+          <View
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 8,
+              backgroundColor: '#FEF8EE',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 1,
+            }}>
+            <Ionicons name="bulb-outline" size={13} color="#C4860A" />
+          </View>
+          <Text style={{ flex: 1, fontSize: 12, lineHeight: 19, color: '#4B5563', fontWeight: '500' }}>
+            {insight}
+          </Text>
         </View>
-        <Text
-          style={{
-            flex: 1,
-            fontSize: 12,
-            lineHeight: 18,
-            color: '#4B5563',
-            fontWeight: '500',
-          }}>
-          {insight}
-        </Text>
       </View>
     </View>
   );

@@ -1,80 +1,113 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
+const CARD_SHADOW = {
+  shadowColor: '#0F1923',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.06,
+  shadowRadius: 14,
+  elevation: 5,
+} as const;
+
 function StepsCard({ steps = 2316 }: { steps?: number }) {
+  const goal = 8000;
+  const pct = Math.min(Math.round((steps / goal) * 100), 100);
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 24,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.07,
-        shadowRadius: 16,
-        elevation: 6,
-      }}>
-      {/* Icon + label row */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <Text style={{ fontSize: 20 }}>👣</Text>
-        <Text style={{ fontSize: 13, fontWeight: '600', color: '#9CA3AF' }}>Steps</Text>
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF', borderRadius: 22, padding: 16, ...CARD_SHADOW }}>
+      {/* Icon + label */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+        <View
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 9,
+            backgroundColor: '#F0F7F3',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Ionicons name="walk-outline" size={16} color="#2C6E49" />
+        </View>
+        <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>
+          Steps
+        </Text>
       </View>
 
       {/* Value */}
-      <Text
-        style={{
-          fontSize: 34,
-          fontWeight: '800',
-          color: '#1C1C1E',
-          lineHeight: 38,
-          letterSpacing: -1,
-        }}>
+      <Text style={{ fontSize: 30, fontWeight: '800', color: '#0F1923', lineHeight: 34, letterSpacing: -1 }}>
         {steps.toLocaleString()}
       </Text>
 
-      {/* Sublabel */}
-      <Text style={{ fontSize: 12, color: '#D1D5DB', fontWeight: '500', marginTop: 3 }}>
-        Steps
-      </Text>
+      {/* Progress toward goal */}
+      <View style={{ marginTop: 10, gap: 4 }}>
+        <View style={{ height: 3, backgroundColor: '#F0EFEC', borderRadius: 2 }}>
+          <View
+            style={{
+              width: `${pct}%`,
+              height: 3,
+              backgroundColor: '#2C6E49',
+              borderRadius: 2,
+              opacity: 0.7,
+            }}
+          />
+        </View>
+        <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '500' }}>
+          {pct}% of {(goal / 1000).toFixed(0)}k goal
+        </Text>
+      </View>
     </View>
   );
 }
 
 function WaterCard({ liters = 1.8 }: { liters?: number }) {
+  const goal = 2.5;
+  const pct = Math.min(Math.round((liters / goal) * 100), 100);
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 24,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.07,
-        shadowRadius: 16,
-        elevation: 6,
-      }}>
-      {/* Icon + label row */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <Ionicons name="water" size={20} color="#8B5CF6" />
-        <Text style={{ fontSize: 13, fontWeight: '600', color: '#9CA3AF' }}>Water</Text>
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF', borderRadius: 22, padding: 16, ...CARD_SHADOW }}>
+      {/* Icon + label */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+        <View
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 9,
+            backgroundColor: '#EFF7FA',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Ionicons name="water-outline" size={16} color="#0B6E8B" />
+        </View>
+        <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>
+          Water
+        </Text>
       </View>
 
-      {/* Value + unit */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
-        <Text
-          style={{
-            fontSize: 34,
-            fontWeight: '800',
-            color: '#1C1C1E',
-            lineHeight: 38,
-            letterSpacing: -1,
-          }}>
+      {/* Value */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
+        <Text style={{ fontSize: 30, fontWeight: '800', color: '#0F1923', lineHeight: 34, letterSpacing: -1 }}>
           {liters}
         </Text>
-        <Text style={{ fontSize: 13, color: '#9CA3AF', fontWeight: '500', marginBottom: 4 }}>
-          Liters
+        <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500', marginBottom: 3 }}>
+          L
+        </Text>
+      </View>
+
+      {/* Progress toward goal */}
+      <View style={{ marginTop: 10, gap: 4 }}>
+        <View style={{ height: 3, backgroundColor: '#F0EFEC', borderRadius: 2 }}>
+          <View
+            style={{
+              width: `${pct}%`,
+              height: 3,
+              backgroundColor: '#0B6E8B',
+              borderRadius: 2,
+              opacity: 0.7,
+            }}
+          />
+        </View>
+        <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '500' }}>
+          {pct}% of {goal}L goal
         </Text>
       </View>
     </View>
@@ -84,7 +117,6 @@ function WaterCard({ liters = 1.8 }: { liters?: number }) {
 interface MetricsGridProps {
   steps?: number;
   waterLiters?: number;
-  // legacy props kept for compatibility
   spo2?: number;
   sleepHours?: number;
   calories?: number;

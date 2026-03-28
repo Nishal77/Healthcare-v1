@@ -10,22 +10,23 @@ export function HealthSectionHeader({ onSeeAll }: HealthSectionHeaderProps) {
     <View
       style={{
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-end',
         justifyContent: 'space-between',
-        paddingTop: 8,
-        paddingBottom: 4,
+        paddingTop: 4,
+        paddingBottom: 2,
       }}>
       <View>
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: '700',
-            color: '#1C1C1E',
-            letterSpacing: -0.4,
+            fontSize: 22,
+            fontWeight: '800',
+            color: '#0F1923',
+            letterSpacing: -0.6,
+            lineHeight: 26,
           }}>
           Your Vitals
         </Text>
-        <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2, fontWeight: '500' }}>
+        <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 3, fontWeight: '500' }}>
           Updated 2 min ago
         </Text>
       </View>
@@ -36,13 +37,13 @@ export function HealthSectionHeader({ onSeeAll }: HealthSectionHeaderProps) {
           flexDirection: 'row',
           alignItems: 'center',
           gap: 5,
-          backgroundColor: '#E9F0EC',
-          paddingHorizontal: 14,
+          backgroundColor: '#F0F7F3',
+          paddingHorizontal: 13,
           paddingVertical: 8,
           borderRadius: 20,
         }}>
         <Ionicons name="bar-chart-outline" size={13} color="#2C6E49" />
-        <Text style={{ fontSize: 13, fontWeight: '600', color: '#2C6E49' }}>Details</Text>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: '#2C6E49' }}>Details</Text>
       </TouchableOpacity>
     </View>
   );
