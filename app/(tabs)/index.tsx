@@ -3,7 +3,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HealthDashboard } from '@/components/home/health-tracking/health-dashboard';
 import { HeroSection } from '@/components/home/hero-section';
-import { VitalitySection } from '@/components/home/vitality/vitality-section';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -34,8 +33,6 @@ export default function HomeScreen() {
         bounces={false}>
 
         <HeroSection userName="Nishal N Poojary" />
-        <VitalitySection />
-        <View style={{ height: 8 }} />
         <HealthDashboard />
       </ScrollView>
     </View>
