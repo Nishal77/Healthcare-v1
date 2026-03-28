@@ -2,11 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
 const CARD_SHADOW = {
-  shadowColor: '#0F1923',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.06,
-  shadowRadius: 14,
-  elevation: 5,
+  borderWidth: 1,
+  borderColor: '#ECEAE6',
 } as const;
 
 function StepsCard({ steps = 2316 }: { steps?: number }) {

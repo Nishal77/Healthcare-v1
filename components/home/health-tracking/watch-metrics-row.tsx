@@ -2,11 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 
 const CARD_SHADOW = {
-  shadowColor: '#0F1923',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.05,
-  shadowRadius: 12,
-  elevation: 4,
+  borderWidth: 1,
+  borderColor: '#ECEAE6',
 } as const;
 
 interface MetricProps {

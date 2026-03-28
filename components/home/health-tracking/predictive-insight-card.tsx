@@ -12,13 +12,15 @@ export function PredictiveInsightCard({ goalsCompleted = 2, onLearnMore }: Goals
       onPress={onLearnMore}
       activeOpacity={0.92}
       style={{
-        backgroundColor: '#F8F7F4',
+        backgroundColor: '#FFFFFF',
         borderRadius: 20,
         paddingHorizontal: 16,
         paddingVertical: 14,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 13,
+        borderWidth: 1,
+        borderColor: '#ECEAE6',
       }}>
       {/* Trophy circle */}
       <View
@@ -29,11 +31,8 @@ export function PredictiveInsightCard({ goalsCompleted = 2, onLearnMore }: Goals
           backgroundColor: '#FFFFFF',
           alignItems: 'center',
           justifyContent: 'center',
-          shadowColor: '#0F1923',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.07,
-          shadowRadius: 6,
-          elevation: 3,
+          borderWidth: 1,
+          borderColor: '#ECEAE6',
         }}>
         <Ionicons name="trophy-outline" size={20} color="#C4860A" />
       </View>

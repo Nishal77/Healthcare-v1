@@ -73,11 +73,8 @@ export function DoshaBalanceCard({
         backgroundColor: '#FFFFFF',
         borderRadius: 22,
         padding: 18,
-        shadowColor: '#0F1923',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 14,
-        elevation: 5,
+        borderWidth: 1,
+        borderColor: '#ECEAE6',
         gap: 16,
       }}>
 
