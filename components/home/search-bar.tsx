@@ -1,22 +1,25 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   Platform,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
 interface SearchBarProps {
-  onSubmit?: (text: string) => void;
   onMicPress?: () => void;
 }
 
-export function SearchBar({ onSubmit, onMicPress }: SearchBarProps) {
-  const [query, setQuery] = useState('');
+/**
+ * Tapping anywhere on this bar navigates to the full AI chat screen.
+ * It is intentionally non-editable on the home screen — the real
+ * TextInput lives inside app/chat.tsx (auto-focused on open).
+ */
+export function SearchBar({ onMicPress }: SearchBarProps) {
+  const router = useRouter();
 
-  function handleSubmit() {
-    if (query.trim()) onSubmit?.(query.trim());
+  function openChat() {
+    router.push('/chat');
   }
 
   return (
@@ -29,43 +32,63 @@ export function SearchBar({ onSubmit, onMicPress }: SearchBarProps) {
         shadowRadius: 16,
         elevation: 5,
       }}>
-      <View
-        className="flex-row items-center bg-white rounded-2xl px-4 gap-3"
-        style={{ paddingVertical: Platform.OS === 'ios' ? 14 : 10 }}>
+
+      {/* Entire bar is a tap target — opens chat screen */}
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={openChat}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+          borderRadius: 18,
+          paddingHorizontal: 16,
+          paddingVertical: Platform.OS === 'ios' ? 14 : 12,
+          gap: 12,
+          borderWidth: 1,
+          borderColor: '#F0EFEC',
+        }}>
 
         {/* Search / AI icon */}
         <Ionicons name="search-outline" size={20} color="#9CA3AF" />
 
-        {/* Editable AI input */}
-        <TextInput
-          className="flex-1 text-sm"
-          style={{ color: '#1A1A1A', fontSize: 14 }}
-          placeholder="Describe symptoms or ask your AI..."
-          placeholderTextColor="#9CA3AF"
-          value={query}
-          onChangeText={setQuery}
-          onSubmitEditing={handleSubmit}
-          returnKeyType="send"
-          multiline={false}
-          autoCorrect
-          autoCapitalize="sentences"
-          blurOnSubmit
-        />
+        {/* Fake placeholder — not a real TextInput */}
+        <View style={{ flex: 1 }}>
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={0}
+            color="transparent"
+          />
+          {/* Placeholder text rendered as View so the bar can't be typed in */}
+          <View pointerEvents="none">
+            <Ionicons name="sparkles-outline" size={0} color="transparent" />
+          </View>
+          {/* Actual placeholder via nested Text-like view */}
+          <PlaceholderText />
+        </View>
 
         {/* Divider */}
-        <View className="w-px h-5" style={{ backgroundColor: '#E5E7EB' }} />
+        <View style={{ width: 1, height: 20, backgroundColor: '#E5E7EB' }} />
 
-        {/* Send (when typing) or Mic */}
-        {query.trim().length > 0 ? (
-          <TouchableOpacity onPress={handleSubmit} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="send" size={18} color="#2C6E49" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={onMicPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="mic-outline" size={20} color="#6B7280" />
-          </TouchableOpacity>
-        )}
-      </View>
+        {/* Mic button */}
+        <TouchableOpacity
+          onPress={onMicPress ?? openChat}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Ionicons name="mic-outline" size={20} color="#6B7280" />
+        </TouchableOpacity>
+      </TouchableOpacity>
     </View>
+  );
+}
+
+// Separate component to keep the file clean
+import { Text } from 'react-native';
+function PlaceholderText() {
+  return (
+    <Text
+      style={{ fontSize: 14, color: '#9CA3AF', fontWeight: '400' }}
+      numberOfLines={1}>
+      Describe symptoms or ask your AI...
+    </Text>
   );
 }
