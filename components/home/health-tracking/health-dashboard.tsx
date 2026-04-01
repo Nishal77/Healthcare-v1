@@ -10,8 +10,8 @@ import { MetricsGrid } from './metrics-grid';
 import { PredictiveInsightCard } from './predictive-insight-card';
 import { WatchMetricsRow } from './watch-metrics-row';
 
-// IS_MOCK=true → always use simulated data (works in Expo Go, iOS, no watch needed)
-// IS_MOCK=false → use real Health Connect on Android dev builds
+// true  → simulated data, works in Expo Go and on iOS
+// false → real Health Connect, requires Android dev build
 const IS_MOCK = true;
 
 interface HealthDashboardProps {
@@ -20,13 +20,21 @@ interface HealthDashboardProps {
 }
 
 export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps) {
-  // Static imports only — Metro can't handle dynamic require() for unknown modules.
-  // useHealthConnect uses the metro stub on Expo Go / iOS and returns 'unavailable'.
   const mockHook = useMockHealthData();
   const liveHook = useHealthConnect();
 
-  const { data, connectionState, connect, disconnect, isLoading } =
-    IS_MOCK || Platform.OS === 'ios' ? mockHook : liveHook;
+  const hook = IS_MOCK || Platform.OS === 'ios' ? mockHook : liveHook;
+
+  const {
+    data,
+    connectionState,
+    connectionStep,
+    deviceName,
+    startScan,
+    connectToDevice,
+    enableBluetooth,
+    disconnect,
+  } = hook;
 
   const isConnected = connectionState === 'connected';
 
@@ -47,9 +55,16 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         lastUpdated={data?.lastUpdated ?? null}
       />
 
-      {!isConnected ? (
-        <ConnectWatchBanner onConnect={connect} isConnecting={isLoading} />
-      ) : null}
+      {!isConnected && (
+        <ConnectWatchBanner
+          connectionStep={connectionStep}
+          deviceName={deviceName}
+          onStartScan={startScan}
+          onConnectToDevice={connectToDevice}
+          onEnableBluetooth={enableBluetooth}
+          onRetry={disconnect}
+        />
+      )}
 
       <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
         <View style={{ flex: 1.35 }}>

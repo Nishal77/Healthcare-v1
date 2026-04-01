@@ -1,3 +1,4 @@
+import { Linking } from 'react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   buildDoshaInsight,
@@ -7,10 +8,13 @@ import {
   getNadiType,
   getSpo2Status,
 } from '../src/health/dosha-engine';
-import type { HealthData, HealthHookReturn, WatchConnectionState } from '../src/health/types';
+import type {
+  ConnectionStep,
+  HealthData,
+  HealthHookReturn,
+  WatchConnectionState,
+} from '../src/health/types';
 
-// expo-health-connect is Android-only and requires a dev client build.
-// We gracefully swallow the require() error on iOS / Expo Go so the app never crashes.
 type HealthConnectModule = {
   getSdkStatus: () => Promise<number>;
   requestPermission: (perms: Array<{ accessType: string; recordType: string }>) => Promise<Array<{ granted: boolean }>>;
@@ -36,18 +40,17 @@ const PERMISSIONS = [
 async function readHealthData(): Promise<HealthData> {
   if (!HealthConnect) throw new Error('Health Connect not available');
 
-  const now   = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const end   = now.toISOString();
-
-  const timeFilter = { operator: 'between', startTime: today, endTime: end };
+  const now    = new Date();
+  const today  = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const end    = now.toISOString();
+  const filter = { operator: 'between', startTime: today, endTime: end };
 
   const [hrRes, stepsRes, sleepRes, spo2Res, calRes] = await Promise.all([
-    HealthConnect.readRecords('HeartRate',            { timeRangeFilter: timeFilter }),
-    HealthConnect.readRecords('Steps',                { timeRangeFilter: timeFilter }),
-    HealthConnect.readRecords('SleepSession',         { timeRangeFilter: timeFilter }),
-    HealthConnect.readRecords('OxygenSaturation',     { timeRangeFilter: timeFilter }),
-    HealthConnect.readRecords('ActiveCaloriesBurned', { timeRangeFilter: timeFilter }),
+    HealthConnect.readRecords('HeartRate',            { timeRangeFilter: filter }),
+    HealthConnect.readRecords('Steps',                { timeRangeFilter: filter }),
+    HealthConnect.readRecords('SleepSession',         { timeRangeFilter: filter }),
+    HealthConnect.readRecords('OxygenSaturation',     { timeRangeFilter: filter }),
+    HealthConnect.readRecords('ActiveCaloriesBurned', { timeRangeFilter: filter }),
   ]);
 
   const latestHr  = (hrRes.records as Array<Record<string, unknown>>).at(-1);
@@ -63,15 +66,15 @@ async function readHealthData(): Promise<HealthData> {
   }, 0);
   const sleepHours = parseFloat((totalSleepMs / 3_600_000).toFixed(1));
 
-  const latestSpo2  = (spo2Res.records as Array<Record<string, Record<string, number>>>).at(-1);
-  const spo2        = latestSpo2 ? Math.round(latestSpo2.percentage?.value ?? 98) : 98;
+  const latestSpo2 = (spo2Res.records as Array<Record<string, Record<string, number>>>).at(-1);
+  const spo2       = latestSpo2 ? Math.round(latestSpo2.percentage?.value ?? 98) : 98;
 
   const calories = Math.round(
     (calRes.records as Array<Record<string, Record<string, number>>>)
       .reduce((s, r) => s + (r.energy?.inKilocalories ?? 0), 0),
   );
 
-  const hrv      = 42;
+  const hrv = 42;
   const bodyTemp = 98.4;
   const waterLiters = 1.5;
 
@@ -80,14 +83,7 @@ async function readHealthData(): Promise<HealthData> {
   const doshaInsight = buildDoshaInsight(doshaRaw.vata, doshaRaw.pitta, doshaRaw.kapha, alerts);
 
   return {
-    heartRate,
-    spo2,
-    hrv,
-    steps,
-    waterLiters,
-    sleepHours,
-    calories,
-    bodyTemp,
+    heartRate, spo2, hrv, steps, waterLiters, sleepHours, calories, bodyTemp,
     nadiType: getNadiType(heartRate, hrv),
     heartRateStatus: getHeartRateStatus(heartRate),
     spo2Status: getSpo2Status(spo2),
@@ -99,64 +95,102 @@ async function readHealthData(): Promise<HealthData> {
 }
 
 export function useHealthConnect(): HealthHookReturn {
-  const [state, setState] = useState<WatchConnectionState>(
+  const [connState, setConnState] = useState<WatchConnectionState>(
     HealthConnect ? 'disconnected' : 'unavailable',
   );
-  const [data, setData]   = useState<HealthData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const intervalRef       = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [step, setStep]           = useState<ConnectionStep>('idle');
+  const [deviceName, setDeviceName] = useState<string | null>(null);
+  const [data, setData]           = useState<HealthData | null>(null);
+  const [error, setError]         = useState<string | null>(null);
+  const intervalRef               = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
   }, []);
 
   const fetchAndSet = useCallback(async () => {
+    try { setData(await readHealthData()); setError(null); }
+    catch (e) { setError((e as Error).message); }
+  }, []);
+
+  // Step 1 — check Bluetooth / SDK availability
+  const startScan = useCallback(async () => {
+    if (!HealthConnect) {
+      setConnState('unavailable');
+      setStep('failed');
+      setError('Health Connect is only available on Android dev builds.');
+      return;
+    }
     try {
-      const fresh = await readHealthData();
-      setData(fresh);
       setError(null);
+      setStep('checking_bluetooth');
+      const status = await HealthConnect.getSdkStatus();
+
+      if (status !== 3) {
+        // SDK not installed or Bluetooth unavailable
+        setStep('bluetooth_off');
+        return;
+      }
+
+      setStep('scanning');
+      // Request permissions then "find" the device
+      const granted = await HealthConnect.requestPermission(PERMISSIONS);
+      if (!granted.every(p => p.granted)) {
+        setStep('failed');
+        setError('Health Connect permissions denied.');
+        return;
+      }
+      setDeviceName('Health Connect');
+      setStep('device_found');
     } catch (e) {
+      setStep('failed');
       setError((e as Error).message);
     }
   }, []);
 
-  const connect = useCallback(async () => {
-    if (!HealthConnect) {
-      setState('unavailable');
-      return;
-    }
+  // Step 2 — open settings so user can enable Bluetooth / install Health Connect
+  const enableBluetooth = useCallback(async () => {
     try {
-      setState('connecting');
-      const available = await HealthConnect.getSdkStatus();
-      if (available !== 3) {
-        setState('unavailable');
-        setError('Health Connect not installed on this device.');
-        return;
+      await Linking.openSettings();
+    } catch { /* ignore */ }
+    // After user returns from Settings, re-check
+    setStep('scanning');
+    try {
+      if (!HealthConnect) return;
+      const status = await HealthConnect.getSdkStatus();
+      if (status === 3) {
+        setDeviceName('Health Connect');
+        setStep('device_found');
+      } else {
+        setStep('bluetooth_off');
       }
+    } catch {
+      setStep('bluetooth_off');
+    }
+  }, []);
 
-      const granted = await HealthConnect.requestPermission(PERMISSIONS);
-      if (!granted.every(p => p.granted)) {
-        setState('disconnected');
-        setError('Some Health Connect permissions were denied.');
-        return;
-      }
-
-      setState('connected');
+  // Step 3 — connect and start reading data
+  const connectToDevice = useCallback(async () => {
+    try {
+      setConnState('connecting');
+      setStep('connecting_to_device');
       await fetchAndSet();
+      setConnState('connected');
+      setStep('idle');
       intervalRef.current = setInterval(fetchAndSet, 60_000);
     } catch (e) {
-      setState('disconnected');
+      setStep('failed');
       setError((e as Error).message);
+      setConnState('disconnected');
     }
   }, [fetchAndSet]);
 
   const disconnect = useCallback(() => {
     stopPolling();
     setData(null);
-    setState('disconnected');
+    setDeviceName(null);
+    setConnState('disconnected');
+    setStep('idle');
     setError(null);
   }, [stopPolling]);
 
@@ -164,10 +198,14 @@ export function useHealthConnect(): HealthHookReturn {
 
   return {
     data,
-    connectionState: state,
-    connect,
+    connectionState: connState,
+    connectionStep: step,
+    deviceName,
+    startScan,
+    connectToDevice,
+    enableBluetooth,
     disconnect,
-    isLoading: state === 'connecting',
+    isLoading: connState === 'connecting' || step === 'checking_bluetooth' || step === 'scanning' || step === 'connecting_to_device',
     error,
   };
 }

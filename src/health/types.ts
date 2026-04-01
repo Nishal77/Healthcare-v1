@@ -2,6 +2,15 @@ export type DoshaType = 'vata' | 'pitta' | 'kapha';
 export type MetricStatus = 'optimal' | 'normal' | 'elevated' | 'low' | 'critical';
 export type WatchConnectionState = 'unavailable' | 'disconnected' | 'connecting' | 'connected';
 
+export type ConnectionStep =
+  | 'idle'
+  | 'checking_bluetooth'
+  | 'bluetooth_off'
+  | 'scanning'
+  | 'device_found'
+  | 'connecting_to_device'
+  | 'failed';
+
 export interface DoshaAlert {
   dosha: DoshaType;
   severity: 'mild' | 'moderate' | 'severe';
@@ -28,7 +37,11 @@ export interface HealthData {
 export interface HealthHookReturn {
   data: HealthData | null;
   connectionState: WatchConnectionState;
-  connect: () => Promise<void>;
+  connectionStep: ConnectionStep;
+  deviceName: string | null;
+  startScan: () => Promise<void>;
+  connectToDevice: () => Promise<void>;
+  enableBluetooth: () => Promise<void>;
   disconnect: () => void;
   isLoading: boolean;
   error: string | null;
