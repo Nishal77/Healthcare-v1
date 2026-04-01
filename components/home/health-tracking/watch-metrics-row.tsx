@@ -1,9 +1,12 @@
 /**
- * WatchMetricsRow — Premium 3-col watch metric cards
+ * WatchMetricsRow — 3 compact cards matching the Sleep card design language
  *
- * Design: square tinted cards, large icon tile at top,
- * large value, label, coloured status dot + text.
- * Matches the bottom row of reference image 2.
+ * Same rules:
+ *  • Bare icon, no tile container
+ *  • Warm off-white card per metric
+ *  • Large bold value
+ *  • Status dot + text at bottom
+ *  • Soft coloured shadow, no border
  */
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -13,9 +16,7 @@ import { Text, View } from 'react-native';
 interface CardDef {
   icon:        ComponentProps<typeof Ionicons>['name'];
   iconColor:   string;
-  iconBg:      string;
-  bgBase:      string;
-  bgBlob:      string;
+  cardBg:      string;
   shadowColor: string;
   label:       string;
   value:       string;
@@ -25,118 +26,73 @@ interface CardDef {
 }
 
 function WatchMetricCard({ card, hasData }: { card: CardDef; hasData: boolean }) {
+  const showStatus = hasData && card.value !== '—' && card.status !== '—';
+
   return (
     <View
       style={{
         flex: 1,
-        borderRadius: 20,
-        overflow: 'hidden',
-        minHeight: 136,
+        borderRadius: 22,
+        backgroundColor: card.cardBg,
+        padding: 14,
+        minHeight: 132,
+        justifyContent: 'space-between',
         shadowColor: card.shadowColor,
-        shadowOffset: { width: 0, height: 5 },
-        shadowOpacity: 0.11,
-        shadowRadius: 12,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.09,
+        shadowRadius: 14,
+        elevation: 3,
       }}>
 
-      <View style={{ flex: 1, backgroundColor: card.bgBase }}>
+      {/* Bare icon — top */}
+      <Ionicons name={card.icon} size={22} color={card.iconColor} />
 
-        {/* Blob */}
-        <View
-          style={{
-            position: 'absolute',
-            top: -18,
-            right: -18,
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: card.bgBlob,
-          }}
-        />
+      {/* Value + unit + label + status — bottom */}
+      <View style={{ gap: 2, marginTop: 12 }}>
 
-        <View style={{ flex: 1, padding: 14, justifyContent: 'space-between' }}>
-
-          {/* Icon tile */}
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 13,
-              backgroundColor: card.iconBg,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Ionicons name={card.icon} size={20} color={card.iconColor} />
-          </View>
-
-          {/* Value + unit + label + status */}
-          <View style={{ gap: 1 }}>
-            {/* Value */}
-            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: '800',
-                  color: hasData ? '#0F1923' : '#D1D5DB',
-                  letterSpacing: -0.8,
-                  lineHeight: 30,
-                  includeFontPadding: false,
-                }}>
-                {hasData ? card.value : '—'}
-              </Text>
-              {hasData && card.value !== '—' && (
-                <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '500', marginBottom: 3 }}>
-                  {card.unit}
-                </Text>
-              )}
-            </View>
-
-            {/* Label */}
-            <Text
-              style={{
-                fontSize: 12,
-                fontWeight: '500',
-                color: '#6B7280',
-                marginTop: 1,
-                letterSpacing: 0.1,
-              }}>
-              {card.label}
+        {/* Value + unit inline */}
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
+          <Text style={{
+            fontSize: 28,
+            fontWeight: '700',
+            color: hasData && card.value !== '—' ? '#1A1A1A' : '#D1D5DB',
+            letterSpacing: -0.8,
+            lineHeight: 32,
+            includeFontPadding: false,
+          }}>
+            {hasData ? card.value : '—'}
+          </Text>
+          {hasData && card.value !== '—' && (
+            <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '400', marginBottom: 4 }}>
+              {card.unit}
             </Text>
+          )}
+        </View>
 
-            {/* Status */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                marginTop: 5,
-              }}>
-              <View
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 3,
-                  backgroundColor: hasData && card.status !== '—' ? card.statusColor : '#E5E7EB',
-                }}
-              />
-              <Text
-                style={{
-                  fontSize: 10,
-                  fontWeight: '600',
-                  color: hasData && card.status !== '—' ? card.statusColor : '#D1D5DB',
-                  letterSpacing: 0.1,
-                }}>
-                {hasData ? card.status : '—'}
-              </Text>
-            </View>
-          </View>
+        {/* Label */}
+        <Text style={{ fontSize: 12, fontWeight: '500', color: '#6B7280', letterSpacing: 0.1 }}>
+          {card.label}
+        </Text>
+
+        {/* Status */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+          <View style={{
+            width: 6, height: 6, borderRadius: 3,
+            backgroundColor: showStatus ? card.statusColor : '#E5E7EB',
+          }} />
+          <Text style={{
+            fontSize: 10, fontWeight: '600', letterSpacing: 0.1,
+            color: showStatus ? card.statusColor : '#D1D5DB',
+          }}>
+            {showStatus ? card.status : '—'}
+          </Text>
         </View>
       </View>
     </View>
   );
 }
 
-// ── Props & logic ─────────────────────────────────────────────────────────────
+// ── Props ─────────────────────────────────────────────────────────────────────
 interface WatchMetricsRowProps {
   spo2?:     number;
   hrv?:      number;
@@ -152,20 +108,18 @@ export function WatchMetricsRow({
 }: WatchMetricsRowProps) {
 
   const spo2Status  = spo2 >= 98 ? 'Optimal' : spo2 >= 95 ? 'Normal' : 'Low';
-  const spo2Color   = spo2 >= 98 ? '#0B6E8B' : spo2 >= 95 ? '#2C6E49' : '#EF4444';
+  const spo2Color   = spo2 >= 98 ? '#0B7ABE' : spo2 >= 95 ? '#2C6E49' : '#EF4444';
   const hrvStatus   = hrv >= 50 ? 'Good' : hrv >= 30 ? 'Fair' : 'Low';
-  const hrvColor    = hrv >= 50 ? '#D97706' : hrv >= 30 ? '#C4860A' : '#EF4444';
+  const hrvColor    = hrv >= 50 ? '#C4860A' : hrv >= 30 ? '#D97706' : '#EF4444';
   const tempStatus  = bodyTemp === 0 ? '—' : bodyTemp < 99.5 ? 'Normal' : 'Elevated';
   const tempColor   = bodyTemp >= 99.5 ? '#EF4444' : '#B83A3A';
 
   const CARDS: CardDef[] = [
     {
       icon:        'water-outline',
-      iconColor:   '#1E90D6',
-      iconBg:      '#D1EDFB',
-      bgBase:      '#EEF7FD',
-      bgBlob:      '#C4E8F720',
-      shadowColor: '#1E90D6',
+      iconColor:   '#2196F3',
+      cardBg:      '#F0F8FE',
+      shadowColor: '#2196F3',
       label:       'Blood O₂',
       value:       spo2 > 0 ? String(spo2) : '—',
       unit:        '%',
@@ -175,10 +129,8 @@ export function WatchMetricsRow({
     {
       icon:        'pulse-outline',
       iconColor:   '#C4860A',
-      iconBg:      '#FEF0C7',
-      bgBase:      '#FFFCF0',
-      bgBlob:      '#FDE68A20',
-      shadowColor: '#C4860A',
+      cardBg:      '#FFFCF2',
+      shadowColor: '#D97706',
       label:       'HRV',
       value:       hrv > 0 ? String(hrv) : '—',
       unit:        'ms',
@@ -188,9 +140,7 @@ export function WatchMetricsRow({
     {
       icon:        'thermometer-outline',
       iconColor:   '#DC2626',
-      iconBg:      '#FEE2E2',
-      bgBase:      '#FFF5F5',
-      bgBlob:      '#FECACA20',
+      cardBg:      '#FFF5F5',
       shadowColor: '#DC2626',
       label:       'Body Temp',
       value:       bodyTemp > 0 ? String(bodyTemp) : '—',
@@ -201,7 +151,7 @@ export function WatchMetricsRow({
   ];
 
   return (
-    <View style={{ flexDirection: 'row', gap: 11 }}>
+    <View style={{ flexDirection: 'row', gap: 12 }}>
       {CARDS.map(card => (
         <WatchMetricCard key={card.label} card={card} hasData={hasData} />
       ))}
