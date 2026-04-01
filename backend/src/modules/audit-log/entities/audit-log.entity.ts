@@ -14,7 +14,8 @@ export type AuditAction =
   | 'LOGIN'
   | 'LOGOUT'
   | 'LOGIN_FAILED'
-  | 'EXPORT';
+  | 'EXPORT'
+  | 'HEALTH_SYNC';
 
 /**
  * HIPAA §164.312(b): Immutable audit log for all PHI access and modifications.

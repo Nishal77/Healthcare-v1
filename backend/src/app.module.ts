@@ -11,6 +11,7 @@ import { PatientsModule } from './modules/patients/patients.module';
 import { UsersModule } from './modules/users/users.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { MedicalRecordsModule } from './modules/medical-records/medical-records.module';
+import { HealthSyncModule } from './modules/health-sync/health-sync.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { MedicalRecordsModule } from './modules/medical-records/medical-records.
     PatientsModule,
     AppointmentsModule,
     MedicalRecordsModule,
+    HealthSyncModule,
   ],
 })
 export class AppModule {}

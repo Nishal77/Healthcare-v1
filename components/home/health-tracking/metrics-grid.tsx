@@ -8,11 +8,10 @@ const CARD_SHADOW = {
 
 function StepsCard({ steps = 2316 }: { steps?: number }) {
   const goal = 8000;
-  const pct = Math.min(Math.round((steps / goal) * 100), 100);
+  const pct  = Math.min(Math.round((steps / goal) * 100), 100);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF', borderRadius: 22, padding: 16, ...CARD_SHADOW }}>
-      {/* Icon + label */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 }}>
         <View
           style={{
@@ -25,17 +24,13 @@ function StepsCard({ steps = 2316 }: { steps?: number }) {
           }}>
           <Ionicons name="walk-outline" size={16} color="#2C6E49" />
         </View>
-        <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>
-          Steps
-        </Text>
+        <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>Steps</Text>
       </View>
 
-      {/* Value */}
       <Text style={{ fontSize: 30, fontWeight: '800', color: '#0F1923', lineHeight: 34, letterSpacing: -1 }}>
         {steps.toLocaleString()}
       </Text>
 
-      {/* Progress toward goal */}
       <View style={{ marginTop: 10, gap: 4 }}>
         <View style={{ height: 3, backgroundColor: '#F0EFEC', borderRadius: 2 }}>
           <View
@@ -58,11 +53,10 @@ function StepsCard({ steps = 2316 }: { steps?: number }) {
 
 function WaterCard({ liters = 1.8 }: { liters?: number }) {
   const goal = 2.5;
-  const pct = Math.min(Math.round((liters / goal) * 100), 100);
+  const pct  = Math.min(Math.round((liters / goal) * 100), 100);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF', borderRadius: 22, padding: 16, ...CARD_SHADOW }}>
-      {/* Icon + label */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 }}>
         <View
           style={{
@@ -75,22 +69,16 @@ function WaterCard({ liters = 1.8 }: { liters?: number }) {
           }}>
           <Ionicons name="water-outline" size={16} color="#0B6E8B" />
         </View>
-        <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>
-          Water
-        </Text>
+        <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>Water</Text>
       </View>
 
-      {/* Value */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
         <Text style={{ fontSize: 30, fontWeight: '800', color: '#0F1923', lineHeight: 34, letterSpacing: -1 }}>
           {liters}
         </Text>
-        <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500', marginBottom: 3 }}>
-          L
-        </Text>
+        <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500', marginBottom: 3 }}>L</Text>
       </View>
 
-      {/* Progress toward goal */}
       <View style={{ marginTop: 10, gap: 4 }}>
         <View style={{ height: 3, backgroundColor: '#F0EFEC', borderRadius: 2 }}>
           <View
@@ -114,9 +102,6 @@ function WaterCard({ liters = 1.8 }: { liters?: number }) {
 interface MetricsGridProps {
   steps?: number;
   waterLiters?: number;
-  spo2?: number;
-  sleepHours?: number;
-  calories?: number;
 }
 
 export function MetricsGrid({ steps = 2316, waterLiters = 1.8 }: MetricsGridProps) {

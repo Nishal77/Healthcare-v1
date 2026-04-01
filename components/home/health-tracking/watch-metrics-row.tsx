@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import type { ComponentProps } from 'react';
 import { Text, View } from 'react-native';
 
 const CARD_SHADOW = {
@@ -7,7 +8,7 @@ const CARD_SHADOW = {
 } as const;
 
 interface MetricProps {
-  icon: keyof typeof import('@expo/vector-icons/Ionicons').glyphMap;
+  icon: ComponentProps<typeof Ionicons>['name'];
   iconColor: string;
   iconBg: string;
   label: string;
@@ -27,7 +28,6 @@ function WatchMetricCard({ icon, iconColor, iconBg, label, value, unit, status, 
         padding: 13,
         ...CARD_SHADOW,
       }}>
-      {/* Icon */}
       <View
         style={{
           width: 30,
@@ -41,7 +41,6 @@ function WatchMetricCard({ icon, iconColor, iconBg, label, value, unit, status, 
         <Ionicons name={icon} size={15} color={iconColor} />
       </View>
 
-      {/* Number */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, marginBottom: 3 }}>
         <Text style={{ fontSize: 20, fontWeight: '800', color: '#0F1923', lineHeight: 24, letterSpacing: -0.6 }}>
           {value}
@@ -51,12 +50,10 @@ function WatchMetricCard({ icon, iconColor, iconBg, label, value, unit, status, 
         </Text>
       </View>
 
-      {/* Label */}
       <Text style={{ fontSize: 10, color: '#6B7280', fontWeight: '600', marginBottom: 8, letterSpacing: 0.1 }}>
         {label}
       </Text>
 
-      {/* Status */}
       <Text style={{ fontSize: 10, fontWeight: '700', color: statusColor, letterSpacing: 0.2 }}>
         {status}
       </Text>
@@ -64,7 +61,20 @@ function WatchMetricCard({ icon, iconColor, iconBg, label, value, unit, status, 
   );
 }
 
-export function WatchMetricsRow() {
+interface WatchMetricsRowProps {
+  spo2?: number;
+  hrv?: number;
+  bodyTemp?: number;
+}
+
+export function WatchMetricsRow({ spo2 = 98, hrv = 42, bodyTemp = 98.4 }: WatchMetricsRowProps) {
+  const spo2Status      = spo2 >= 98 ? 'Optimal' : spo2 >= 95 ? 'Normal' : 'Low';
+  const spo2Color       = spo2 >= 98 ? '#0B6E8B' : spo2 >= 95 ? '#2C6E49' : '#C4860A';
+  const hrvStatus       = hrv >= 50 ? 'Good' : hrv >= 30 ? 'Moderate' : 'Low';
+  const hrvColor        = hrv >= 50 ? '#2C6E49' : '#C4860A';
+  const tempStatus      = bodyTemp < 99 ? 'Normal' : 'Elevated';
+  const tempStatusColor = bodyTemp < 99 ? '#2C6E49' : '#C4860A';
+
   return (
     <View style={{ flexDirection: 'row', gap: 10 }}>
       <WatchMetricCard
@@ -72,30 +82,30 @@ export function WatchMetricsRow() {
         iconColor="#0B6E8B"
         iconBg="#EFF7FA"
         label="Blood O₂"
-        value="98"
+        value={String(spo2)}
         unit="%"
-        status="Optimal"
-        statusColor="#0B6E8B"
+        status={spo2Status}
+        statusColor={spo2Color}
       />
       <WatchMetricCard
         icon="pulse-outline"
         iconColor="#C4860A"
         iconBg="#FEF8EE"
         label="HRV"
-        value="42"
+        value={String(hrv)}
         unit="ms"
-        status="Moderate"
-        statusColor="#C4860A"
+        status={hrvStatus}
+        statusColor={hrvColor}
       />
       <WatchMetricCard
         icon="thermometer-outline"
         iconColor="#B83A3A"
         iconBg="#FEF3F3"
         label="Body Temp"
-        value="98.4"
+        value={String(bodyTemp)}
         unit="°F"
-        status="Normal"
-        statusColor="#2C6E49"
+        status={tempStatus}
+        statusColor={tempStatusColor}
       />
     </View>
   );

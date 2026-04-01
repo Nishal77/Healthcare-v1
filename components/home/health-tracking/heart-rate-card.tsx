@@ -1,20 +1,24 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
+import type { MetricStatus } from '../../../src/health/types';
 
-// 14-point BPM history — rising to peak then settling
 const PULSE_BARS = [58, 63, 68, 72, 70, 76, 80, 88, 99, 123, 112, 104, 96, 88];
-const MAX_BPM = Math.max(...PULSE_BARS);
-const MIN_BPM = Math.min(...PULSE_BARS);
-const CHART_H = 48;
+const MAX_BPM    = Math.max(...PULSE_BARS);
+const MIN_BPM    = Math.min(...PULSE_BARS);
+const CHART_H    = 48;
 
-function PulseChart() {
+function PulseChart({ bpm }: { bpm: number }) {
+  const bars = [...PULSE_BARS.slice(1), bpm];
+  const max  = Math.max(...bars);
+  const min  = Math.min(...bars);
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3.5, height: CHART_H }}>
-      {PULSE_BARS.map((val, i) => {
-        const norm = ((val - MIN_BPM) / (MAX_BPM - MIN_BPM)) * CHART_H * 0.78 + CHART_H * 0.14;
-        const isPeak = val === MAX_BPM;
-        // Brand palette: green rising bars → gold peak → muted green falling
-        const color = isPeak ? '#C4860A' : '#2C6E49';
+      {bars.map((val, i) => {
+        const range = max - min || 1;
+        const norm  = ((val - min) / range) * CHART_H * 0.78 + CHART_H * 0.14;
+        const isPeak = val === max;
+        const color  = isPeak ? '#C4860A' : '#2C6E49';
         const opacity = isPeak ? 1 : i < 9 ? 0.35 + (i / 9) * 0.55 : 0.9 - (i - 9) * 0.12;
         return (
           <View
@@ -35,17 +39,21 @@ function PulseChart() {
 
 interface HeartRateCardProps {
   bpm?: number;
-  status?: 'normal' | 'elevated' | 'low';
+  status?: MetricStatus;
   nadiType?: string;
 }
 
-export function HeartRateCard({
-  bpm = 123,
-  status = 'normal',
-  nadiType = 'Vataja',
-}: HeartRateCardProps) {
-  const statusColor = status === 'elevated' ? '#C4860A' : status === 'low' ? '#0B6E8B' : '#2C6E49';
-  const statusLabel = status === 'elevated' ? 'Elevated' : status === 'low' ? 'Low' : 'Normal';
+export function HeartRateCard({ bpm = 123, status = 'normal', nadiType = 'Vataja' }: HeartRateCardProps) {
+  const statusColor = status === 'elevated' || status === 'critical'
+    ? '#C4860A'
+    : status === 'low'
+    ? '#0B6E8B'
+    : '#2C6E49';
+
+  const statusLabel = status === 'elevated' ? 'Elevated'
+    : status === 'critical' ? 'Critical'
+    : status === 'low'      ? 'Low'
+    : 'Normal';
 
   return (
     <View
@@ -57,8 +65,6 @@ export function HeartRateCard({
         borderWidth: 1,
         borderColor: '#ECEAE6',
       }}>
-
-      {/* Header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
         <View
           style={{
@@ -83,12 +89,10 @@ export function HeartRateCard({
         </View>
       </View>
 
-      {/* Bar chart */}
       <View style={{ marginBottom: 12 }}>
-        <PulseChart />
+        <PulseChart bpm={bpm} />
       </View>
 
-      {/* BPM */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginBottom: 14 }}>
         <Text style={{ fontSize: 46, fontWeight: '800', color: '#0F1923', lineHeight: 50, letterSpacing: -2 }}>
           {bpm}
@@ -98,18 +102,13 @@ export function HeartRateCard({
         </Text>
       </View>
 
-      {/* Ayurvedic data — no box background, just clean rows */}
       <View style={{ borderTopWidth: 1, borderTopColor: '#F0EFEC', paddingTop: 10, gap: 6 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ fontSize: 10, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.5 }}>
-            NADI
-          </Text>
+          <Text style={{ fontSize: 10, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.5 }}>NADI</Text>
           <Text style={{ fontSize: 11, fontWeight: '700', color: '#4B5563' }}>{nadiType}</Text>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: 10, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.5 }}>
-            STATUS
-          </Text>
+          <Text style={{ fontSize: 10, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.5 }}>STATUS</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: statusColor }} />
             <Text style={{ fontSize: 11, fontWeight: '700', color: statusColor }}>{statusLabel}</Text>
