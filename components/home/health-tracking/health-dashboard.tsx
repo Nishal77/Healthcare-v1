@@ -1,18 +1,18 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
-import { useHealthData } from '../../../hooks/useHealthData';
+import { useHealthData }    from '../../../hooks/useHealthData';
 import { useWatchBluetooth } from '../../../hooks/useWatchBluetooth';
 import { buildDoshaInsight, getDoshaBars } from '../../../src/health/dosha-engine';
-import { ConnectWatchBanner } from './connect-watch-banner';
-import { DoshaBalanceCard } from './dosha-balance-card';
+import { ConnectWatchBanner }  from './connect-watch-banner';
+import { DoshaBalanceCard }    from './dosha-balance-card';
 import { HealthSectionHeader } from './health-section-header';
-import { HeartRateCard } from './heart-rate-card';
-import { MetricsGrid } from './metrics-grid';
+import { HeartRateCard }       from './heart-rate-card';
+import { MetricsGrid }         from './metrics-grid';
 import { PredictiveInsightCard } from './predictive-insight-card';
-import { WatchMetricsRow } from './watch-metrics-row';
+import { WatchMetricsRow }     from './watch-metrics-row';
 
 interface HealthDashboardProps {
-  onSeeAll?: () => void;
+  onSeeAll?:    () => void;
   onLearnMore?: () => void;
 }
 
@@ -20,17 +20,12 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
   const ble    = useWatchBluetooth();
   const health = useHealthData();
 
-  // When BLE connects, kick off health data reading
   useEffect(() => {
-    if (ble.connectionState === 'connected' && !health.ready) {
-      health.start();
-    }
-    if (ble.connectionState === 'disconnected') {
-      health.reset();
-    }
+    if (ble.connectionState === 'connected' && !health.ready) health.start();
+    if (ble.connectionState === 'disconnected') health.reset();
   }, [ble.connectionState]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const data = health.data;
+  const data        = health.data;
   const isConnected = ble.connectionState === 'connected';
 
   const dosha = data
@@ -43,6 +38,7 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
 
   return (
     <View style={{ paddingHorizontal: 20, gap: 12 }}>
+
       <HealthSectionHeader
         onSeeAll={onSeeAll}
         onDisconnect={ble.disconnect}
@@ -51,6 +47,7 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         deviceName={ble.connectedDevice?.name ?? null}
       />
 
+      {/* Connect watch banner — only when disconnected */}
       {!isConnected && (
         <ConnectWatchBanner
           connectionStep={ble.connectionStep}
@@ -64,22 +61,24 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         />
       )}
 
-      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
-        <View style={{ flex: 1.35 }}>
-          <HeartRateCard
-            bpm={data?.heartRate ?? 0}
-            status={data?.heartRateStatus ?? 'normal'}
-            nadiType={data?.nadiType ?? '—'}
-            hasData={!!data}
-          />
-        </View>
-        <MetricsGrid
-          steps={data?.steps ?? 0}
-          waterLiters={data?.waterLiters ?? 0}
-          hasData={!!data}
-        />
-      </View>
+      {/* Heart Rate — full width */}
+      <HeartRateCard
+        bpm={data?.heartRate ?? 0}
+        status={data?.heartRateStatus ?? 'normal'}
+        nadiType={data?.nadiType ?? '—'}
+        hasData={!!data}
+      />
 
+      {/* 2 × 2 metrics grid: Steps · Calories · Sleep · Water */}
+      <MetricsGrid
+        steps={data?.steps ?? 0}
+        waterLiters={data?.waterLiters ?? 0}
+        calories={data?.calories ?? 0}
+        sleepHours={data?.sleepHours ?? 0}
+        hasData={!!data}
+      />
+
+      {/* 3-col row: Blood O₂ · HRV · Body Temp */}
       <WatchMetricsRow
         spo2={data?.spo2 ?? 0}
         hrv={data?.hrv ?? 0}
@@ -95,7 +94,11 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
       />
 
       <PredictiveInsightCard
-        goalsCompleted={isConnected && data ? Math.min(data.doshaAlerts.length === 0 ? 3 : 1, 5) : 0}
+        goalsCompleted={
+          isConnected && data
+            ? Math.min(data.doshaAlerts.length === 0 ? 3 : 1, 5)
+            : 0
+        }
         onLearnMore={onLearnMore}
       />
 
