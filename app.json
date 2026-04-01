@@ -15,7 +15,10 @@
         "NSBluetoothAlwaysUsageDescription": "Vedarogya uses Bluetooth to scan for and connect to your smartwatch to read live health metrics.",
         "NSBluetoothPeripheralUsageDescription": "Vedarogya connects to your smartwatch over Bluetooth to sync heart rate, SpO₂ and HRV in real time.",
         "NSHealthShareUsageDescription": "Vedarogya reads heart rate, steps, sleep and oxygen data from Apple Health to display your vitals.",
-        "NSHealthUpdateUsageDescription": "Vedarogya writes wellness data back to Apple Health so your records stay in sync."
+        "NSHealthUpdateUsageDescription": "Vedarogya writes wellness data back to Apple Health so your records stay in sync.",
+        "NSCameraUsageDescription": "Vedarogya uses your camera so you can photograph symptoms or scan health documents for AI analysis.",
+        "NSPhotoLibraryUsageDescription": "Vedarogya accesses your photo library so you can share health images and lab reports with the AI assistant.",
+        "NSMicrophoneUsageDescription": "Vedarogya uses the microphone for voice input in the AI health assistant."
       },
       "entitlements": {
         "com.apple.developer.healthkit": true,
@@ -38,7 +41,11 @@
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -47,6 +54,13 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Vedarogya accesses your photo library to let you share health images with the AI assistant.",
+          "cameraPermission": "Vedarogya uses the camera to photograph symptoms or scan health documents."
+        }
+      ],
       [
         "expo-splash-screen",
         {
