@@ -1,6 +1,7 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
+const path = require('path');
 const { getDefaultConfig } = require('expo/metro-config');
-const { withNativeWind } = require("nativewind/metro");
+const { withNativeWind } = require('nativewind/metro');
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
@@ -9,4 +10,14 @@ const config = getDefaultConfig(__dirname);
 // stale/duplicate component files from worktree subdirectories
 config.resolver.blockList = [/\/.claude\/.*/];
 
-module.exports = withNativeWind(config, { input: "./global.css" });
+// Stub out native-only packages that aren't installed in Expo Go / iOS.
+// Metro resolves all require() calls at bundle time even inside try/catch,
+// so missing modules crash the bundler before the app ever loads.
+config.resolver.extraNodeModules = {
+  'react-native-health-connect': path.resolve(
+    __dirname,
+    'src/health/health-connect-stub.js',
+  ),
+};
+
+module.exports = withNativeWind(config, { input: './global.css' });

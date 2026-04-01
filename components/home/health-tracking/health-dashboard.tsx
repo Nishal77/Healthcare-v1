@@ -1,4 +1,5 @@
 import { Platform, View } from 'react-native';
+import { useHealthConnect } from '../../../hooks/useHealthConnect';
 import { useMockHealthData } from '../../../hooks/useMockHealthData';
 import { buildDoshaInsight, getDoshaBars } from '../../../src/health/dosha-engine';
 import { ConnectWatchBanner } from './connect-watch-banner';
@@ -9,7 +10,8 @@ import { MetricsGrid } from './metrics-grid';
 import { PredictiveInsightCard } from './predictive-insight-card';
 import { WatchMetricsRow } from './watch-metrics-row';
 
-// Flip to false to use the real Health Connect hook on Android dev build
+// IS_MOCK=true → always use simulated data (works in Expo Go, iOS, no watch needed)
+// IS_MOCK=false → use real Health Connect on Android dev builds
 const IS_MOCK = true;
 
 interface HealthDashboardProps {
@@ -18,17 +20,16 @@ interface HealthDashboardProps {
 }
 
 export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps) {
-  // On iOS Health Connect is unavailable — always fall back to mock
-  const useHook = IS_MOCK || Platform.OS === 'ios'
-    ? useMockHealthData
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    : require('../../../hooks/useHealthConnect').useHealthConnect;
+  // Static imports only — Metro can't handle dynamic require() for unknown modules.
+  // useHealthConnect uses the metro stub on Expo Go / iOS and returns 'unavailable'.
+  const mockHook = useMockHealthData();
+  const liveHook = useHealthConnect();
 
-  const { data, connectionState, connect, disconnect, isLoading } = useHook();
+  const { data, connectionState, connect, disconnect, isLoading } =
+    IS_MOCK || Platform.OS === 'ios' ? mockHook : liveHook;
 
   const isConnected = connectionState === 'connected';
 
-  // Derive dosha bars from live data or show defaults
   const dosha = data
     ? getDoshaBars(data.steps, data.sleepHours, data.heartRate, data.spo2)
     : { vata: 32, pitta: 45, kapha: 23 };
@@ -50,7 +51,6 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         <ConnectWatchBanner onConnect={connect} isConnecting={isLoading} />
       ) : null}
 
-      {/* Row 1: Heart Rate + Steps & Water */}
       <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
         <View style={{ flex: 1.35 }}>
           <HeartRateCard
@@ -65,14 +65,12 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         />
       </View>
 
-      {/* Row 2: SpO2, HRV, Body Temp */}
       <WatchMetricsRow
         spo2={data?.spo2 ?? 98}
         hrv={data?.hrv ?? 42}
         bodyTemp={data?.bodyTemp ?? 98.4}
       />
 
-      {/* Row 3: Dosha Balance */}
       <DoshaBalanceCard
         vata={dosha.vata}
         pitta={dosha.pitta}
@@ -80,7 +78,6 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         insight={doshaInsight}
       />
 
-      {/* Goals banner */}
       <PredictiveInsightCard
         goalsCompleted={isConnected && data ? Math.min(data.doshaAlerts.length === 0 ? 3 : 1, 5) : 0}
         onLearnMore={onLearnMore}
