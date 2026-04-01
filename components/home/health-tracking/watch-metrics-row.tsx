@@ -1,23 +1,22 @@
 /**
- * WatchMetricsRow — 3 compact cards matching the Sleep card design language
+ * WatchMetricsRow
  *
- * Same rules:
- *  • Bare icon, no tile container
- *  • Warm off-white card per metric
- *  • Large bold value
- *  • Status dot + text at bottom
- *  • Soft coloured shadow, no border
+ * Same design rules as MetricsGrid:
+ *  • LinearGradient bg — top light, bottom richer tint
+ *  • NO shadow, NO border
+ *  • Bare icon (no tile), large value, status dot + text
  */
 
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentProps } from 'react';
 import { Text, View } from 'react-native';
 
 interface CardDef {
   icon:        ComponentProps<typeof Ionicons>['name'];
   iconColor:   string;
-  cardBg:      string;
-  shadowColor: string;
+  gradTop:     string;
+  gradBot:     string;
   label:       string;
   value:       string;
   unit:        string;
@@ -29,70 +28,59 @@ function WatchMetricCard({ card, hasData }: { card: CardDef; hasData: boolean })
   const showStatus = hasData && card.value !== '—' && card.status !== '—';
 
   return (
-    <View
-      style={{
-        flex: 1,
-        borderRadius: 22,
-        backgroundColor: card.cardBg,
-        padding: 14,
-        minHeight: 132,
-        justifyContent: 'space-between',
-        shadowColor: card.shadowColor,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.09,
-        shadowRadius: 14,
-        elevation: 3,
-      }}>
+    <View style={{ flex: 1, borderRadius: 22, overflow: 'hidden', minHeight: 136 }}>
+      <LinearGradient
+        colors={[card.gradTop, card.gradBot]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ flex: 1, padding: 14, justifyContent: 'space-between' }}>
 
-      {/* Bare icon — top */}
-      <Ionicons name={card.icon} size={22} color={card.iconColor} />
+        {/* Bare icon — top */}
+        <Ionicons name={card.icon} size={22} color={card.iconColor} />
 
-      {/* Value + unit + label + status — bottom */}
-      <View style={{ gap: 2, marginTop: 12 }}>
-
-        {/* Value + unit inline */}
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
-          <Text style={{
-            fontSize: 28,
-            fontWeight: '700',
-            color: hasData && card.value !== '—' ? '#1A1A1A' : '#D1D5DB',
-            letterSpacing: -0.8,
-            lineHeight: 32,
-            includeFontPadding: false,
-          }}>
-            {hasData ? card.value : '—'}
-          </Text>
-          {hasData && card.value !== '—' && (
-            <Text style={{ fontSize: 10, color: '#9CA3AF', fontWeight: '400', marginBottom: 4 }}>
-              {card.unit}
+        {/* Value + label + status — bottom */}
+        <View style={{ gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
+            <Text style={{
+              fontSize: 28,
+              fontWeight: '700',
+              color: hasData && card.value !== '—' ? '#1A1A1A' : '#C8C8C8',
+              letterSpacing: -0.8,
+              lineHeight: 32,
+              includeFontPadding: false,
+            }}>
+              {hasData ? card.value : '—'}
             </Text>
-          )}
-        </View>
+            {hasData && card.value !== '—' && (
+              <Text style={{ fontSize: 10, color: '#8A8A8E', fontWeight: '400', marginBottom: 4 }}>
+                {card.unit}
+              </Text>
+            )}
+          </View>
 
-        {/* Label */}
-        <Text style={{ fontSize: 12, fontWeight: '500', color: '#6B7280', letterSpacing: 0.1 }}>
-          {card.label}
-        </Text>
-
-        {/* Status */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
-          <View style={{
-            width: 6, height: 6, borderRadius: 3,
-            backgroundColor: showStatus ? card.statusColor : '#E5E7EB',
-          }} />
-          <Text style={{
-            fontSize: 10, fontWeight: '600', letterSpacing: 0.1,
-            color: showStatus ? card.statusColor : '#D1D5DB',
-          }}>
-            {showStatus ? card.status : '—'}
+          <Text style={{ fontSize: 12, fontWeight: '500', color: '#6B7280', letterSpacing: 0.1 }}>
+            {card.label}
           </Text>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+            <View style={{
+              width: 6, height: 6, borderRadius: 3,
+              backgroundColor: showStatus ? card.statusColor : '#D1D5DB',
+            }} />
+            <Text style={{
+              fontSize: 10, fontWeight: '600', letterSpacing: 0.1,
+              color: showStatus ? card.statusColor : '#C8C8C8',
+            }}>
+              {showStatus ? card.status : '—'}
+            </Text>
+          </View>
         </View>
-      </View>
+
+      </LinearGradient>
     </View>
   );
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
 interface WatchMetricsRowProps {
   spo2?:     number;
   hrv?:      number;
@@ -118,8 +106,8 @@ export function WatchMetricsRow({
     {
       icon:        'water-outline',
       iconColor:   '#2196F3',
-      cardBg:      '#F0F8FE',
-      shadowColor: '#2196F3',
+      gradTop:     '#F4FAFF',
+      gradBot:     '#C9E8FB',
       label:       'Blood O₂',
       value:       spo2 > 0 ? String(spo2) : '—',
       unit:        '%',
@@ -129,8 +117,8 @@ export function WatchMetricsRow({
     {
       icon:        'pulse-outline',
       iconColor:   '#C4860A',
-      cardBg:      '#FFFCF2',
-      shadowColor: '#D97706',
+      gradTop:     '#FFFDF5',
+      gradBot:     '#FDE9A8',
       label:       'HRV',
       value:       hrv > 0 ? String(hrv) : '—',
       unit:        'ms',
@@ -140,8 +128,8 @@ export function WatchMetricsRow({
     {
       icon:        'thermometer-outline',
       iconColor:   '#DC2626',
-      cardBg:      '#FFF5F5',
-      shadowColor: '#DC2626',
+      gradTop:     '#FFF8F8',
+      gradBot:     '#FCCACA',
       label:       'Body Temp',
       value:       bodyTemp > 0 ? String(bodyTemp) : '—',
       unit:        '°F',
