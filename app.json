@@ -10,7 +10,17 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.vedarogya.app"
+      "bundleIdentifier": "com.vedarogya.app",
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Vedarogya uses Bluetooth to scan for and connect to your smartwatch to read live health metrics.",
+        "NSBluetoothPeripheralUsageDescription": "Vedarogya connects to your smartwatch over Bluetooth to sync heart rate, SpO₂ and HRV in real time.",
+        "NSHealthShareUsageDescription": "Vedarogya reads heart rate, steps, sleep and oxygen data from Apple Health to display your vitals.",
+        "NSHealthUpdateUsageDescription": "Vedarogya writes wellness data back to Apple Health so your records stay in sync."
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
+      }
     },
     "android": {
       "package": "com.vedarogya.app",
@@ -21,7 +31,15 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",

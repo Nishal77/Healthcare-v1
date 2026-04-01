@@ -13,19 +13,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ConnectionStep, ScannedDevice, WatchConnectionState } from '../src/health/types';
 
 // ── BLE module resolution ────────────────────────────────────────────────────
-// Metro maps 'react-native-ble-plx' → stub when native module is absent.
-// The stub exports IS_STUB = true so we know we're running without hardware.
-const bleLib = require('react-native-ble-plx') as {
-  BleManager: new () => BleManagerLike;
-  State: Record<string, string>;
-  IS_STUB?: boolean;
-};
+// react-native-ble-plx is installed in node_modules (needed for native builds),
+// but in Expo Go the underlying native module doesn't exist. The BleManager
+// constructor calls new NativeEventEmitter(nativeModule) — if the native module
+// is null the invariant throws immediately.
+//
+// Fix: instantiate BleManager lazily inside a try/catch. On Expo Go the catch
+// runs and returns null; on a real dev build it succeeds and returns the manager.
 
 interface BleDevice {
   id: string;
   name: string | null;
   rssi: number | null;
-  connect: () => Promise<BleDevice>;
 }
 
 interface BleManagerLike {
@@ -42,13 +41,19 @@ interface BleManagerLike {
   destroy(): void;
 }
 
-const IS_NATIVE_BLE = !bleLib.IS_STUB;
-
-// Single BleManager instance for the app lifetime
 let _manager: BleManagerLike | null = null;
+let _initDone = false;
+
 function getManager(): BleManagerLike | null {
-  if (!IS_NATIVE_BLE) return null;
-  if (!_manager) _manager = new bleLib.BleManager();
+  if (_initDone) return _manager;
+  _initDone = true;
+  try {
+    const { BleManager } = require('react-native-ble-plx') as { BleManager: new () => BleManagerLike };
+    _manager = new BleManager();
+  } catch {
+    // Native module absent (Expo Go / web / simulator without BLE support)
+    _manager = null;
+  }
   return _manager;
 }
 
@@ -76,9 +81,7 @@ function isWatchDevice(name: string | null): boolean {
 // ── Hook ─────────────────────────────────────────────────────────────────────
 export function useWatchBluetooth() {
   const [connState, setConnState]   = useState<WatchConnectionState>('disconnected');
-  const [step, setStep]             = useState<ConnectionStep>(
-    IS_NATIVE_BLE ? 'idle' : 'dev_build_required',
-  );
+  const [step, setStep]             = useState<ConnectionStep>('idle');
   const [devices, setDevices]       = useState<ScannedDevice[]>([]);
   const [connected, setConnected]   = useState<ScannedDevice | null>(null);
   const [error, setError]           = useState<string | null>(null);

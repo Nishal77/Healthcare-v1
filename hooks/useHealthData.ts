@@ -2,11 +2,10 @@
  * useHealthData
  *
  * Reads live biometric data from the platform health store:
+ *   iOS     → Apple HealthKit  (react-native-health)
  *   Android → Google Health Connect (react-native-health-connect)
- *   iOS     → Apple HealthKit via Linking to the Health app (full HealthKit
- *              access requires a dev build with react-native-health installed)
  *
- * Returns null data when the native module is absent (Expo Go).
+ * Returns null data when the native module is absent (Expo Go / simulator).
  * Never returns fabricated numbers — if data isn't available, data === null.
  */
 
@@ -22,14 +21,134 @@ import {
 } from '../src/health/dosha-engine';
 import type { HealthData } from '../src/health/types';
 
-// ── Health Connect (Android) ─────────────────────────────────────────────────
+// ── Apple HealthKit (iOS only) ───────────────────────────────────────────────
+
+interface HKValue { value: number }
+interface HKSleep { startDate: string; endDate: string; value: string }
+
+interface HKInterface {
+  IS_STUB?: boolean;
+  Constants: { Permissions: Record<string, string> };
+  initHealthKit(opts: object, cb: (err: string | null) => void): void;
+  getLatestHeartRate(opts: object, cb: (err: string | null, r: HKValue | null) => void): void;
+  getStepCount(opts: object, cb: (err: string | null, r: HKValue | null) => void): void;
+  getSleepSamples(opts: object, cb: (err: string | null, r: HKSleep[]) => void): void;
+  getLatestBloodOxygenSaturation(opts: object, cb: (err: string | null, r: HKValue | null) => void): void;
+  getActiveEnergyBurned(opts: object, cb: (err: string | null, r: HKValue[]) => void): void;
+  getHeartRateVariabilitySamples(opts: object, cb: (err: string | null, r: HKValue[]) => void): void;
+  getLatestBodyTemperature(opts: object, cb: (err: string | null, r: HKValue | null) => void): void;
+}
+
+// Lazy singleton — constructor is safe on Android; every call is guarded by
+// Platform.OS === 'ios' so the Android bundle never invokes HealthKit methods.
+let _hk: HKInterface | null = null;
+let _hkDone = false;
+
+function getHK(): HKInterface | null {
+  if (_hkDone) return _hk;
+  _hkDone = true;
+  if (Platform.OS !== 'ios') return null;
+  try {
+    const lib = require('react-native-health') as HKInterface & { default?: HKInterface };
+    const mod  = lib?.default ?? lib;
+    _hk = mod?.IS_STUB ? null : mod;
+  } catch {
+    _hk = null;
+  }
+  return _hk;
+}
+
+function hkPromise<T>(fn: (cb: (err: string | null, r: T) => void) => void): Promise<T | null> {
+  return new Promise(resolve => fn((err, r) => resolve(err ? null : r)));
+}
+
+async function initHK(hk: HKInterface): Promise<boolean> {
+  return new Promise(resolve =>
+    hk.initHealthKit(
+      {
+        permissions: {
+          read: [
+            'HeartRate', 'StepCount', 'SleepAnalysis',
+            'OxygenSaturation', 'ActiveEnergyBurned',
+            'HeartRateVariabilitySDNN', 'BodyTemperature',
+          ],
+          write: [],
+        },
+      },
+      err => resolve(!err),
+    ),
+  );
+}
+
+async function readHealthKit(hk: HKInterface): Promise<HealthData | null> {
+  const ok = await initHK(hk);
+  if (!ok) return null;
+
+  const today     = new Date();
+  const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+  const endDate   = today.toISOString();
+
+  const [hrVal, stepsVal, sleepRecs, spo2Val, calRecs, hrvRecs, tempVal] = await Promise.all([
+    hkPromise<HKValue>  (cb => hk.getLatestHeartRate({}, cb)),
+    hkPromise<HKValue>  (cb => hk.getStepCount({ date: endDate }, cb)),
+    hkPromise<HKSleep[]>(cb => hk.getSleepSamples({ startDate, endDate }, cb)),
+    hkPromise<HKValue>  (cb => hk.getLatestBloodOxygenSaturation({}, cb)),
+    hkPromise<HKValue[]>(cb => hk.getActiveEnergyBurned({ startDate, endDate }, cb)),
+    hkPromise<HKValue[]>(cb => hk.getHeartRateVariabilitySamples({ startDate, endDate, limit: 1 }, cb)),
+    hkPromise<HKValue>  (cb => hk.getLatestBodyTemperature({}, cb)),
+  ]);
+
+  const heartRate = hrVal?.value ? Math.round(hrVal.value) : 0;
+  if (!heartRate) return null; // no real data yet today
+
+  const steps  = stepsVal?.value ? Math.round(stepsVal.value) : 0;
+  const spo2   = spo2Val?.value  ? Math.round(spo2Val.value * 100) : 0; // fraction → %
+  const hrv    = Math.round((hrvRecs ?? []).at(-1)?.value ?? 0);
+
+  const totalSleepMs = (sleepRecs ?? [])
+    .filter(r => r.value === 'ASLEEP' || r.value === 'INBED')
+    .reduce((ms, r) => ms + (new Date(r.endDate).getTime() - new Date(r.startDate).getTime()), 0);
+  const sleepHours = parseFloat((totalSleepMs / 3_600_000).toFixed(1));
+
+  const calories = Math.round((calRecs ?? []).reduce((s, r) => s + (r.value ?? 0), 0));
+
+  // HealthKit BodyTemperature is in Celsius → convert to °F
+  const tempC    = tempVal?.value ?? 0;
+  const bodyTemp = tempC ? parseFloat((tempC * 9 / 5 + 32).toFixed(1)) : 0;
+
+  const alerts   = generateDoshaAlert(heartRate, spo2 || 98, sleepHours || 7, steps);
+  const doshaRaw = getDoshaBars(steps, sleepHours || 7, heartRate, spo2 || 98);
+  const insight  = buildDoshaInsight(doshaRaw.vata, doshaRaw.pitta, doshaRaw.kapha, alerts);
+
+  return {
+    heartRate,
+    spo2:        spo2  || 98,
+    hrv,
+    steps,
+    waterLiters: 0,
+    sleepHours,
+    calories,
+    bodyTemp,
+    nadiType:         getNadiType(heartRate, hrv || 42),
+    heartRateStatus:  getHeartRateStatus(heartRate),
+    spo2Status:       getSpo2Status(spo2 || 98),
+    doshaAlerts:      alerts,
+    lastUpdated:      new Date(),
+    ...(doshaRaw as unknown as object),
+    doshaInsight:     insight,
+  } as HealthData & { vata: number; pitta: number; kapha: number; doshaInsight: string };
+}
+
+// ── Google Health Connect (Android only) ────────────────────────────────────
+
 type HCModule = {
-  getSdkStatus: () => Promise<number>;
+  IS_STUB?: boolean;
+  getSdkStatus:      () => Promise<number>;
   requestPermission: (p: Array<{ accessType: string; recordType: string }>) => Promise<Array<{ granted: boolean }>>;
-  readRecords: (type: string, opts: object) => Promise<{ records: object[] }>;
+  readRecords:       (type: string, opts: object) => Promise<{ records: object[] }>;
 };
 
-const hcLib = require('react-native-health-connect') as HCModule & { IS_STUB?: boolean };
+const hcLib = require('react-native-health-connect') as HCModule;
 const HC_AVAILABLE = Platform.OS === 'android' && !hcLib.IS_STUB;
 
 const HC_PERMISSIONS = [
@@ -46,11 +165,11 @@ async function readHealthConnect(): Promise<HealthData | null> {
   if (status !== 3) return null;
 
   const grants = await hcLib.requestPermission(HC_PERMISSIONS);
-  if (!grants.every((g) => g.granted)) return null;
+  if (!grants.every(g => g.granted)) return null;
 
-  const now   = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const end   = now.toISOString();
+  const now    = new Date();
+  const today  = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const end    = now.toISOString();
   const filter = { operator: 'between', startTime: today, endTime: end };
 
   const [hrRes, stepsRes, sleepRes, spo2Res, calRes] = await Promise.all([
@@ -65,7 +184,7 @@ async function readHealthConnect(): Promise<HealthData | null> {
   const heartRate = latestHr
     ? Math.round(((latestHr.samples as Array<Record<string, number>>)?.at(-1)?.beatsPerMinute ?? 0))
     : 0;
-  if (!heartRate) return null; // no real data today yet
+  if (!heartRate) return null;
 
   const steps = (stepsRes.records as Array<Record<string, number>>)
     .reduce((s, r) => s + (r.count ?? 0), 0);
@@ -82,11 +201,6 @@ async function readHealthConnect(): Promise<HealthData | null> {
       .reduce((s, r) => s + (r.energy?.inKilocalories ?? 0), 0),
   );
 
-  // Health Connect doesn't expose HRV directly on all devices
-  const hrv      = 0;
-  const bodyTemp = 0;
-  const waterLiters = 0;
-
   const alerts   = generateDoshaAlert(heartRate, spo2 || 98, sleepHours || 7, steps);
   const doshaRaw = getDoshaBars(steps, sleepHours || 7, heartRate, spo2 || 98);
   const insight  = buildDoshaInsight(doshaRaw.vata, doshaRaw.pitta, doshaRaw.kapha, alerts);
@@ -94,13 +208,13 @@ async function readHealthConnect(): Promise<HealthData | null> {
   return {
     heartRate,
     spo2:        spo2 || 98,
-    hrv,
+    hrv:         0,
     steps,
-    waterLiters,
+    waterLiters: 0,
     sleepHours,
     calories,
-    bodyTemp,
-    nadiType:         getNadiType(heartRate, hrv || 42),
+    bodyTemp:    0,
+    nadiType:         getNadiType(heartRate, 42),
     heartRateStatus:  getHeartRateStatus(heartRate),
     spo2Status:       getSpo2Status(spo2 || 98),
     doshaAlerts:      alerts,
@@ -112,10 +226,10 @@ async function readHealthConnect(): Promise<HealthData | null> {
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 export function useHealthData() {
-  const [data, setData]     = useState<HealthData | null>(null);
-  const [error, setError]   = useState<string | null>(null);
-  const [ready, setReady]   = useState(false);
-  const intervalRef         = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [data, setData]   = useState<HealthData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const intervalRef       = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stop = useCallback(() => {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
@@ -125,14 +239,23 @@ export function useHealthData() {
     try {
       let result: HealthData | null = null;
 
-      if (HC_AVAILABLE) {
+      if (Platform.OS === 'ios') {
+        const hk = getHK();
+        if (hk) result = await readHealthKit(hk);
+      } else if (HC_AVAILABLE) {
         result = await readHealthConnect();
       }
-      // iOS HealthKit: requires dev build with react-native-health installed.
-      // When that native module is available in a future build, add an else-if branch here.
 
-      if (result) { setData(result); setError(null); }
-      else        { setError('No health data available yet for today. Wear your watch and sync.'); }
+      if (result) {
+        setData(result);
+        setError(null);
+      } else {
+        setError(
+          Platform.OS === 'ios'
+            ? 'No Apple Health data yet today. Wear your watch and open the Health app.'
+            : 'No Health Connect data yet today. Wear your watch and sync.',
+        );
+      }
     } catch (e) {
       setError((e as Error).message);
     }
@@ -152,5 +275,8 @@ export function useHealthData() {
     setError(null);
   }, [stop]);
 
-  return { data, error, ready, start, reset, isAvailable: HC_AVAILABLE };
+  // true when the current platform has a real health data backend
+  const isAvailable = Platform.OS === 'ios' ? !!getHK() : HC_AVAILABLE;
+
+  return { data, error, ready, start, reset, isAvailable };
 }

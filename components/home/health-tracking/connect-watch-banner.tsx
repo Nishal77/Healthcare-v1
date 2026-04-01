@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
   Animated,
+  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -142,14 +143,22 @@ export function ConnectWatchBanner({
             </Text>
             <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500', textAlign: 'center', lineHeight: 18 }}>
               Bluetooth scanning is not available in Expo Go.{'\n'}
-              Run <Text style={{ fontFamily: 'monospace', color: '#0F1923' }}>pnpm android</Text> to build the dev client and unlock live watch sync.
+              Run{' '}
+              <Text style={{ fontFamily: 'monospace', color: '#0F1923' }}>
+                {Platform.OS === 'ios' ? 'pnpm ios' : 'pnpm android'}
+              </Text>
+              {' '}to build the dev client and unlock live watch sync.
             </Text>
           </View>
           <View style={{ backgroundColor: '#F9F9F8', borderRadius: 12, padding: 12, gap: 6 }}>
             {[
               { icon: 'checkmark-circle-outline', color: '#2C6E49', text: 'Real BLE device scanning' },
               { icon: 'checkmark-circle-outline', color: '#2C6E49', text: 'Live heart rate, SpO₂, HRV' },
-              { icon: 'checkmark-circle-outline', color: '#2C6E49', text: 'Google Health Connect sync' },
+              {
+                icon: 'checkmark-circle-outline',
+                color: '#2C6E49',
+                text: Platform.OS === 'ios' ? 'Apple HealthKit sync' : 'Google Health Connect sync',
+              },
             ].map(r => (
               <View key={r.text} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Ionicons name={r.icon as 'checkmark-circle-outline'} size={14} color={r.color} />
