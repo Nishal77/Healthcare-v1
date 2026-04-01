@@ -69,14 +69,21 @@ export function HeartRateCard({
     // No shadow, no border — gradient only
     <View style={{ borderRadius: 22, overflow: 'hidden' }}>
       <LinearGradient
-        colors={['#F8FFF9', '#D6F5E0']}
+        colors={['#FFFFFF', '#E8F8EE']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={{ padding: 16 }}>
 
-        {/* Header — bare icon + label + LIVE */}
+        {/* Header — icon tile + label + LIVE */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-          <Ionicons name="heart" size={20} color="#EF4444" style={{ marginRight: 9 }} />
+          <View style={{
+            width: 36, height: 36, borderRadius: 11,
+            backgroundColor: '#FECDD3',
+            alignItems: 'center', justifyContent: 'center',
+            marginRight: 10,
+          }}>
+            <Ionicons name="heart" size={18} color="#EF4444" />
+          </View>
           <Text style={{ fontSize: 15, fontWeight: '600', color: '#1C1C1E', flex: 1, letterSpacing: -0.2 }}>
             Heart Rate
           </Text>

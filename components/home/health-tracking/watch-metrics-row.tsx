@@ -106,7 +106,7 @@ export function WatchMetricsRow({
     {
       icon:        'water-outline',
       iconColor:   '#2196F3',
-      gradTop:     '#F4FAFF',
+      gradTop:     '#FFFFFF',
       gradBot:     '#C9E8FB',
       label:       'Blood O₂',
       value:       spo2 > 0 ? String(spo2) : '—',
@@ -117,7 +117,7 @@ export function WatchMetricsRow({
     {
       icon:        'pulse-outline',
       iconColor:   '#C4860A',
-      gradTop:     '#FFFDF5',
+      gradTop:     '#FFFFFF',
       gradBot:     '#FDE9A8',
       label:       'HRV',
       value:       hrv > 0 ? String(hrv) : '—',
@@ -128,7 +128,7 @@ export function WatchMetricsRow({
     {
       icon:        'thermometer-outline',
       iconColor:   '#DC2626',
-      gradTop:     '#FFF8F8',
+      gradTop:     '#FFFFFF',
       gradBot:     '#FCCACA',
       label:       'Body Temp',
       value:       bodyTemp > 0 ? String(bodyTemp) : '—',

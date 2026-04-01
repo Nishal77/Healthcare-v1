@@ -223,7 +223,7 @@ export function MetricsGrid({
         <MetricCard
           def={{
             icon: 'flame', iconColor: '#E8490A',
-            gradTop: '#FFF5F2', gradBot: '#FCDDD5',
+            gradTop: '#FFFFFF', gradBot: '#FCDDD5',
             label: 'Calories', chart: 'ring',
             ringColor: '#E8490A', ringTrack: '#F9C4B2', gradId: 'calG',
           }}
@@ -234,7 +234,7 @@ export function MetricsGrid({
         <MetricCard
           def={{
             icon: 'water', iconColor: '#2196F3',
-            gradTop: '#F4FAFF', gradBot: '#C9E8FB',
+            gradTop: '#FFFFFF', gradBot: '#C9E8FB',
             label: 'Water', chart: 'ring',
             ringColor: '#2196F3', ringTrack: '#B3D9F7', gradId: 'watG',
           }}
@@ -249,7 +249,7 @@ export function MetricsGrid({
         <MetricCard
           def={{
             icon: 'moon', iconColor: '#D97706',
-            gradTop: '#FFFDF5', gradBot: '#FDE9A8',
+            gradTop: '#FFFFFF', gradBot: '#FDE9A8',
             label: 'Sleep', chart: 'bars',
             ringColor: '#D97706', ringTrack: '#FDE68A', gradId: 'slpG',
           }}
@@ -260,7 +260,7 @@ export function MetricsGrid({
         <MetricCard
           def={{
             icon: 'footsteps', iconColor: '#2C9E5A',
-            gradTop: '#F5FFF8', gradBot: '#C3F0D2',
+            gradTop: '#FFFFFF', gradBot: '#C3F0D2',
             label: 'Steps', chart: 'sparkline',
             ringColor: '#2C9E5A', ringTrack: '#BBF7D0', gradId: 'stpG',
           }}
