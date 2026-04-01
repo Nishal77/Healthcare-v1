@@ -1,133 +1,96 @@
 /**
  * HealthReminders
  *
- * A premium banner card below the home search bar.
- * Warm earthy-green healthcare palette — replicates the reference image style
- * with a bold title, subtitle copy, CTA button, and a large decorative icon.
+ * Compact premium banner — reduced height, normal/medium weights,
+ * static bell icon with amber notification dot.
+ * Healthcare colour palette, changes by time of day.
  */
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { useRef, useState } from 'react';
+import { Animated, Text, TouchableOpacity, View } from 'react-native';
 
-// ── Subtle floating animation for the decorative icon ────────────────────────
-function FloatingIcon() {
-  const floatAnim = useRef(new Animated.Value(0)).current;
-  const rotAnim   = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, { toValue: -7,  duration: 1200, useNativeDriver: true }),
-        Animated.timing(floatAnim, { toValue:  0,  duration: 1200, useNativeDriver: true }),
-      ]),
-    ).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(rotAnim, { toValue:  1, duration: 900, useNativeDriver: true }),
-        Animated.timing(rotAnim, { toValue: -1, duration: 900, useNativeDriver: true }),
-        Animated.timing(rotAnim, { toValue:  0, duration: 900, useNativeDriver: true }),
-      ]),
-    ).start();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const rotate = rotAnim.interpolate({ inputRange: [-1, 1], outputRange: ['-10deg', '10deg'] });
-
+// ── Static bell icon (no animation) ─────────────────────────────────────────
+function BellIcon({ dotColor }: { dotColor: string }) {
   return (
-    <Animated.View
-      style={{
-        transform: [{ translateY: floatAnim }, { rotate }],
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-
-      {/* Glow ring */}
+    <View style={{ width: 68, height: 68, alignItems: 'center', justifyContent: 'center' }}>
+      {/* Outer frosted ring */}
       <View
         style={{
-          position: 'absolute',
-          width: 78,
-          height: 78,
-          borderRadius: 39,
-          backgroundColor: 'rgba(255,255,255,0.12)',
-        }}
-      />
-
-      {/* Icon circle */}
-      <View
-        style={{
-          width: 66,
-          height: 66,
-          borderRadius: 33,
-          backgroundColor: 'rgba(255,255,255,0.18)',
+          width: 68,
+          height: 68,
+          borderRadius: 34,
+          backgroundColor: 'rgba(255,255,255,0.10)',
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.18)',
           alignItems: 'center',
           justifyContent: 'center',
-          borderWidth: 1.5,
-          borderColor: 'rgba(255,255,255,0.25)',
         }}>
-        <Ionicons name="alarm-outline" size={32} color="#FFFFFF" />
+        {/* Inner circle */}
+        <View
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            backgroundColor: 'rgba(255,255,255,0.14)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Ionicons name="notifications-outline" size={26} color="#FFFFFF" />
+        </View>
       </View>
 
-      {/* Small pulse dot top-right */}
+      {/* Amber notification dot */}
       <View
         style={{
           position: 'absolute',
-          top: 4,
-          right: 2,
-          width: 12,
-          height: 12,
+          top: 6,
+          right: 6,
+          width: 11,
+          height: 11,
           borderRadius: 6,
-          backgroundColor: '#F59E0B',
+          backgroundColor: dotColor,
           borderWidth: 2,
-          borderColor: '#2C6E49',
+          borderColor: 'rgba(0,0,0,0.25)',
         }}
       />
-    </Animated.View>
+    </View>
   );
 }
 
-// ── Banner variants — rotated daily so it never feels stale ──────────────────
+// ── Banner data — rotates by hour ────────────────────────────────────────────
 const BANNERS = [
   {
-    title:    'Set Your Health\nReminder',
-    sub:      "Never miss your morning routine.\nStay consistent, stay healthy.",
-    cta:      'Set Reminder',
-    bg:       '#1C4A32',       // deep forest green
-    pill:     '#2C6E49',
-    pillText: '#FFFFFF',
-    accent:   '#4ADE80',
+    title:   'Set Your Health Reminder',
+    sub:     'Never miss your morning routine. Stay consistent, stay healthy.',
+    cta:     'Set Reminder',
+    bg:      '#1A3D2B',
+    accent:  '#52C87A',
+    dot:     '#F59E0B',
   },
   {
-    title:    'Hydration\nCheck-In',
-    sub:      "You're halfway through the day.\nHave you had enough water?",
-    cta:      'Log Water',
-    bg:       '#0C3547',       // deep teal
-    pill:     '#0B6E8B',
-    pillText: '#FFFFFF',
-    accent:   '#67E8F9',
+    title:   'Hydration Check-In',
+    sub:     "You're halfway through the day. Have you had enough water?",
+    cta:     'Log Water',
+    bg:      '#0A3040',
+    accent:  '#38BDF8',
+    dot:     '#F59E0B',
   },
   {
-    title:    'Evening Wind\nDown',
-    sub:      "Time to relax and recover.\nSet a bedtime reminder now.",
-    cta:      'Set Bedtime',
-    bg:       '#2D1B5E',       // deep indigo
-    pill:     '#5B21B6',
-    pillText: '#FFFFFF',
-    accent:   '#C4B5FD',
+    title:   'Evening Wind Down',
+    sub:     'Time to relax and recover. Set a bedtime reminder now.',
+    cta:     'Set Bedtime',
+    bg:      '#271650',
+    accent:  '#A78BFA',
+    dot:     '#F59E0B',
   },
   {
-    title:    'Medication\nReminder',
-    sub:      "Consistency is key to recovery.\nTrack your daily doses.",
-    cta:      'Track Meds',
-    bg:       '#4A1919',       // deep rose
-    pill:     '#B83A3A',
-    pillText: '#FFFFFF',
-    accent:   '#FCA5A5',
+    title:   'Medication Reminder',
+    sub:     'Consistency is key to recovery. Track your daily doses.',
+    cta:     'Track Meds',
+    bg:      '#3D1212',
+    accent:  '#F87171',
+    dot:     '#F59E0B',
   },
 ];
 
@@ -136,155 +99,136 @@ interface HealthRemindersProps {
 }
 
 export function HealthReminders({ onCTAPress }: HealthRemindersProps) {
-  // Pick banner by hour so it changes throughout the day
-  const hourIndex = new Date().getHours() % BANNERS.length;
-  const banner    = BANNERS[hourIndex];
-
-  const [pressed, setPressed] = useState(false);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const banner     = BANNERS[new Date().getHours() % BANNERS.length];
+  const [done, setDone] = useState(false);
+  const scaleAnim  = useRef(new Animated.Value(1)).current;
 
   function handleCTA() {
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.96, duration: 90, useNativeDriver: true }),
-      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, bounciness: 10 }),
+      Animated.timing(scaleAnim, { toValue: 0.97, duration: 80, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, bounciness: 8 }),
     ]).start();
-    setPressed(true);
+    setDone(true);
     onCTAPress?.(banner.cta);
   }
 
   return (
-    <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 }}>
+    <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 2 }}>
       <Animated.View
         style={{
           transform: [{ scale: scaleAnim }],
-          borderRadius: 24,
+          borderRadius: 20,
           backgroundColor: banner.bg,
           overflow: 'hidden',
-          // Premium shadow
           shadowColor: banner.bg,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.45,
-          shadowRadius: 20,
-          elevation: 10,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.5,
+          shadowRadius: 16,
+          elevation: 8,
         }}>
 
-        {/* Background texture — subtle radial blobs */}
+        {/* Subtle top-left blob */}
         <View
           style={{
             position: 'absolute',
-            top: -40,
-            left: -40,
-            width: 180,
-            height: 180,
-            borderRadius: 90,
+            top: -28,
+            left: -28,
+            width: 110,
+            height: 110,
+            borderRadius: 55,
             backgroundColor: 'rgba(255,255,255,0.04)',
           }}
         />
-        <View
-          style={{
-            position: 'absolute',
-            bottom: -30,
-            right: 60,
-            width: 140,
-            height: 140,
-            borderRadius: 70,
-            backgroundColor: 'rgba(255,255,255,0.03)',
-          }}
-        />
 
+        {/* Content row */}
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            paddingHorizontal: 22,
-            paddingVertical: 22,
-            gap: 12,
+            paddingHorizontal: 18,
+            paddingVertical: 16,
+            gap: 14,
           }}>
 
-          {/* Left: text content */}
-          <View style={{ flex: 1, gap: 8 }}>
-            {/* Accent label */}
+          {/* ── Left text block ── */}
+          <View style={{ flex: 1, gap: 6 }}>
+
+            {/* Badge pill */}
             <View
               style={{
                 alignSelf: 'flex-start',
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 5,
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderRadius: 20,
+                backgroundColor: 'rgba(255,255,255,0.09)',
+                borderRadius: 30,
                 paddingHorizontal: 9,
-                paddingVertical: 4,
+                paddingVertical: 3,
                 borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.15)',
+                borderColor: 'rgba(255,255,255,0.13)',
               }}>
-              <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: banner.accent }} />
-              <Text style={{ fontSize: 10, fontWeight: '700', color: banner.accent, letterSpacing: 0.6 }}>
+              <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: banner.accent }} />
+              <Text style={{ fontSize: 9.5, fontWeight: '600', color: banner.accent, letterSpacing: 0.8 }}>
                 HEALTH REMINDER
               </Text>
             </View>
 
-            {/* Title */}
+            {/* Title — medium weight */}
             <Text
               style={{
-                fontSize: 20,
-                fontWeight: '800',
+                fontSize: 17,
+                fontWeight: '600',
                 color: '#FFFFFF',
-                lineHeight: 26,
-                letterSpacing: -0.5,
+                letterSpacing: -0.3,
+                lineHeight: 22,
               }}>
               {banner.title}
             </Text>
 
-            {/* Subtitle */}
+            {/* Subtitle — normal weight */}
             <Text
               style={{
                 fontSize: 12,
-                color: 'rgba(255,255,255,0.62)',
                 fontWeight: '400',
+                color: 'rgba(255,255,255,0.58)',
                 lineHeight: 17,
               }}>
               {banner.sub}
             </Text>
 
-            {/* CTA button */}
+            {/* CTA */}
             <TouchableOpacity
               onPress={handleCTA}
-              activeOpacity={0.82}
+              activeOpacity={0.8}
               style={{
                 alignSelf: 'flex-start',
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 6,
-                marginTop: 4,
-                backgroundColor: pressed ? banner.accent : '#FFFFFF',
-                borderRadius: 22,
-                paddingHorizontal: 16,
-                paddingVertical: 9,
+                marginTop: 6,
+                backgroundColor: '#FFFFFF',
+                borderRadius: 30,
+                paddingHorizontal: 14,
+                paddingVertical: 8,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.15,
-                shadowRadius: 6,
+                shadowOpacity: 0.12,
+                shadowRadius: 5,
                 elevation: 3,
               }}>
               <Ionicons
-                name={pressed ? 'checkmark-circle' : 'add-circle-outline'}
-                size={15}
-                color={pressed ? banner.bg : banner.bg}
+                name={done ? 'checkmark-circle' : 'add-circle-outline'}
+                size={14}
+                color={banner.bg}
               />
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: '700',
-                  color: banner.bg,
-                  letterSpacing: -0.1,
-                }}>
-                {pressed ? 'Reminder Set!' : banner.cta}
+              <Text style={{ fontSize: 12.5, fontWeight: '600', color: banner.bg, letterSpacing: 0.1 }}>
+                {done ? 'Reminder Set!' : banner.cta}
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Right: floating decorative icon */}
-          <FloatingIcon />
+          {/* ── Right static bell ── */}
+          <BellIcon dotColor={banner.dot} />
         </View>
       </Animated.View>
     </View>
