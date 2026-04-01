@@ -41,9 +41,10 @@ interface HeartRateCardProps {
   bpm?: number;
   status?: MetricStatus;
   nadiType?: string;
+  hasData?: boolean;
 }
 
-export function HeartRateCard({ bpm = 123, status = 'normal', nadiType = 'Vataja' }: HeartRateCardProps) {
+export function HeartRateCard({ bpm = 0, status = 'normal', nadiType = '—', hasData = false }: HeartRateCardProps) {
   const statusColor = status === 'elevated' || status === 'critical'
     ? '#C4860A'
     : status === 'low'
@@ -94,12 +95,12 @@ export function HeartRateCard({ bpm = 123, status = 'normal', nadiType = 'Vataja
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginBottom: 14 }}>
-        <Text style={{ fontSize: 46, fontWeight: '800', color: '#0F1923', lineHeight: 50, letterSpacing: -2 }}>
-          {bpm}
+        <Text style={{ fontSize: 46, fontWeight: '800', color: hasData ? '#0F1923' : '#D1D5DB', lineHeight: 50, letterSpacing: -2 }}>
+          {hasData ? bpm : '—'}
         </Text>
-        <Text style={{ fontSize: 13, color: '#9CA3AF', fontWeight: '500', marginBottom: 6 }}>
-          bpm
-        </Text>
+        {hasData && (
+          <Text style={{ fontSize: 13, color: '#9CA3AF', fontWeight: '500', marginBottom: 6 }}>bpm</Text>
+        )}
       </View>
 
       <View style={{ borderTopWidth: 1, borderTopColor: '#F0EFEC', paddingTop: 10, gap: 6 }}>

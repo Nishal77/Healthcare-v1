@@ -6,7 +6,7 @@ const CARD_SHADOW = {
   borderColor: '#ECEAE6',
 } as const;
 
-function StepsCard({ steps = 2316 }: { steps?: number }) {
+function StepsCard({ steps = 0, hasData = false }: { steps?: number; hasData?: boolean }) {
   const goal = 8000;
   const pct  = Math.min(Math.round((steps / goal) * 100), 100);
 
@@ -27,8 +27,8 @@ function StepsCard({ steps = 2316 }: { steps?: number }) {
         <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.2 }}>Steps</Text>
       </View>
 
-      <Text style={{ fontSize: 30, fontWeight: '800', color: '#0F1923', lineHeight: 34, letterSpacing: -1 }}>
-        {steps.toLocaleString()}
+      <Text style={{ fontSize: 30, fontWeight: '800', color: hasData ? '#0F1923' : '#D1D5DB', lineHeight: 34, letterSpacing: -1 }}>
+        {hasData ? steps.toLocaleString() : '—'}
       </Text>
 
       <View style={{ marginTop: 10, gap: 4 }}>
@@ -51,7 +51,7 @@ function StepsCard({ steps = 2316 }: { steps?: number }) {
   );
 }
 
-function WaterCard({ liters = 1.8 }: { liters?: number }) {
+function WaterCard({ liters = 0, hasData = false }: { liters?: number; hasData?: boolean }) {
   const goal = 2.5;
   const pct  = Math.min(Math.round((liters / goal) * 100), 100);
 
@@ -73,10 +73,10 @@ function WaterCard({ liters = 1.8 }: { liters?: number }) {
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
-        <Text style={{ fontSize: 30, fontWeight: '800', color: '#0F1923', lineHeight: 34, letterSpacing: -1 }}>
-          {liters}
+        <Text style={{ fontSize: 30, fontWeight: '800', color: hasData ? '#0F1923' : '#D1D5DB', lineHeight: 34, letterSpacing: -1 }}>
+          {hasData ? liters : '—'}
         </Text>
-        <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500', marginBottom: 3 }}>L</Text>
+        {hasData && <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500', marginBottom: 3 }}>L</Text>}
       </View>
 
       <View style={{ marginTop: 10, gap: 4 }}>
@@ -102,13 +102,14 @@ function WaterCard({ liters = 1.8 }: { liters?: number }) {
 interface MetricsGridProps {
   steps?: number;
   waterLiters?: number;
+  hasData?: boolean;
 }
 
-export function MetricsGrid({ steps = 2316, waterLiters = 1.8 }: MetricsGridProps) {
+export function MetricsGrid({ steps = 0, waterLiters = 0, hasData = false }: MetricsGridProps) {
   return (
     <View style={{ flex: 1, gap: 12 }}>
-      <StepsCard steps={steps} />
-      <WaterCard liters={waterLiters} />
+      <StepsCard steps={hasData ? steps : 0} hasData={hasData} />
+      <WaterCard liters={hasData ? waterLiters : 0} hasData={hasData} />
     </View>
   );
 }

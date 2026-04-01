@@ -7,6 +7,7 @@ interface HealthSectionHeaderProps {
   onDisconnect?: () => void;
   connectionState?: WatchConnectionState;
   lastUpdated?: Date | null;
+  deviceName?: string | null;
 }
 
 function timeSince(date: Date): string {
@@ -21,6 +22,7 @@ export function HealthSectionHeader({
   onDisconnect,
   connectionState = 'disconnected',
   lastUpdated,
+  deviceName,
 }: HealthSectionHeaderProps) {
   const isConnected = connectionState === 'connected';
 
@@ -50,7 +52,7 @@ export function HealthSectionHeader({
           )}
           <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500' }}>
             {isConnected && lastUpdated
-              ? timeSince(lastUpdated)
+              ? `${deviceName ? deviceName + ' · ' : ''}${timeSince(lastUpdated)}`
               : 'No watch connected'}
           </Text>
         </View>

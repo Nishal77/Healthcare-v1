@@ -42,12 +42,14 @@ function WatchMetricCard({ icon, iconColor, iconBg, label, value, unit, status, 
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, marginBottom: 3 }}>
-        <Text style={{ fontSize: 20, fontWeight: '800', color: '#0F1923', lineHeight: 24, letterSpacing: -0.6 }}>
+        <Text style={{ fontSize: 20, fontWeight: '800', color: value === '—' ? '#D1D5DB' : '#0F1923', lineHeight: 24, letterSpacing: -0.6 }}>
           {value}
         </Text>
-        <Text style={{ fontSize: 9, color: '#9CA3AF', fontWeight: '600', marginBottom: 2, letterSpacing: 0.2 }}>
-          {unit}
-        </Text>
+        {value !== '—' && (
+          <Text style={{ fontSize: 9, color: '#9CA3AF', fontWeight: '600', marginBottom: 2, letterSpacing: 0.2 }}>
+            {unit}
+          </Text>
+        )}
       </View>
 
       <Text style={{ fontSize: 10, color: '#6B7280', fontWeight: '600', marginBottom: 8, letterSpacing: 0.1 }}>
@@ -65,9 +67,10 @@ interface WatchMetricsRowProps {
   spo2?: number;
   hrv?: number;
   bodyTemp?: number;
+  hasData?: boolean;
 }
 
-export function WatchMetricsRow({ spo2 = 98, hrv = 42, bodyTemp = 98.4 }: WatchMetricsRowProps) {
+export function WatchMetricsRow({ spo2 = 0, hrv = 0, bodyTemp = 0, hasData = false }: WatchMetricsRowProps) {
   const spo2Status      = spo2 >= 98 ? 'Optimal' : spo2 >= 95 ? 'Normal' : 'Low';
   const spo2Color       = spo2 >= 98 ? '#0B6E8B' : spo2 >= 95 ? '#2C6E49' : '#C4860A';
   const hrvStatus       = hrv >= 50 ? 'Good' : hrv >= 30 ? 'Moderate' : 'Low';
@@ -82,30 +85,30 @@ export function WatchMetricsRow({ spo2 = 98, hrv = 42, bodyTemp = 98.4 }: WatchM
         iconColor="#0B6E8B"
         iconBg="#EFF7FA"
         label="Blood O₂"
-        value={String(spo2)}
+        value={hasData ? String(spo2) : '—'}
         unit="%"
-        status={spo2Status}
-        statusColor={spo2Color}
+        status={hasData ? spo2Status : '—'}
+        statusColor={hasData ? spo2Color : '#D1D5DB'}
       />
       <WatchMetricCard
         icon="pulse-outline"
         iconColor="#C4860A"
         iconBg="#FEF8EE"
         label="HRV"
-        value={String(hrv)}
+        value={hasData && hrv > 0 ? String(hrv) : '—'}
         unit="ms"
-        status={hrvStatus}
-        statusColor={hrvColor}
+        status={hasData && hrv > 0 ? hrvStatus : '—'}
+        statusColor={hasData && hrv > 0 ? hrvColor : '#D1D5DB'}
       />
       <WatchMetricCard
         icon="thermometer-outline"
         iconColor="#B83A3A"
         iconBg="#FEF3F3"
         label="Body Temp"
-        value={String(bodyTemp)}
+        value={hasData && bodyTemp > 0 ? String(bodyTemp) : '—'}
         unit="°F"
-        status={tempStatus}
-        statusColor={tempStatusColor}
+        status={hasData && bodyTemp > 0 ? tempStatus : '—'}
+        statusColor={hasData && bodyTemp > 0 ? tempStatusColor : '#D1D5DB'}
       />
     </View>
   );

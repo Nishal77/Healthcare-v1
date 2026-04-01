@@ -1,6 +1,7 @@
-import { Platform, View } from 'react-native';
-import { useHealthConnect } from '../../../hooks/useHealthConnect';
-import { useMockHealthData } from '../../../hooks/useMockHealthData';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import { useHealthData } from '../../../hooks/useHealthData';
+import { useWatchBluetooth } from '../../../hooks/useWatchBluetooth';
 import { buildDoshaInsight, getDoshaBars } from '../../../src/health/dosha-engine';
 import { ConnectWatchBanner } from './connect-watch-banner';
 import { DoshaBalanceCard } from './dosha-balance-card';
@@ -10,33 +11,27 @@ import { MetricsGrid } from './metrics-grid';
 import { PredictiveInsightCard } from './predictive-insight-card';
 import { WatchMetricsRow } from './watch-metrics-row';
 
-// true  → simulated data, works in Expo Go and on iOS
-// false → real Health Connect, requires Android dev build
-const IS_MOCK = true;
-
 interface HealthDashboardProps {
   onSeeAll?: () => void;
   onLearnMore?: () => void;
 }
 
 export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps) {
-  const mockHook = useMockHealthData();
-  const liveHook = useHealthConnect();
+  const ble    = useWatchBluetooth();
+  const health = useHealthData();
 
-  const hook = IS_MOCK || Platform.OS === 'ios' ? mockHook : liveHook;
+  // When BLE connects, kick off health data reading
+  useEffect(() => {
+    if (ble.connectionState === 'connected' && !health.ready) {
+      health.start();
+    }
+    if (ble.connectionState === 'disconnected') {
+      health.reset();
+    }
+  }, [ble.connectionState]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const {
-    data,
-    connectionState,
-    connectionStep,
-    deviceName,
-    startScan,
-    connectToDevice,
-    enableBluetooth,
-    disconnect,
-  } = hook;
-
-  const isConnected = connectionState === 'connected';
+  const data = health.data;
+  const isConnected = ble.connectionState === 'connected';
 
   const dosha = data
     ? getDoshaBars(data.steps, data.sleepHours, data.heartRate, data.spo2)
@@ -50,40 +45,46 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
     <View style={{ paddingHorizontal: 20, gap: 12 }}>
       <HealthSectionHeader
         onSeeAll={onSeeAll}
-        onDisconnect={disconnect}
-        connectionState={connectionState}
+        onDisconnect={ble.disconnect}
+        connectionState={ble.connectionState}
         lastUpdated={data?.lastUpdated ?? null}
+        deviceName={ble.connectedDevice?.name ?? null}
       />
 
       {!isConnected && (
         <ConnectWatchBanner
-          connectionStep={connectionStep}
-          deviceName={deviceName}
-          onStartScan={startScan}
-          onConnectToDevice={connectToDevice}
-          onEnableBluetooth={enableBluetooth}
-          onRetry={disconnect}
+          connectionStep={ble.connectionStep}
+          scannedDevices={ble.scannedDevices}
+          connectedDevice={ble.connectedDevice}
+          onStartScan={ble.startScan}
+          onSelectDevice={ble.selectDevice}
+          onEnableBluetooth={ble.enableBluetooth}
+          onRetry={ble.disconnect}
+          error={ble.error ?? health.error}
         />
       )}
 
       <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
         <View style={{ flex: 1.35 }}>
           <HeartRateCard
-            bpm={data?.heartRate ?? 72}
+            bpm={data?.heartRate ?? 0}
             status={data?.heartRateStatus ?? 'normal'}
-            nadiType={data?.nadiType ?? 'Kaphaja'}
+            nadiType={data?.nadiType ?? '—'}
+            hasData={!!data}
           />
         </View>
         <MetricsGrid
           steps={data?.steps ?? 0}
           waterLiters={data?.waterLiters ?? 0}
+          hasData={!!data}
         />
       </View>
 
       <WatchMetricsRow
-        spo2={data?.spo2 ?? 98}
-        hrv={data?.hrv ?? 42}
-        bodyTemp={data?.bodyTemp ?? 98.4}
+        spo2={data?.spo2 ?? 0}
+        hrv={data?.hrv ?? 0}
+        bodyTemp={data?.bodyTemp ?? 0}
+        hasData={!!data}
       />
 
       <DoshaBalanceCard
