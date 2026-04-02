@@ -8,7 +8,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <View style={{ flex: 1, backgroundColor: '#F9F5EC' }}>
 
       {/* Fixed white cover behind the Dynamic Island / status bar */}
       <View
@@ -18,7 +18,7 @@ export default function HomeScreen() {
           left: 0,
           right: 0,
           height: insets.top,
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#F9F5EC',
           zIndex: 100,
         }}
         pointerEvents="none"
