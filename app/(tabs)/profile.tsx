@@ -8,7 +8,7 @@ export default function AccountScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F9F5EC' }}>
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 
       {/*
        * Fixed white bar that sits on top of the scroll content.
@@ -22,7 +22,7 @@ export default function AccountScreen() {
           left: 0,
           right: 0,
           height: insets.top,
-          backgroundColor: '#F9F5EC',
+          backgroundColor: '#FFFFFF',
           zIndex: 100,
         }}
         pointerEvents="none"
