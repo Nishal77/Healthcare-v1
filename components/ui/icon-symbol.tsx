@@ -27,6 +27,7 @@ const MAPPING = {
   'waveform.path.ecg': 'monitor-heart',
   'note.text': 'edit-note',
   'chart.bar.fill': 'bar-chart',
+  'ellipsis': 'more-vert',
   // misc
   'heart.fill': 'favorite',
   'bell.fill': 'notifications',

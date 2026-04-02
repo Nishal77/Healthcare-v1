@@ -126,24 +126,30 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                 accessibilityRole="button"
                 accessibilityLabel={LABELS[route.name]}>
                 <View style={[styles.activeWrap, isFocused && styles.activeWrapVisible]}>
-                  <IconSymbol name={ICONS[route.name]} size={26} color={color} />
-                  <Text style={[styles.label, { color }]}>{LABELS[route.name]}</Text>
+                  <IconSymbol name={ICONS[route.name]} size={24} color={color} />
+                  <Text
+                    style={[styles.label, { color }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}>
+                    {LABELS[route.name]}
+                  </Text>
                 </View>
               </Pressable>
             );
           })}
         </View>
 
-        {/* Account circle */}
+        {/* Account circle — 3-dot vertical menu */}
         {accountRoute && (
           <Pressable
             onPress={() => handlePress(ACCOUNT_ROUTE, accountRoute.key)}
             style={[styles.accountCircle, isAccountFocused && styles.accountCircleActive]}
             accessibilityRole="button"
-            accessibilityLabel="Me">
+            accessibilityLabel="More">
             <IconSymbol
-              name="person.fill"
-              size={26}
+              name="ellipsis"
+              size={24}
               color={isAccountFocused ? '#FFFFFF' : INACTIVE_COLOR}
             />
           </Pressable>
@@ -197,8 +203,8 @@ const styles = StyleSheet.create({
     gap: 3,
     borderRadius: 999,
     paddingVertical: 9,
-    paddingHorizontal: 12,
-    minWidth: 68,
+    paddingHorizontal: 8,
+    alignSelf: 'stretch',
   },
   activeWrapVisible: {
     backgroundColor: ACTIVE_BG,
