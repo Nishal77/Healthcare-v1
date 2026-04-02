@@ -17,16 +17,16 @@ const ACCOUNT_ROUTE = 'profile';
 
 const LABELS: Record<string, string> = {
   index: 'Home',
-  track: 'Track',
+  track: 'Log',
   learn: 'Learn',
-  care: 'Care',
+  care: 'Progress',
 };
 
 const ICONS: Record<string, React.ComponentProps<typeof IconSymbol>['name']> = {
   index: 'house.fill',
-  track: 'sparkles',
+  track: 'note.text',
   learn: 'play.circle.fill',
-  care: 'waveform.path.ecg',
+  care: 'chart.bar.fill',
 };
 
 // ─── Bottom fade gradient (pure View, no extra deps) ─────────────────────────
@@ -157,11 +157,11 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 const SHADOW = Platform.select({
   ios: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.09,
+    shadowRadius: 20,
   },
-  android: { elevation: 10 },
+  android: { elevation: 12 },
   default: {},
 });
 
@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 7,
     ...SHADOW,
   },
   pillTab: {
@@ -194,26 +194,26 @@ const styles = StyleSheet.create({
   activeWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: 3,
     borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    minWidth: 64,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    minWidth: 68,
   },
   activeWrapVisible: {
     backgroundColor: ACTIVE_BG,
   },
   label: {
     fontSize: 11,
-    fontWeight: '500',
-    letterSpacing: -0.2,
+    fontWeight: '600',
+    letterSpacing: -0.1,
   },
 
   // ── Account circle ─────────────────────────────────────────────
   accountCircle: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',

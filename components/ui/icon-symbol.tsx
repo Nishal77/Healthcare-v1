@@ -25,6 +25,8 @@ const MAPPING = {
   'sparkles': 'auto-awesome',
   'play.circle.fill': 'play-circle',
   'waveform.path.ecg': 'monitor-heart',
+  'note.text': 'edit-note',
+  'chart.bar.fill': 'bar-chart',
   // misc
   'heart.fill': 'favorite',
   'bell.fill': 'notifications',
