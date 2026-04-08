@@ -323,14 +323,17 @@ export function LogEntrySheet({ visible, onClose }: Props) {
               <Ionicons name="close" size={18} color="#374151" />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
-              <Text style={{
-                fontSize:     22,
-                fontWeight:   '800',
-                color:        '#0D1117',
-                letterSpacing:-0.5,
-                lineHeight:   28,
-              }}>
-                What would you{'\n'}like to log?
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                style={{
+                  fontSize:     22,
+                  fontWeight:   '800',
+                  color:        '#0D1117',
+                  letterSpacing:-0.5,
+                  lineHeight:   28,
+                }}>
+                What would you like to log?
               </Text>
               <Text style={{
                 fontSize:  13,
