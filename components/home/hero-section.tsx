@@ -1,10 +1,10 @@
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FeelingPrompt }   from './feeling-prompt';
-import { HealthReminders } from './health-reminders';
-import { HomeHeader }      from './home-header';
-import { SearchBar }       from './search-bar';
+import { FeelingPrompt }     from './feeling-prompt';
+import { HealthStatusCard }  from './health-status-card';
+import { HomeHeader }        from './home-header';
+import { SearchBar }         from './search-bar';
 
 interface HeroSectionProps {
   userName?: string;
@@ -20,8 +20,8 @@ export function HeroSection({ userName = 'Guest', onAvatarPress }: HeroSectionPr
       <FeelingPrompt />
       {/* SearchBar navigates to /chat internally */}
       <SearchBar />
-      {/* Health reminders strip — below the search bar */}
-      <HealthReminders />
+      {/* Health status card — below the search bar */}
+      <HealthStatusCard />
       <View style={{ height: 8 }} />
     </View>
   );
