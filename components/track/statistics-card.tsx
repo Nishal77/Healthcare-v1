@@ -2,6 +2,7 @@ import React from 'react';
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Svg, { Defs, Line, LinearGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
+// SvgText still used for goal pill label inside SVG
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -206,22 +207,30 @@ export function StatisticsCard({ period = 'Week', onPeriodToggle }: Props) {
             );
           })}
 
-          {/* X-axis day labels */}
-          {DAYS.map((label, i) => (
-            <SvgText
-              key={label}
-              x={i * (BAR_W + GAP) + BAR_W / 2}
-              y={CHART_H + 14}
-              fontSize={10} fontWeight="500"
-              fill="#94A3B8" textAnchor="middle">
-              {label}
-            </SvgText>
-          ))}
         </Svg>
       </View>
 
-      {/* X-axis spacer */}
-      <View style={{ height: 16 }} />
+      {/* ── X-axis day labels — outside SVG so they never clip ─────── */}
+      <View style={{
+        flexDirection: 'row',
+        marginLeft: YAXIS_W,
+        marginTop: 8,
+        marginBottom: 4,
+      }}>
+        {DAYS.map((label, i) => (
+          <View
+            key={label}
+            style={{
+              width: BAR_W,
+              marginRight: i < DAYS.length - 1 ? GAP : 0,
+              alignItems: 'center',
+            }}>
+            <Text style={{ fontSize: 10.5, fontWeight: '500', color: '#94A3B8' }}>
+              {label}
+            </Text>
+          </View>
+        ))}
+      </View>
 
       {/* ── Legend ──────────────────────────────────────────────────── */}
       <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center' }}>
