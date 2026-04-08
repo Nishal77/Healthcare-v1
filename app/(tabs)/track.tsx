@@ -3,8 +3,7 @@ import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { TrackHeader } from '@/components/track/track-header';
-import { DateStrip } from '@/components/track/date-strip';
+import { WeekHeader } from '@/components/track/week-header';
 import { SummaryCard } from '@/components/track/daily-summary/summary-card';
 import { QuickAddRow } from '@/components/track/quick-add/quick-add-row';
 import { TimelineView } from '@/components/track/timeline/timeline-view';
@@ -58,8 +57,7 @@ export default function TrackTab() {
         showsVerticalScrollIndicator={false}
         bounces={false}>
 
-        <TrackHeader />
-        <DateStrip onDateChange={() => {}} />
+        <WeekHeader onDateChange={() => {}} />
         <SummaryCard />
 
         {/* Quick add row — each pill opens the sheet with that type pre-selected */}
