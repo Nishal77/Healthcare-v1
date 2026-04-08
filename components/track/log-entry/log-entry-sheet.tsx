@@ -270,7 +270,6 @@ export function LogEntrySheet({ visible, onClose }: Props) {
   }
 
   function handleLog() {
-    console.log('Logged:', Object.fromEntries([...selected].map(id => [id, values[id] ?? ''])));
     setSelected(new Set());
     setValues({});
     onClose();

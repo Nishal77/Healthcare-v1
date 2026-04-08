@@ -3,7 +3,7 @@
  * Shell card that hosts the period picker and swaps the chart view:
  *   Day   → DayMacros  (2×2 macro grid + water banner)
  *   Week  → WeekChart  (stacked bar chart Mon–Sun)
- *   Month → WeekChart  (same chart, different data in future)
+ *   Month → MonthChart (28-day bezier line chart — Fats / Carbs / Protein)
  */
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
