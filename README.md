@@ -1,50 +1,133 @@
-# Welcome to your Expo app 👋
+# Vedarogya
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A premium Ayurvedic healthcare app built with React Native and Expo. Vedarogya combines traditional Ayurvedic wisdom with modern health tracking — giving users a personalised daily health companion that feels as thoughtful as it looks.
 
-## Get started
+---
 
-1. Install dependencies
+## What it does
 
-   ```bash
-   npm install
-   ```
+- **AI Health Assistant** — conversational Ayurvedic guidance powered by Claude
+- **Health Tracking** — heart rate, steps, water intake, sleep, macros, and vitals from Apple Watch / Wear OS
+- **Daily Log** — log nutrition, fitness, and wellness entries with an inline bottom sheet
+- **Learn** — curated yoga lessons, home remedies, and Ayurvedic tips
+- **Care** — appointment booking, medical records, and care team management
+- **Profile** — personal health profile, secure settings, and audit-logged data access
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Tech stack
 
-In the output, you'll find options to open the app in a
+| Layer | Technology |
+|-------|-----------|
+| Mobile framework | Expo 54 + React Native 0.81 |
+| Navigation | expo-router v6 (file-based) |
+| Styling | NativeWind v4 (Tailwind for RN) |
+| Language | TypeScript (strict mode) |
+| Backend | NestJS 11 + Fastify |
+| ORM | TypeORM |
+| Database | PostgreSQL |
+| Auth | JWT (15 min) + rotating refresh tokens |
+| Package manager | pnpm (workspace monorepo) |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Project structure
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+vedarogya/
+├── app/                        # expo-router screens
+│   ├── (auth)/                 # login, register, forgot-password
+│   ├── (tabs)/                 # main tab screens
+│   │   ├── index.tsx           # Home
+│   │   ├── track.tsx           # Log
+│   │   ├── learn.tsx           # Learn
+│   │   ├── care.tsx            # Care / Progress
+│   │   └── profile.tsx         # Profile
+│   └── _layout.tsx
+├── components/
+│   ├── home/                   # home screen components
+│   │   ├── health-tracking/    # vitals cards, metrics grid
+│   │   └── vitality/           # semi-gauge meters, health pillars
+│   ├── learn/                  # featured lesson, yoga, remedies, tips
+│   ├── profile/                # header, settings menu, account info
+│   ├── track/                  # week header, statistics card
+│   │   ├── statistics/         # day-macros, week-chart, month-chart, period-dropdown
+│   │   ├── eating-guide/       # today's food log
+│   │   ├── fab/                # floating action button
+│   │   └── log-entry/          # bottom sheet, chip grid, input rows
+│   ├── custom-tab-bar.tsx
+│   └── ui/                     # icon-symbol (SF Symbols + fallback)
+├── src/
+│   ├── api/                    # apiRequest client + typed endpoints
+│   └── types/                  # shared TypeScript types
+├── hooks/                      # custom React hooks
+├── constants/
+│   └── theme.ts                # design tokens
+├── assets/
+│   └── images/
+├── backend/                    # NestJS API (workspace: @vedarogya/backend)
+│   └── src/
+│       ├── modules/            # auth, users, patients, appointments, records, audit-log
+│       ├── common/             # guards, decorators, filters, interceptors
+│       └── config/             # app, database, jwt configs
+└── pnpm-workspace.yaml
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Setup
 
-To learn more about developing your project with Expo, look at the following resources:
+### Prerequisites
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL 15+
+- Expo Go (for quick preview) or a development build
 
-## Join the community
+### Mobile app
 
-Join our community of developers creating universal apps.
+```bash
+pnpm install
+cp .env.example .env        # fill in your values
+pnpm start
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Backend
+
+```bash
+cd backend
+pnpm install
+cp .env.example .env        # fill in your values
+pnpm start:dev
+```
+
+### Clear Metro cache
+
+```bash
+pnpm start --clear
+```
+
+---
+
+## Environment variables
+
+See [`.env.example`](.env.example) for all required variables and descriptions.
+
+---
+
+## Security
+
+This app handles personal health information (PHI). See [`SECURITY.md`](SECURITY.md) for:
+- Vulnerability reporting process
+- Auth and data protection measures
+- HIPAA compliance posture
+
+---
+
+## Changelog
+
+See [`CHANGELOG.md`](CHANGELOG.md) for a full version history.
+
+---
+
+*Built with care. Powered by Ayurveda.*
