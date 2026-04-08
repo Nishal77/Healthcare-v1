@@ -85,8 +85,6 @@ export const ChatInput = forwardRef<TextInput, ChatInputProps>(
           paddingTop: 10,
           paddingBottom: Platform.OS === 'ios' ? 6 : 10,
           backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#F0EFEC',
         }}>
 
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>

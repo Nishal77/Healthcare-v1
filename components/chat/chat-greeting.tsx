@@ -25,8 +25,8 @@ export function ChatGreeting({ name = 'there' }: ChatGreetingProps) {
       <Text
         style={{
           fontSize: 15,
-          fontWeight: '500',
-          color: '#9CA3AF',
+          fontWeight: '600',
+          color: '#737373',
           marginBottom: 6,
           letterSpacing: 0.1,
         }}>
@@ -35,8 +35,8 @@ export function ChatGreeting({ name = 'there' }: ChatGreetingProps) {
       <Text
         style={{
           fontSize: 28,
-          fontWeight: '800',
-          color: '#0F1923',
+          fontWeight: '600',
+          color: '#000000',
           lineHeight: 34,
           letterSpacing: -0.8,
         }}>
