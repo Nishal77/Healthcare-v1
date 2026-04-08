@@ -8,9 +8,10 @@
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { DayMacros }       from './statistics/day-macros';
-import { WeekChart }        from './statistics/week-chart';
-import { PeriodDropdown, type Period } from './statistics/period-dropdown';
+import { DayMacros }                    from './statistics/day-macros';
+import { WeekChart }                    from './statistics/week-chart';
+import { MonthChart }                   from './statistics/month-chart';
+import { PeriodDropdown, type Period }  from './statistics/period-dropdown';
 
 export function StatisticsCard() {
   const [period, setPeriod] = useState<Period>('Week');
@@ -63,11 +64,9 @@ export function StatisticsCard() {
       </View>
 
       {/* ── Content — swaps based on selected period ─────────────────── */}
-      {period === 'Day' ? (
-        <DayMacros />
-      ) : (
-        <WeekChart />
-      )}
+      {period === 'Day'   && <DayMacros  />}
+      {period === 'Week'  && <WeekChart  />}
+      {period === 'Month' && <MonthChart />}
     </View>
   );
 }
