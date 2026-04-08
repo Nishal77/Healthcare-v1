@@ -59,6 +59,14 @@ const OPTIONS: Option[] = [
 const SECTIONS: Section[] = ['Nutrition', 'Fitness', 'Wellness'];
 const MOODS = ['😔','😐','🙂','😊','😄'];
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+}
+
 // ─── Chip ─────────────────────────────────────────────────────────────────────
 
 function Chip({ opt, selected, onToggle }: {
@@ -71,14 +79,13 @@ function Chip({ opt, selected, onToggle }: {
       onPress={onToggle}
       activeOpacity={0.75}
       style={{
+        flex:             1,
         flexDirection:    'row',
         alignItems:       'center',
+        justifyContent:   'center',
         gap:              6,
-        paddingHorizontal:14,
-        paddingVertical:  10,
+        paddingVertical:  12,
         borderRadius:     30,
-        marginRight:      8,
-        marginBottom:     9,
         backgroundColor:  selected ? '#0D1117' : '#F3F4F6',
       }}>
       <Ionicons
@@ -87,9 +94,9 @@ function Chip({ opt, selected, onToggle }: {
         color={selected ? '#FFFFFF' : '#9CA3AF'}
       />
       <Text style={{
-        fontSize:   13.5,
-        fontWeight: selected ? '600' : '400',
-        color:      selected ? '#FFFFFF' : '#374151',
+        fontSize:      13.5,
+        fontWeight:    selected ? '600' : '400',
+        color:         selected ? '#FFFFFF' : '#374151',
         letterSpacing: -0.1,
       }}>
         {opt.label}
@@ -351,30 +358,40 @@ export function LogEntrySheet({ visible, onClose }: Props) {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled">
 
-            {/* Chip sections */}
-            {SECTIONS.map(section => (
-              <View key={section} style={{ marginTop: 22 }}>
-                <Text style={{
-                  fontSize:     16,
-                  fontWeight:   '700',
-                  color:        '#0D1117',
-                  letterSpacing:-0.3,
-                  marginBottom: 12,
-                }}>
-                  {section}
-                </Text>
-                <View style={{ flexDirection:'row', flexWrap:'wrap' }}>
-                  {OPTIONS.filter(o => o.section === section).map(opt => (
-                    <Chip
-                      key={opt.id}
-                      opt={opt}
-                      selected={selected.has(opt.id)}
-                      onToggle={() => toggle(opt.id)}
-                    />
+            {/* Chip sections — 3-column grid, every row fills full width */}
+            {SECTIONS.map(section => {
+              const opts = OPTIONS.filter(o => o.section === section);
+              const rows = chunk(opts, 3);
+              return (
+                <View key={section} style={{ marginTop: 22 }}>
+                  <Text style={{
+                    fontSize:     16,
+                    fontWeight:   '700',
+                    color:        '#0D1117',
+                    letterSpacing:-0.3,
+                    marginBottom: 10,
+                  }}>
+                    {section}
+                  </Text>
+                  {rows.map((row, ri) => (
+                    <View key={ri} style={{ flexDirection:'row', gap: 8, marginBottom: 8 }}>
+                      {row.map(opt => (
+                        <Chip
+                          key={opt.id}
+                          opt={opt}
+                          selected={selected.has(opt.id)}
+                          onToggle={() => toggle(opt.id)}
+                        />
+                      ))}
+                      {/* Empty flex spacers so partial rows stay grid-aligned */}
+                      {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, si) => (
+                        <View key={`sp-${si}`} style={{ flex: 1 }} />
+                      ))}
+                    </View>
                   ))}
                 </View>
-              </View>
-            ))}
+              );
+            })}
 
             {/* Input card */}
             {selectedOpts.length > 0 && (
