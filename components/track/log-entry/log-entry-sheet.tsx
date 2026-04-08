@@ -1,13 +1,8 @@
 /**
- * LogEntrySheet
- * Premium bottom-sheet modal for logging health activities.
- * Replicates the "What do you vibe with?" chip-selection UI
- * adapted for health tracking: Nutrition / Fitness / Wellness.
- *
- * Flow:
- *  1. User sees chip grid — tap to select
- *  2. Selected chips reveal an inline input row
- *  3. Footer shows count + "Log it" CTA
+ * LogEntrySheet — v2
+ * Premium healthcare bottom sheet.
+ * Design language: near-monochrome, dark-when-selected chips,
+ * glass input card, full-bleed footer CTA.
  */
 import React, { useRef, useState } from 'react';
 import {
@@ -33,67 +28,69 @@ interface Option {
   id:          string;
   label:       string;
   icon:        React.ComponentProps<typeof Ionicons>['name'];
-  iconColor:   string;
-  iconBg:      string;
+  accentColor: string;          // used only for selected icon tint
   section:     Section;
   inputKind:   InputKind;
   placeholder: string;
   unit?:       string;
 }
 
-// ─── Options data ─────────────────────────────────────────────────────────────
+// ─── Options ─────────────────────────────────────────────────────────────────
 
 const OPTIONS: Option[] = [
   // Nutrition
-  { id:'water',   label:'Water',    icon:'water-outline',      iconColor:'#38BDF8', iconBg:'#F0F9FF', section:'Nutrition', inputKind:'ml',     placeholder:'250',               unit:'ml'    },
-  { id:'meal',    label:'Meal',     icon:'restaurant-outline', iconColor:'#F97316', iconBg:'#FFF7ED', section:'Nutrition', inputKind:'text',   placeholder:'What did you eat?'              },
-  { id:'coffee',  label:'Coffee',   icon:'cafe-outline',       iconColor:'#92400E', iconBg:'#FEF3C7', section:'Nutrition', inputKind:'ml',     placeholder:'250',               unit:'ml'    },
-  { id:'snack',   label:'Snack',    icon:'nutrition-outline',  iconColor:'#10B981', iconBg:'#ECFDF5', section:'Nutrition', inputKind:'text',   placeholder:'What was the snack?'            },
+  { id:'water',   label:'Water',    icon:'water-outline',      accentColor:'#38BDF8', section:'Nutrition', inputKind:'ml',     placeholder:'250',               unit:'ml'    },
+  { id:'meal',    label:'Meal',     icon:'restaurant-outline', accentColor:'#F97316', section:'Nutrition', inputKind:'text',   placeholder:'What did you eat?'              },
+  { id:'coffee',  label:'Coffee',   icon:'cafe-outline',       accentColor:'#D97706', section:'Nutrition', inputKind:'ml',     placeholder:'200',               unit:'ml'    },
+  { id:'snack',   label:'Snack',    icon:'nutrition-outline',  accentColor:'#10B981', section:'Nutrition', inputKind:'text',   placeholder:'What was the snack?'            },
   // Fitness
-  { id:'running', label:'Running',  icon:'walk-outline',       iconColor:'#EF4444', iconBg:'#FEF2F2', section:'Fitness',   inputKind:'min',    placeholder:'30',                unit:'min'   },
-  { id:'gym',     label:'Gym',      icon:'barbell-outline',    iconColor:'#8B5CF6', iconBg:'#F5F3FF', section:'Fitness',   inputKind:'min',    placeholder:'60',                unit:'min'   },
-  { id:'yoga',    label:'Yoga',     icon:'body-outline',       iconColor:'#F59E0B', iconBg:'#FFFBEB', section:'Fitness',   inputKind:'min',    placeholder:'45',                unit:'min'   },
-  { id:'cycling', label:'Cycling',  icon:'bicycle-outline',    iconColor:'#06B6D4', iconBg:'#ECFEFF', section:'Fitness',   inputKind:'min',    placeholder:'30',                unit:'min'   },
-  { id:'steps',   label:'Steps',    icon:'footsteps-outline',  iconColor:'#2C6E49', iconBg:'#F0FBF5', section:'Fitness',   inputKind:'number', placeholder:'8000',              unit:'steps' },
+  { id:'running', label:'Running',  icon:'walk-outline',       accentColor:'#EF4444', section:'Fitness',   inputKind:'min',    placeholder:'30',                unit:'min'   },
+  { id:'gym',     label:'Gym',      icon:'barbell-outline',    accentColor:'#8B5CF6', section:'Fitness',   inputKind:'min',    placeholder:'60',                unit:'min'   },
+  { id:'yoga',    label:'Yoga',     icon:'body-outline',       accentColor:'#F59E0B', section:'Fitness',   inputKind:'min',    placeholder:'45',                unit:'min'   },
+  { id:'cycling', label:'Cycling',  icon:'bicycle-outline',    accentColor:'#06B6D4', section:'Fitness',   inputKind:'min',    placeholder:'30',                unit:'min'   },
+  { id:'steps',   label:'Steps',    icon:'footsteps-outline',  accentColor:'#2C6E49', section:'Fitness',   inputKind:'number', placeholder:'8000',              unit:'steps' },
   // Wellness
-  { id:'mood',    label:'Mood',     icon:'happy-outline',      iconColor:'#F59E0B', iconBg:'#FFFBEB', section:'Wellness',  inputKind:'mood',   placeholder:''                               },
-  { id:'sleep',   label:'Sleep',    icon:'moon-outline',       iconColor:'#6366F1', iconBg:'#EEF2FF', section:'Wellness',  inputKind:'number', placeholder:'8',                 unit:'hrs'   },
-  { id:'weight',  label:'Weight',   icon:'scale-outline',      iconColor:'#EC4899', iconBg:'#FDF2F8', section:'Wellness',  inputKind:'number', placeholder:'70',                unit:'kg'    },
-  { id:'meds',    label:'Medicine', icon:'medical-outline',    iconColor:'#EF4444', iconBg:'#FEF2F2', section:'Wellness',  inputKind:'text',   placeholder:'Medication name'                },
+  { id:'mood',    label:'Mood',     icon:'happy-outline',      accentColor:'#F59E0B', section:'Wellness',  inputKind:'mood',   placeholder:''                               },
+  { id:'sleep',   label:'Sleep',    icon:'moon-outline',       accentColor:'#6366F1', section:'Wellness',  inputKind:'number', placeholder:'8',                 unit:'hrs'   },
+  { id:'weight',  label:'Weight',   icon:'scale-outline',      accentColor:'#EC4899', section:'Wellness',  inputKind:'number', placeholder:'70',                unit:'kg'    },
+  { id:'meds',    label:'Medicine', icon:'medical-outline',    accentColor:'#EF4444', section:'Wellness',  inputKind:'text',   placeholder:'Medication name'                },
 ];
 
 const SECTIONS: Section[] = ['Nutrition', 'Fitness', 'Wellness'];
-
 const MOODS = ['😔','😐','🙂','😊','😄'];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Chip ─────────────────────────────────────────────────────────────────────
 
-/** A single selectable chip */
-function Chip({
-  opt, selected, onToggle,
-}: { opt: Option; selected: boolean; onToggle: () => void }) {
+function Chip({ opt, selected, onToggle }: {
+  opt:      Option;
+  selected: boolean;
+  onToggle: () => void;
+}) {
   return (
     <TouchableOpacity
       onPress={onToggle}
-      activeOpacity={0.8}
+      activeOpacity={0.75}
       style={{
         flexDirection:    'row',
         alignItems:       'center',
-        gap:              7,
-        paddingHorizontal:13,
-        paddingVertical:  9,
+        gap:              6,
+        paddingHorizontal:14,
+        paddingVertical:  10,
         borderRadius:     30,
-        backgroundColor:  selected ? opt.iconBg      : '#F5F6F8',
-        borderWidth:      selected ? 1.5             : 0,
-        borderColor:      selected ? opt.iconColor   : 'transparent',
         marginRight:      8,
-        marginBottom:     8,
+        marginBottom:     9,
+        backgroundColor:  selected ? '#0D1117' : '#F3F4F6',
       }}>
-      <Ionicons name={opt.icon} size={15} color={selected ? opt.iconColor : '#9CA3AF'} />
+      <Ionicons
+        name={opt.icon}
+        size={14}
+        color={selected ? '#FFFFFF' : '#9CA3AF'}
+      />
       <Text style={{
-        fontSize:   13,
+        fontSize:   13.5,
         fontWeight: selected ? '600' : '400',
-        color:      selected ? opt.iconColor : '#374151',
+        color:      selected ? '#FFFFFF' : '#374151',
+        letterSpacing: -0.1,
       }}>
         {opt.label}
       </Text>
@@ -101,120 +98,163 @@ function Chip({
   );
 }
 
-/** Inline input row that appears when a chip is selected */
-function InputRow({ opt, value, onChange }: {
-  opt:      Option;
-  value:    string;
-  onChange: (v: string) => void;
-}) {
-  if (opt.inputKind === 'mood') {
-    return (
-      <View style={{
-        flexDirection:    'row',
-        alignItems:       'center',
-        backgroundColor:  '#F5F6F8',
-        borderRadius:     14,
-        padding:          12,
-        marginBottom:     10,
-        gap:              6,
-      }}>
-        <Ionicons name={opt.icon} size={16} color={opt.iconColor} />
-        <Text style={{ fontSize: 12.5, fontWeight:'600', color: opt.iconColor, flex: 1 }}>
-          {opt.label}
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {MOODS.map((m, i) => (
-            <TouchableOpacity
-              key={m}
-              onPress={() => onChange(String(i))}
-              style={{
-                width: 32, height: 32,
-                borderRadius: 16,
-                backgroundColor: value === String(i) ? opt.iconBg : 'transparent',
-                alignItems: 'center', justifyContent: 'center',
-                borderWidth: value === String(i) ? 1.5 : 0,
-                borderColor: opt.iconColor,
-              }}>
-              <Text style={{ fontSize: 18 }}>{m}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-    );
-  }
+// ─── Input card rows ──────────────────────────────────────────────────────────
 
+function MoodRow({ opt, value, onChange }: {
+  opt: Option; value: string; onChange: (v: string) => void;
+}) {
   return (
-    <View style={{
-      flexDirection:    'row',
-      alignItems:       'center',
-      backgroundColor:  '#F5F6F8',
-      borderRadius:     14,
-      paddingHorizontal:14,
-      paddingVertical:  11,
-      marginBottom:     10,
-      gap:              10,
-    }}>
-      <Ionicons name={opt.icon} size={16} color={opt.iconColor} />
-      <Text style={{ fontSize: 13, fontWeight:'600', color: opt.iconColor, width: 62 }}>
-        {opt.label}
-      </Text>
+    <View style={rowWrap}>
+      <View style={{ flexDirection:'row', alignItems:'center', gap: 10, flex: 1 }}>
+        <View style={[iconCircle, { backgroundColor: opt.accentColor + '18' }]}>
+          <Ionicons name={opt.icon} size={15} color={opt.accentColor} />
+        </View>
+        <Text style={rowLabel}>{opt.label}</Text>
+      </View>
+      <View style={{ flexDirection:'row', gap: 7 }}>
+        {MOODS.map((m, i) => (
+          <TouchableOpacity
+            key={m}
+            onPress={() => onChange(String(i))}
+            style={{
+              width: 34, height: 34,
+              borderRadius: 17,
+              backgroundColor: value === String(i) ? '#0D1117' : '#F3F4F6',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+            <Text style={{ fontSize: 17 }}>{m}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function NumberRow({ opt, value, onChange, isLast }: {
+  opt: Option; value: string; onChange: (v: string) => void; isLast: boolean;
+}) {
+  return (
+    <View style={[rowWrap, !isLast && rowBorder]}>
+      <View style={{ flexDirection:'row', alignItems:'center', gap: 10, flex: 1 }}>
+        <View style={[iconCircle, { backgroundColor: opt.accentColor + '18' }]}>
+          <Ionicons name={opt.icon} size={15} color={opt.accentColor} />
+        </View>
+        <Text style={rowLabel}>{opt.label}</Text>
+      </View>
+      <View style={{ flexDirection:'row', alignItems:'center', gap: 6 }}>
+        <TextInput
+          value={value}
+          onChangeText={onChange}
+          placeholder={opt.placeholder}
+          placeholderTextColor="#C4C9D4"
+          keyboardType="numeric"
+          style={{
+            fontSize:   18,
+            fontWeight: '700',
+            color:      '#0D1117',
+            minWidth:   52,
+            textAlign:  'right',
+            padding: 0,
+          }}
+        />
+        {opt.unit && (
+          <Text style={{ fontSize: 12, color: '#9CA3AF', fontWeight: '500' }}>
+            {opt.unit}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+function TextRow({ opt, value, onChange, isLast }: {
+  opt: Option; value: string; onChange: (v: string) => void; isLast: boolean;
+}) {
+  return (
+    <View style={[rowWrap, { flexDirection:'column', alignItems:'stretch', paddingVertical: 14 }, !isLast && rowBorder]}>
+      <View style={{ flexDirection:'row', alignItems:'center', gap: 10, marginBottom: 10 }}>
+        <View style={[iconCircle, { backgroundColor: opt.accentColor + '18' }]}>
+          <Ionicons name={opt.icon} size={15} color={opt.accentColor} />
+        </View>
+        <Text style={rowLabel}>{opt.label}</Text>
+      </View>
       <TextInput
         value={value}
         onChangeText={onChange}
         placeholder={opt.placeholder}
         placeholderTextColor="#C4C9D4"
-        keyboardType={opt.inputKind === 'text' ? 'default' : 'numeric'}
+        multiline
         style={{
-          flex:       1,
-          fontSize:   14,
-          fontWeight: '500',
-          color:      '#0D1117',
-          padding:    0,
+          fontSize:         14,
+          fontWeight:       '400',
+          color:            '#0D1117',
+          padding:          0,
+          minHeight:        36,
+          lineHeight:       20,
         }}
       />
-      {opt.unit && (
-        <Text style={{ fontSize: 12.5, fontWeight:'500', color:'#9CA3AF' }}>
-          {opt.unit}
-        </Text>
-      )}
     </View>
   );
 }
 
+// Shared row styles
+const rowWrap = {
+  flexDirection:    'row' as const,
+  alignItems:       'center' as const,
+  justifyContent:   'space-between' as const,
+  paddingVertical:  16,
+  paddingHorizontal:16,
+};
+const rowBorder = {
+  borderBottomWidth: 1,
+  borderBottomColor: '#F3F4F6',
+};
+const iconCircle = {
+  width: 30, height: 30,
+  borderRadius: 10,
+  alignItems:      'center' as const,
+  justifyContent:  'center' as const,
+};
+const rowLabel = {
+  fontSize:   14,
+  fontWeight: '600' as const,
+  color:      '#0D1117',
+  letterSpacing: -0.1,
+};
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface Props {
-  visible:  boolean;
-  onClose:  () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 export function LogEntrySheet({ visible, onClose }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [values,   setValues  ] = useState<Record<string, string>>({});
 
-  const slideY  = useRef(new Animated.Value(600)).current;
+  const slideY  = useRef(new Animated.Value(700)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
-  // Animate in when visible changes
   React.useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.spring(slideY,  { toValue: 0,   useNativeDriver: true, damping: 22, stiffness: 220 }),
-        Animated.timing(opacity, { toValue: 1,   duration: 200, useNativeDriver: true }),
+        Animated.spring(slideY,  { toValue: 0,   useNativeDriver: true, damping: 24, stiffness: 240 }),
+        Animated.timing(opacity, { toValue: 1,   duration: 180, useNativeDriver: true }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(slideY,  { toValue: 600, duration: 280, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0,   duration: 200, useNativeDriver: true }),
+        Animated.timing(slideY,  { toValue: 700, duration: 260, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0,   duration: 180, useNativeDriver: true }),
       ]).start();
     }
   }, [visible]);
 
   function toggle(id: string) {
     setSelected(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
     });
   }
 
@@ -223,180 +263,204 @@ export function LogEntrySheet({ visible, onClose }: Props) {
   }
 
   function handleLog() {
-    console.log('Logging entries:', Object.fromEntries(
-      [...selected].map(id => [id, values[id] ?? ''])
-    ));
+    console.log('Logged:', Object.fromEntries([...selected].map(id => [id, values[id] ?? ''])));
     setSelected(new Set());
     setValues({});
     onClose();
   }
 
   const selectedOpts = OPTIONS.filter(o => selected.has(o.id));
+  const canLog       = selected.size > 0;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
 
-      {/* Backdrop */}
-      <Animated.View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.45)',
-          opacity,
-        }}>
+      {/* Dim backdrop */}
+      <Animated.View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', opacity }}>
         <Pressable style={{ flex: 1 }} onPress={onClose} />
       </Animated.View>
 
       {/* Sheet */}
       <Animated.View style={{
-        position:        'absolute',
+        position: 'absolute',
         left: 0, right: 0, bottom: 0,
-        transform:       [{ translateY: slideY }],
-        backgroundColor: '#FFFFFF',
-        borderTopLeftRadius:  28,
-        borderTopRightRadius: 28,
-        maxHeight:            '88%',
+        transform:            [{ translateY: slideY }],
+        backgroundColor:      '#FFFFFF',
+        borderTopLeftRadius:  32,
+        borderTopRightRadius: 32,
+        maxHeight:            '92%',
         shadowColor:          '#000',
-        shadowOffset:         { width: 0, height: -4 },
-        shadowOpacity:        0.12,
-        shadowRadius:         20,
-        elevation:            24,
+        shadowOffset:         { width: 0, height: -6 },
+        shadowOpacity:        0.14,
+        shadowRadius:         24,
+        elevation:            30,
       }}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
-          {/* Handle */}
-          <View style={{ alignItems:'center', paddingTop: 12, paddingBottom: 4 }}>
-            <View style={{
-              width: 36, height: 4,
-              borderRadius: 2,
-              backgroundColor: '#E5E7EB',
-            }} />
+          {/* Drag handle */}
+          <View style={{ alignItems:'center', paddingTop: 14 }}>
+            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: '#E0E0E5' }} />
           </View>
 
           {/* Header */}
           <View style={{
-            flexDirection:  'row',
-            alignItems:     'center',
-            paddingHorizontal: 20,
-            paddingTop:     12,
-            paddingBottom:  6,
+            flexDirection: 'row',
+            alignItems:    'flex-start',
+            paddingHorizontal: 22,
+            paddingTop:    20,
+            paddingBottom: 6,
+            gap: 14,
           }}>
-            <TouchableOpacity onPress={onClose} style={{ padding: 4, marginRight: 12 }}>
-              <Ionicons name="close" size={22} color="#374151" />
+            <TouchableOpacity
+              onPress={onClose}
+              style={{
+                width: 34, height: 34,
+                borderRadius: 17,
+                backgroundColor: '#F3F4F6',
+                alignItems: 'center', justifyContent: 'center',
+                marginTop: 2,
+              }}>
+              <Ionicons name="close" size={18} color="#374151" />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
               <Text style={{
-                fontSize:     20,
+                fontSize:     22,
                 fontWeight:   '800',
                 color:        '#0D1117',
-                letterSpacing:-0.4,
+                letterSpacing:-0.5,
+                lineHeight:   28,
               }}>
-                What would you like to log?
+                What would you{'\n'}like to log?
               </Text>
-              <Text style={{ fontSize: 12.5, color: '#9CA3AF', marginTop: 2 }}>
+              <Text style={{
+                fontSize:  13,
+                color:     '#9CA3AF',
+                marginTop: 4,
+              }}>
                 Select activities to track today
               </Text>
             </View>
           </View>
 
+          {/* Scrollable content */}
           <ScrollView
-            style={{ paddingHorizontal: 20 }}
+            style={{ paddingHorizontal: 22 }}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled">
 
-            {/* ── Chip sections ─────────────────────────────────── */}
-            {SECTIONS.map(section => {
-              const opts = OPTIONS.filter(o => o.section === section);
-              return (
-                <View key={section} style={{ marginTop: 20 }}>
-                  <Text style={{
-                    fontSize:     15,
-                    fontWeight:   '700',
-                    color:        '#0D1117',
-                    letterSpacing:-0.2,
-                    marginBottom: 10,
-                  }}>
-                    {section}
-                  </Text>
-                  <View style={{ flexDirection:'row', flexWrap:'wrap' }}>
-                    {opts.map(opt => (
-                      <Chip
-                        key={opt.id}
-                        opt={opt}
-                        selected={selected.has(opt.id)}
-                        onToggle={() => toggle(opt.id)}
-                      />
-                    ))}
-                  </View>
-                </View>
-              );
-            })}
-
-            {/* ── Inline inputs for selected items ──────────────── */}
-            {selectedOpts.length > 0 && (
-              <View style={{ marginTop: 24 }}>
+            {/* Chip sections */}
+            {SECTIONS.map(section => (
+              <View key={section} style={{ marginTop: 22 }}>
                 <Text style={{
-                  fontSize:     12,
-                  fontWeight:   '600',
-                  color:        '#9CA3AF',
-                  letterSpacing: 0.4,
+                  fontSize:     16,
+                  fontWeight:   '700',
+                  color:        '#0D1117',
+                  letterSpacing:-0.3,
+                  marginBottom: 12,
+                }}>
+                  {section}
+                </Text>
+                <View style={{ flexDirection:'row', flexWrap:'wrap' }}>
+                  {OPTIONS.filter(o => o.section === section).map(opt => (
+                    <Chip
+                      key={opt.id}
+                      opt={opt}
+                      selected={selected.has(opt.id)}
+                      onToggle={() => toggle(opt.id)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ))}
+
+            {/* Input card */}
+            {selectedOpts.length > 0 && (
+              <View style={{ marginTop: 28 }}>
+                <Text style={{
+                  fontSize:      11,
+                  fontWeight:    '600',
+                  color:         '#9CA3AF',
+                  letterSpacing: 1,
                   marginBottom:  10,
                 }}>
                   ENTER DETAILS
                 </Text>
-                {selectedOpts.map(opt => (
-                  <InputRow
-                    key={opt.id}
-                    opt={opt}
-                    value={values[opt.id] ?? ''}
-                    onChange={v => setValue(opt.id, v)}
-                  />
-                ))}
+
+                <View style={{
+                  backgroundColor: '#FAFAFA',
+                  borderRadius:    20,
+                  borderWidth:     1,
+                  borderColor:     '#F0F0F5',
+                  overflow:        'hidden',
+                }}>
+                  {selectedOpts.map((opt, idx) => {
+                    const isLast = idx === selectedOpts.length - 1;
+                    const v = values[opt.id] ?? '';
+                    const onChange = (val: string) => setValue(opt.id, val);
+
+                    if (opt.inputKind === 'mood')
+                      return <MoodRow key={opt.id} opt={opt} value={v} onChange={onChange} />;
+                    if (opt.inputKind === 'text')
+                      return <TextRow key={opt.id} opt={opt} value={v} onChange={onChange} isLast={isLast} />;
+                    return <NumberRow key={opt.id} opt={opt} value={v} onChange={onChange} isLast={isLast} />;
+                  })}
+                </View>
               </View>
             )}
 
-            <View style={{ height: 120 }} />
+            <View style={{ height: 130 }} />
           </ScrollView>
 
-          {/* ── Footer ─────────────────────────────────────────── */}
+          {/* Footer */}
           <View style={{
             position:         'absolute',
-            bottom:           0,
-            left: 0, right:   0,
-            backgroundColor:  '#FFFFFF',
-            borderTopWidth:   1,
-            borderTopColor:   '#F3F4F6',
-            paddingHorizontal:20,
-            paddingVertical:  16,
+            bottom:           0, left: 0, right: 0,
+            paddingHorizontal:22,
+            paddingVertical:  18,
             flexDirection:    'row',
             alignItems:       'center',
             justifyContent:   'space-between',
+            backgroundColor:  '#FFFFFF',
+            borderTopWidth:   1,
+            borderTopColor:   '#F3F4F6',
           }}>
-            <Text style={{ fontSize: 13, fontWeight:'500', color:'#9CA3AF' }}>
-              {selected.size} / {OPTIONS.length} selected
-            </Text>
+            {/* Counter */}
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: '800', color: '#0D1117', letterSpacing: -0.5 }}>
+                {selected.size}
+                <Text style={{ fontSize: 14, fontWeight: '400', color: '#C4C9D4' }}>
+                  {' '}/ {OPTIONS.length}
+                </Text>
+              </Text>
+              <Text style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 1 }}>selected</Text>
+            </View>
+
+            {/* CTA */}
             <TouchableOpacity
-              onPress={selected.size > 0 ? handleLog : undefined}
-              activeOpacity={selected.size > 0 ? 0.8 : 1}
+              onPress={canLog ? handleLog : undefined}
+              activeOpacity={canLog ? 0.85 : 1}
               style={{
-                backgroundColor:  selected.size > 0 ? '#0D1117' : '#E5E7EB',
+                backgroundColor:  canLog ? '#0D1117' : '#F3F4F6',
                 borderRadius:     30,
-                paddingHorizontal:28,
-                paddingVertical:  13,
+                paddingHorizontal:36,
+                paddingVertical:  16,
+                shadowColor:      canLog ? '#0D1117' : 'transparent',
+                shadowOffset:     { width: 0, height: 6 },
+                shadowOpacity:    canLog ? 0.3 : 0,
+                shadowRadius:     14,
+                elevation:        canLog ? 8 : 0,
               }}>
               <Text style={{
-                fontSize:   14,
+                fontSize:   16,
                 fontWeight: '700',
-                color:      selected.size > 0 ? '#FFFFFF' : '#9CA3AF',
+                color:      canLog ? '#FFFFFF' : '#C4C9D4',
+                letterSpacing: -0.3,
               }}>
                 Log it
               </Text>
             </TouchableOpacity>
           </View>
+
         </KeyboardAvoidingView>
       </Animated.View>
     </Modal>
