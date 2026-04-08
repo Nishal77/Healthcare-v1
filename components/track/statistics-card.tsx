@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Text, TouchableOpacity, View, LayoutChangeEvent } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Animated, Modal, Pressable, Text, TouchableOpacity, View, LayoutChangeEvent } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Svg, {
   Defs, Line, LinearGradient as SvgLinearGradient,
@@ -36,14 +36,126 @@ function yPos(value: number, h: number) {
   return h - (value / Y_MAX) * h;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Period options ──────────────────────────────────────────────────────────
 
-interface Props {
-  period?: 'Week' | 'Month';
-  onPeriodToggle?: () => void;
+type Period = 'Day' | 'Week' | 'Month';
+const PERIODS: Period[] = ['Day', 'Week', 'Month'];
+
+// ─── Period Dropdown ─────────────────────────────────────────────────────────
+
+function PeriodDropdown({
+  selected,
+  onChange,
+}: {
+  selected: Period;
+  onChange: (p: Period) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const anim = useRef(new Animated.Value(0)).current;
+
+  function toggle() {
+    if (!open) {
+      setOpen(true);
+      Animated.spring(anim, { toValue: 1, useNativeDriver: true, damping: 18, stiffness: 260 }).start();
+    } else {
+      Animated.timing(anim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => setOpen(false));
+    }
+  }
+
+  function select(p: Period) {
+    onChange(p);
+    Animated.timing(anim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => setOpen(false));
+  }
+
+  const scale   = anim.interpolate({ inputRange: [0, 1], outputRange: [0.88, 1] });
+  const opacity = anim;
+  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [-8, 0] });
+
+  return (
+    <View style={{ position: 'relative', zIndex: 99 }}>
+      {/* Trigger pill */}
+      <TouchableOpacity
+        onPress={toggle}
+        activeOpacity={0.8}
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: 5,
+          backgroundColor: open ? '#E8F0EB' : '#F4F4F6',
+          borderRadius: 20,
+          paddingHorizontal: 14, paddingVertical: 8,
+          borderWidth: open ? 1 : 0,
+          borderColor: '#2C6E49',
+        }}>
+        <Text style={{
+          fontSize: 13, fontWeight: '600',
+          color: open ? '#2C6E49' : '#374151',
+        }}>
+          {selected}
+        </Text>
+        <Animated.View style={{
+          transform: [{ rotate: anim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] }) }],
+        }}>
+          <Ionicons name="chevron-down" size={13} color={open ? '#2C6E49' : '#6B7280'} />
+        </Animated.View>
+      </TouchableOpacity>
+
+      {/* Dropdown panel */}
+      {open && (
+        <Animated.View style={{
+          position: 'absolute',
+          top: 44, right: 0,
+          width: 130,
+          backgroundColor: '#FFFFFF',
+          borderRadius: 16,
+          paddingVertical: 6,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.13,
+          shadowRadius: 20,
+          elevation: 14,
+          opacity,
+          transform: [{ scale }, { translateY }],
+        }}>
+          {PERIODS.map((p, i) => {
+            const isSelected = p === selected;
+            return (
+              <TouchableOpacity
+                key={p}
+                onPress={() => select(p)}
+                activeOpacity={0.7}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 16,
+                  paddingVertical: 11,
+                  backgroundColor: isSelected ? '#F0FBF5' : 'transparent',
+                  marginHorizontal: 4,
+                  borderRadius: 10,
+                  marginBottom: i < PERIODS.length - 1 ? 2 : 0,
+                }}>
+                <Text style={{
+                  fontSize: 14,
+                  fontWeight: isSelected ? '600' : '400',
+                  color: isSelected ? '#2C6E49' : '#374151',
+                }}>
+                  {p}
+                </Text>
+                {isSelected && (
+                  <Ionicons name="checkmark" size={15} color="#2C6E49" />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </Animated.View>
+      )}
+    </View>
+  );
 }
 
-export function StatisticsCard({ period = 'Week', onPeriodToggle }: Props) {
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function StatisticsCard() {
+  const [period, setPeriod] = useState<Period>('Week');
   // Measure the true inner width at runtime — works on both iOS & Android
   const [chartW, setChartW] = useState(0);
 
@@ -69,6 +181,7 @@ export function StatisticsCard({ period = 'Week', onPeriodToggle }: Props) {
       shadowOpacity: 0.07,
       shadowRadius: 18,
       elevation: 5,
+      overflow: 'visible',
     }}>
 
       {/* ── Header ──────────────────────────────────────────────────── */}
@@ -85,17 +198,7 @@ export function StatisticsCard({ period = 'Week', onPeriodToggle }: Props) {
           </Text>
         </View>
 
-        <TouchableOpacity
-          onPress={onPeriodToggle}
-          activeOpacity={0.75}
-          style={{
-            flexDirection: 'row', alignItems: 'center', gap: 5,
-            backgroundColor: '#F4F4F6', borderRadius: 20,
-            paddingHorizontal: 14, paddingVertical: 8,
-          }}>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: '#374151' }}>{period}</Text>
-          <Ionicons name="refresh-outline" size={13} color="#6B7280" />
-        </TouchableOpacity>
+        <PeriodDropdown selected={period} onChange={setPeriod} />
       </View>
 
       {/* ── Chart area — onLayout measures exact usable width ───────── */}
