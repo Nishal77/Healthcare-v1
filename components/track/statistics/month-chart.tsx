@@ -17,10 +17,15 @@ import Svg, {
 
 // ─── 28-day mock data (4 weeks) ───────────────────────────────────────────────
 
+// Values swing widely so the three lines cross each other naturally.
+// Week 1: Fats spikes up, Carbs crashes down → they swap positions crossing Protein.
+// Week 2: Recovery — Carbs climbs back, Fats drops back.
+// Week 3: Protein surges, briefly overtakes Carbs while Fats stays mid.
+// Week 4: All three converge then spread again.
 const MONTH_DATA = {
-  fats:    [35,42,38,51,29,44,38, 52,61,47,55,39,48,43, 72,58,65,71,49,63,68, 55,48,61,57,44,52,47],
-  carbs:   [180,210,195,240,165,225,190, 255,280,240,265,195,245,220, 310,275,295,320,250,290,305, 265,245,280,270,215,255,240],
-  protein: [95,110,105,125,88,115,100, 130,145,120,135,108,125,118, 155,140,148,162,128,145,155, 140,132,148,142,120,138,132],
+  fats:    [ 28, 42, 70,115,162,185,158,  118, 78, 52, 42, 58,105,148,  178,155,108, 65, 42, 55, 92,  138,168,148,112, 72, 44, 30],
+  carbs:   [255,225,185,138, 98, 72, 88,  132,178,218,258,210,155,102,   82,122,180,228,268,222,165,  118, 82,110,158,208,255,272],
+  protein: [ 92,105,118,128,135,124,112,  122,135,148,158,145,132,120,  128,145,162,175,188,170,150,  138,148,162,148,135,148,138],
 };
 
 const NUM_POINTS = MONTH_DATA.fats.length;  // 28
@@ -30,7 +35,7 @@ const WEEK_LABELS = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
 // ─── Chart constants ──────────────────────────────────────────────────────────
 
-const Y_MAX   = 350;
+const Y_MAX   = 300;
 const Y_TICKS = [0, 100, 200, 300];
 const YAXIS_W = 34;
 const CHART_H = 190;
