@@ -8,14 +8,15 @@ import { SearchBar }       from './search-bar';
 
 interface HeroSectionProps {
   userName?: string;
+  onAvatarPress?: () => void;
 }
 
-export function HeroSection({ userName = 'Guest' }: HeroSectionProps) {
+export function HeroSection({ userName = 'Guest', onAvatarPress }: HeroSectionProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={{ backgroundColor: '#FFFFFF', paddingTop: insets.top + 16 }}>
-      <HomeHeader name={userName} hasNotification />
+      <HomeHeader name={userName} hasNotification onAvatarPress={onAvatarPress} />
       <FeelingPrompt />
       {/* SearchBar navigates to /chat internally */}
       <SearchBar />

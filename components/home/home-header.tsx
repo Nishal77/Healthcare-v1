@@ -12,12 +12,14 @@ interface HomeHeaderProps {
   name?: string;
   hasNotification?: boolean;
   onNotificationPress?: () => void;
+  onAvatarPress?: () => void;
 }
 
 export function HomeHeader({
   name = 'Guest',
   hasNotification = true,
   onNotificationPress,
+  onAvatarPress,
 }: HomeHeaderProps) {
   const initials = name
     .split(' ')
@@ -30,11 +32,13 @@ export function HomeHeader({
     <View className="flex-row items-center justify-between px-5 pt-2 pb-1">
       {/* Avatar + greeting */}
       <View className="flex-row items-center gap-3">
-        <View
+        <TouchableOpacity
+          onPress={onAvatarPress}
+          activeOpacity={0.75}
           className="w-12 h-12 rounded-full items-center justify-center"
           style={{ backgroundColor: '#2C6E49' }}>
           <Text className="text-white text-base font-bold">{initials}</Text>
-        </View>
+        </TouchableOpacity>
 
         <View>
           <Text className="text-sm font-normal" style={{ color: '#6B7280' }}>
