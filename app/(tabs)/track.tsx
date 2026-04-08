@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { WeekHeader } from '@/components/track/week-header';
 import { StatisticsCard } from '@/components/track/statistics-card';
+import { EatingGuide } from '@/components/track/eating-guide';
 import { SummaryCard } from '@/components/track/daily-summary/summary-card';
 import { QuickAddRow } from '@/components/track/quick-add/quick-add-row';
 import { TimelineView } from '@/components/track/timeline/timeline-view';
@@ -60,6 +61,7 @@ export default function TrackTab() {
 
         <WeekHeader onDateChange={() => {}} />
         <StatisticsCard />
+        <EatingGuide />
         <SummaryCard />
 
         {/* Quick add row — each pill opens the sheet with that type pre-selected */}
