@@ -1,11 +1,27 @@
+/**
+ * HeartRateCard — compact design
+ *
+ * Layout:
+ *  ┌──────────────────────────────────────┐
+ *  │ [❤] Heart Rate            ● LIVE     │  ← header row
+ *  │                                      │
+ *  │  72          ▁▂▄▅▇█▆▄▃▂▁▂▃▄▅▆▇     │  ← BPM left · bars right
+ *  │  bpm                                 │
+ *  ├──────────────────────────────────────┤
+ *  │ NADI ───────── —   STATUS ── ● —    │  ← footer row
+ *  └──────────────────────────────────────┘
+ *
+ * White card + green bottom gradient — matches MetricsGrid shadow system.
+ */
+
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, View } from 'react-native';
 import type { MetricStatus } from '../../../src/health/types';
 
-// ── Heart rate bar chart ──────────────────────────────────────────────────────
+// ── Bar chart (compact 38px height) ──────────────────────────────────────────
 const BASE_BARS = [38, 45, 52, 58, 62, 68, 74, 88, 99, 118, 104, 92, 76, 62];
-const CHART_H   = 52;
+const CHART_H   = 42;
 
 function HeartBars({ bpm }: { bpm: number }) {
   const bars  = [...BASE_BARS.slice(1), bpm > 0 ? bpm : 72];
@@ -14,9 +30,9 @@ function HeartBars({ bpm }: { bpm: number }) {
   const range = max - min || 1;
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, height: CHART_H }}>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3.5, height: CHART_H, flex: 1 }}>
       {bars.map((val, i) => {
-        const norm   = ((val - min) / range) * CHART_H * 0.8 + CHART_H * 0.12;
+        const norm   = ((val - min) / range) * CHART_H * 0.78 + CHART_H * 0.12;
         const isPeak = val === max;
         const prog   = i / (bars.length - 1);
         const color  = isPeak ? '#C4860A'
@@ -27,11 +43,11 @@ function HeartBars({ bpm }: { bpm: number }) {
           <View
             key={i}
             style={{
-              flex: 1,
-              height: norm,
-              borderRadius: 4,
+              flex:            1,
+              height:          norm,
+              borderRadius:    3.5,
               backgroundColor: color,
-              opacity: isPeak ? 1 : 0.5 + prog * 0.5,
+              opacity:         isPeak ? 1 : 0.45 + prog * 0.55,
             }}
           />
         );
@@ -54,9 +70,10 @@ export function HeartRateCard({
   nadiType = '—',
   hasData  = false,
 }: HeartRateCardProps) {
+
   const statusColor =
     status === 'elevated' || status === 'critical' ? '#EA580C'
-    : status === 'low' ? '#0B6E8B'
+    : status === 'low'    ? '#0B6E8B'
     : '#2C6E49';
 
   const statusLabel =
@@ -66,27 +83,46 @@ export function HeartRateCard({
     : 'Normal';
 
   return (
-    // No shadow, no border — gradient only
-    <View style={{ borderRadius: 22, overflow: 'hidden' }}>
+    <View style={{
+      borderRadius:    22,
+      overflow:        'hidden',
+      backgroundColor: '#FFFFFF',
+      shadowColor:     '#0A0A0A',
+      shadowOffset:    { width: 0, height: 2 },
+      shadowOpacity:   0.07,
+      shadowRadius:    10,
+      elevation:       3,
+    }}>
       <LinearGradient
-        colors={['#FFFFFF', '#E8F8EE']}
+        colors={['#FFFFFF', '#EAF7EF']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={{ padding: 16 }}>
+        style={{ padding: 14 }}>
 
-        {/* Header — icon tile + label + LIVE */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
+        {/* ── Header ── */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <View style={{
-            width: 36, height: 36, borderRadius: 11,
+            width:           34,
+            height:          34,
+            borderRadius:    11,
             backgroundColor: '#FECDD3',
-            alignItems: 'center', justifyContent: 'center',
-            marginRight: 10,
+            alignItems:      'center',
+            justifyContent:  'center',
+            marginRight:     10,
           }}>
-            <Ionicons name="heart" size={18} color="#EF4444" />
+            <Ionicons name="heart" size={16} color="#EF4444" />
           </View>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: '#1C1C1E', flex: 1, letterSpacing: -0.2 }}>
+
+          <Text style={{
+            fontSize:      15,
+            fontWeight:    '600',
+            color:         '#1C1C1E',
+            flex:          1,
+            letterSpacing: -0.2,
+          }}>
             Heart Rate
           </Text>
+
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#2C6E49' }} />
             <Text style={{ fontSize: 10, fontWeight: '700', color: '#2C6E49', letterSpacing: 0.8 }}>
@@ -95,54 +131,79 @@ export function HeartRateCard({
           </View>
         </View>
 
-        {/* Bar chart */}
-        <View style={{ marginBottom: 14 }}>
+        {/* ── Middle: BPM (left) + bars (right) ── */}
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, marginBottom: 12 }}>
+
+          {/* BPM value */}
+          <View style={{ justifyContent: 'flex-end' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3 }}>
+              <Text style={{
+                fontSize:          36,
+                fontWeight:        '700',
+                color:             hasData ? '#1A1A1A' : '#D1D5DB',
+                letterSpacing:     -1.2,
+                lineHeight:        40,
+                includeFontPadding: false,
+              }}>
+                {hasData ? bpm : '—'}
+              </Text>
+              {hasData && (
+                <Text style={{ fontSize: 12, color: '#8A8A8E', fontWeight: '400', marginBottom: 5 }}>
+                  bpm
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Bars */}
           <HeartBars bpm={bpm} />
         </View>
 
-        {/* BPM value */}
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginBottom: 14 }}>
-          <Text style={{
-            fontSize: 44,
-            fontWeight: '700',
-            color: hasData ? '#1A1A1A' : '#C8C8C8',
-            lineHeight: 48,
-            letterSpacing: -1.5,
-            includeFontPadding: false,
-          }}>
-            {hasData ? bpm : '—'}
-          </Text>
-          {hasData && (
-            <Text style={{ fontSize: 13, color: '#8A8A8E', fontWeight: '400', marginBottom: 7 }}>
-              bpm
-            </Text>
-          )}
-        </View>
+        {/* ── Footer: NADI · STATUS in one tight row ── */}
+        <View style={{
+          flexDirection:  'row',
+          alignItems:     'center',
+          paddingTop:     10,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(44,110,73,0.1)',
+          gap:            18,
+        }}>
 
-        {/* NADI + STATUS — divider line removed, use faint separator */}
-        <View style={{ gap: 7, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(44,110,73,0.12)' }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ fontSize: 10, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.8 }}>
+          {/* NADI */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+            <Text style={{ fontSize: 9.5, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.7 }}>
               NADI
             </Text>
-            <Text style={{ fontSize: 11, fontWeight: '500', color: '#4B5563' }}>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: hasData ? '#374151' : '#D1D5DB' }}>
               {hasData ? nadiType : '—'}
             </Text>
           </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ fontSize: 10, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.8 }}>
+
+          {/* Divider dot */}
+          <View style={{ width: 3, height: 3, borderRadius: 1.5, backgroundColor: '#E5E7EB' }} />
+
+          {/* STATUS */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+            <Text style={{ fontSize: 9.5, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.7 }}>
               STATUS
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <View style={{
-                width: 6, height: 6, borderRadius: 3,
+                width:           6,
+                height:          6,
+                borderRadius:    3,
                 backgroundColor: hasData ? statusColor : '#D1D5DB',
               }} />
-              <Text style={{ fontSize: 11, fontWeight: '600', color: hasData ? statusColor : '#D1D5DB' }}>
+              <Text style={{
+                fontSize:   11,
+                fontWeight: '600',
+                color:      hasData ? statusColor : '#D1D5DB',
+              }}>
                 {hasData ? statusLabel : '—'}
               </Text>
             </View>
           </View>
+
         </View>
 
       </LinearGradient>
