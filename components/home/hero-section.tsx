@@ -7,16 +7,24 @@ import { HomeHeader }        from './home-header';
 import { SearchBar }         from './search-bar';
 
 interface HeroSectionProps {
-  userName?: string;
+  userName?:      string;
+  watchConnected?: boolean;
   onAvatarPress?: () => void;
+  onWatchPress?:  () => void;
 }
 
-export function HeroSection({ userName = 'Guest', onAvatarPress }: HeroSectionProps) {
+export function HeroSection({ userName = 'Guest', watchConnected = false, onAvatarPress, onWatchPress }: HeroSectionProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={{ backgroundColor: '#FFFFFF', paddingTop: insets.top + 16 }}>
-      <HomeHeader name={userName} hasNotification onAvatarPress={onAvatarPress} />
+      <HomeHeader
+        name={userName}
+        hasNotification
+        watchConnected={watchConnected}
+        onAvatarPress={onAvatarPress}
+        onWatchPress={onWatchPress}
+      />
       <FeelingPrompt />
       {/* SearchBar navigates to /chat internally */}
       <SearchBar />

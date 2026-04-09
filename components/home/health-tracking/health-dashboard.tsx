@@ -3,7 +3,6 @@ import { View } from 'react-native';
 import { useHealthData }    from '../../../hooks/useHealthData';
 import { useWatchBluetooth } from '../../../hooks/useWatchBluetooth';
 import { buildDoshaInsight, getDoshaBars } from '../../../src/health/dosha-engine';
-import { ConnectWatchBanner }  from './connect-watch-banner';
 import { DoshaBalanceCard }    from './dosha-balance-card';
 import { HealthSectionHeader } from './health-section-header';
 import { HeartRateCard }       from './heart-rate-card';
@@ -14,6 +13,7 @@ import { WatchMetricsRow }     from './watch-metrics-row';
 interface HealthDashboardProps {
   onSeeAll?:    () => void;
   onLearnMore?: () => void;
+  // Watch sheet is now triggered from the header — dashboard no longer renders it
 }
 
 export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps) {
@@ -46,20 +46,6 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         lastUpdated={data?.lastUpdated ?? null}
         deviceName={ble.connectedDevice?.name ?? null}
       />
-
-      {/* Connect watch banner — only when disconnected */}
-      {!isConnected && (
-        <ConnectWatchBanner
-          connectionStep={ble.connectionStep}
-          scannedDevices={ble.scannedDevices}
-          connectedDevice={ble.connectedDevice}
-          onStartScan={ble.startScan}
-          onSelectDevice={ble.selectDevice}
-          onEnableBluetooth={ble.enableBluetooth}
-          onRetry={ble.disconnect}
-          error={ble.error ?? health.error}
-        />
-      )}
 
       {/* Heart Rate — full width */}
       <HeartRateCard
