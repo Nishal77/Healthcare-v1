@@ -138,7 +138,7 @@ export function EatingGuide() {
   const totalKcal = MEALS.reduce((s, m) => s + m.kcal, 0);
 
   return (
-    <View style={{ paddingHorizontal: 20, marginBottom: 28 }}>
+    <View style={{ paddingHorizontal: 20, marginBottom: 4 }}>
 
       {/* ── Header ──────────────────────────────────────────────────── */}
       <View style={{ marginBottom: 14 }}>

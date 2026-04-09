@@ -34,7 +34,7 @@ export default function TrackTab() {
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop:    insets.top + 10,
-          paddingBottom: insets.bottom + TAB_BAR_H + 80,
+          paddingBottom: insets.bottom + TAB_BAR_H + 16,
         }}
         showsVerticalScrollIndicator={false}
         bounces={false}>
@@ -43,7 +43,6 @@ export default function TrackTab() {
         <StatisticsCard />
         <EatingGuide />
 
-        <View style={{ height: 24 }} />
       </ScrollView>
 
       {/* Fixed + FAB above the tab bar */}
