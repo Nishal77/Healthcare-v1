@@ -49,8 +49,8 @@ const DOSHAS = [
 
 // ─── Animated circular ring ───────────────────────────────────────────────────
 
-const R          = 20;
-const STROKE     = 3.5;
+const R          = 18;
+const STROKE     = 3;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
 function CircleRing({
@@ -116,10 +116,10 @@ function CircleRing({
       {/* Percentage label inside the ring */}
       <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{
-          fontSize:      9,
-          fontWeight:    '800',
+          fontSize:      8,
+          fontWeight:    '700',
           color,
-          letterSpacing: -0.3,
+          letterSpacing: -0.2,
         }}>
           {percentage}%
         </Text>
@@ -160,59 +160,58 @@ function DoshaRow({
       transform:     [{ translateX: slideX }],
       flexDirection: 'row',
       alignItems:    'center',
-      paddingVertical: 14,
+      paddingVertical: 10,
       paddingHorizontal: 16,
     }}>
 
       {/* Left: icon tile */}
       <View style={{
-        width:           46,
-        height:          46,
-        borderRadius:    14,
+        width:           40,
+        height:          40,
+        borderRadius:    12,
         backgroundColor: dosha.iconBg,
         alignItems:      'center',
         justifyContent:  'center',
-        marginRight:     14,
-        // Subtle inner top highlight
+        marginRight:     12,
         borderWidth:     1,
         borderColor:     `${dosha.iconColor}20`,
       }}>
-        <Ionicons name={dosha.icon} size={22} color={dosha.iconColor} />
+        <Ionicons name={dosha.icon} size={18} color={dosha.iconColor} />
       </View>
 
-      {/* Middle: bold value + label */}
+      {/* Middle: name + badge + elements */}
       <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={{
-            fontSize:      22,
-            fontWeight:    '800',
+            fontSize:      16,
+            fontWeight:    '700',
             color:         '#0D1117',
-            letterSpacing: -0.6,
-            lineHeight:    26,
+            letterSpacing: -0.4,
+            lineHeight:    20,
           }}>
             {dosha.label}
           </Text>
           {isDominant && (
             <View style={{
               backgroundColor: dosha.iconBg,
-              borderRadius:    6,
-              paddingHorizontal: 7,
-              paddingVertical: 3,
+              borderRadius:    5,
+              paddingHorizontal: 6,
+              paddingVertical: 2,
               borderWidth:     1,
               borderColor:     `${dosha.iconColor}30`,
             }}>
               <Text style={{
-                fontSize:      9,
-                fontWeight:    '800',
+                fontSize:      8.5,
+                fontWeight:    '700',
                 color:         dosha.iconColor,
-                letterSpacing: 0.6,
+                letterSpacing: 0.5,
               }}>
                 HIGH
               </Text>
             </View>
           )}
         </View>
-        <Text style={{ fontSize: 12.5, color: '#9CA3AF', marginTop: 2, fontWeight: '500' }}>
+        <Text style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 1, fontWeight: '500' }}>
           {dosha.elements}
         </Text>
       </View>
@@ -262,19 +261,19 @@ export function DoshaBalanceCard({
         alignItems:        'center',
         justifyContent:    'space-between',
         paddingHorizontal: 16,
-        paddingTop:        18,
-        paddingBottom:     4,
+        paddingTop:        14,
+        paddingBottom:     2,
       }}>
         <View>
           <Text style={{
-            fontSize:      16,
+            fontSize:      15,
             fontWeight:    '700',
             color:         '#0D1117',
-            letterSpacing: -0.4,
+            letterSpacing: -0.3,
           }}>
             Dosha Balance
           </Text>
-          <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+          <Text style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1.5 }}>
             Prakriti Analysis · Today
           </Text>
         </View>
@@ -291,8 +290,8 @@ export function DoshaBalanceCard({
           borderWidth:       1,
           borderColor:       'rgba(34,197,94,0.2)',
         }}>
-          <Ionicons name="sparkles" size={10} color="#16A34A" />
-          <Text style={{ fontSize: 10, fontWeight: '700', color: '#16A34A', letterSpacing: 0.4 }}>
+          <Ionicons name="sparkles" size={9} color="#16A34A" />
+          <Text style={{ fontSize: 9.5, fontWeight: '700', color: '#16A34A', letterSpacing: 0.4 }}>
             AI ANALYSIS
           </Text>
         </View>
@@ -320,32 +319,32 @@ export function DoshaBalanceCard({
       {/* ── AI Insight footer ─────────────────────────────────────── */}
       <View style={{
         marginHorizontal:  16,
-        marginBottom:      16,
+        marginBottom:      14,
         marginTop:         4,
         backgroundColor:   dominantD.iconBg,
-        borderRadius:      16,
-        padding:           14,
+        borderRadius:      14,
+        padding:           12,
         flexDirection:     'row',
         alignItems:        'flex-start',
-        gap:               10,
+        gap:               9,
         borderWidth:       1,
         borderColor:       `${dominantD.iconColor}18`,
       }}>
         <View style={{
-          width:           32,
-          height:          32,
-          borderRadius:    10,
+          width:           28,
+          height:          28,
+          borderRadius:    9,
           backgroundColor: '#FFFFFF',
           alignItems:      'center',
           justifyContent:  'center',
           flexShrink:      0,
         }}>
-          <Ionicons name="bulb-outline" size={16} color={dominantD.iconColor} />
+          <Ionicons name="bulb-outline" size={14} color={dominantD.iconColor} />
         </View>
         <Text style={{
           flex:       1,
-          fontSize:   12.5,
-          lineHeight: 19,
+          fontSize:   12,
+          lineHeight: 18,
           color:      '#374151',
           fontWeight: '500',
         }}>
