@@ -223,10 +223,12 @@ interface OtpBoxesProps {
 }
 
 function OtpBoxes({ digits, setDigits, refs }: OtpBoxesProps) {
+  const [focusedIdx, setFocusedIdx] = useState(-1);
+
   function handleChange(index: number, raw: string) {
     const cleaned = raw.replace(/[^0-9]/g, '');
 
-    // Handle paste / SMS autofill of full code
+    // Handle paste / SMS autofill
     if (cleaned.length > 1) {
       const next = [...digits];
       for (let j = 0; j < cleaned.length && index + j < 6; j++) {
@@ -255,21 +257,33 @@ function OtpBoxes({ digits, setDigits, refs }: OtpBoxesProps) {
 
   return (
     <View style={otp.boxRow}>
-      {digits.map((d, i) => (
-        <TextInput
-          key={i}
-          ref={r => { refs.current[i] = r; }}
-          style={[otp.box, d ? otp.boxFilled : {}]}
-          value={d}
-          onChangeText={v => handleChange(i, v)}
-          onKeyPress={e => handleKey(i, e.nativeEvent.key)}
-          keyboardType="number-pad"
-          maxLength={6}
-          textContentType={i === 0 ? 'oneTimeCode' : 'none'}
-          caretHidden
-          selectTextOnFocus
-        />
-      ))}
+      {digits.map((d, i) => {
+        const isFocused = focusedIdx === i;
+        const isFilled  = d.length > 0;
+        return (
+          <View
+            key={i}
+            style={[
+              otp.boxWrap,
+              isFilled  && otp.boxWrapFilled,
+              isFocused && otp.boxWrapFocused,
+            ]}>
+            <TextInput
+              ref={r => { refs.current[i] = r; }}
+              style={otp.boxInput}
+              value={d}
+              onChangeText={v => handleChange(i, v)}
+              onKeyPress={e => handleKey(i, e.nativeEvent.key)}
+              onFocus={() => setFocusedIdx(i)}
+              onBlur={() => setFocusedIdx(-1)}
+              keyboardType="number-pad"
+              maxLength={6}
+              textContentType={i === 0 ? 'oneTimeCode' : 'none'}
+              caretHidden
+            />
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -469,55 +483,83 @@ function Step3({ digits, setDigits, refs, phone, onResend }: S3Props) {
     }
   }
 
-  const mm  = Math.floor(seconds / 60);
-  const ss  = seconds % 60;
-  const pct = seconds / 120;
+  const mm       = Math.floor(seconds / 60);
+  const ss       = seconds % 60;
+  const pct      = seconds / 120;
+  const filledCount = digits.filter(d => d).length;
 
   return (
     <View style={otp.container}>
-      {/* Icon */}
-      <View style={otp.iconCircle}>
-        <Ionicons name="phone-portrait-outline" size={32} color={GREEN} />
+
+      {/* ── Icon — double-ring glow ──────────────────────────────── */}
+      <View style={otp.iconOuter}>
+        <View style={otp.iconInner}>
+          <Ionicons name="phone-portrait-outline" size={30} color={GREEN} />
+        </View>
       </View>
 
-      {/* Heading */}
+      {/* ── Heading ──────────────────────────────────────────────── */}
       <Text style={otp.title}>Verify Your Phone</Text>
       <Text style={otp.sub}>We sent a 6-digit code to</Text>
-      <Text style={otp.phone}>{phone}</Text>
+      <View style={otp.phonePill}>
+        <Ionicons name="call-outline" size={13} color={GREEN} />
+        <Text style={otp.phoneNum}>{phone}</Text>
+      </View>
 
-      {/* Boxes */}
+      {/* ── OTP boxes ────────────────────────────────────────────── */}
       <OtpBoxes digits={digits} setDigits={setDigits} refs={refs} />
 
-      {/* Timer */}
-      {!canResend && (
-        <View style={otp.timerWrap}>
-          <Text style={otp.timerText}>
-            Code expires in{' '}
-            <Text style={otp.timerCount}>
-              {mm}:{ss.toString().padStart(2, '0')}
+      {/* ── Progress dots ────────────────────────────────────────── */}
+      <View style={otp.dotsRow}>
+        {digits.map((_, i) => (
+          <View
+            key={i}
+            style={[otp.dot, i < filledCount && otp.dotFilled]}
+          />
+        ))}
+      </View>
+
+      {/* ── Timer ────────────────────────────────────────────────── */}
+      {!canResend ? (
+        <View style={otp.timerCard}>
+          <View style={otp.timerLabelRow}>
+            <Ionicons name="time-outline" size={13} color="#94A3B8" />
+            <Text style={otp.timerLabel}>
+              Code expires in{' '}
+              <Text style={otp.timerCount}>
+                {mm}:{ss.toString().padStart(2, '0')}
+              </Text>
             </Text>
-          </Text>
-          <View style={otp.timerBar}>
+          </View>
+          {/* thin progress bar */}
+          <View style={otp.timerTrack}>
             <View style={[otp.timerFill, { width: `${pct * 100}%` as any }]} />
           </View>
         </View>
+      ) : (
+        <View style={otp.expiredBadge}>
+          <Ionicons name="alert-circle-outline" size={13} color="#F59E0B" />
+          <Text style={otp.expiredText}>Code expired</Text>
+        </View>
       )}
 
-      {/* Resend */}
+      {/* ── Resend ───────────────────────────────────────────────── */}
       <View style={otp.resendRow}>
-        <Text style={otp.resendLabel}>{"Didn't receive it? "}</Text>
+        <Text style={otp.resendLabel}>{"Didn't receive it?  "}</Text>
         <TouchableOpacity
           onPress={canResend ? handleResend : undefined}
           activeOpacity={canResend ? 0.7 : 1}
-          disabled={!canResend || resendLoading}>
+          disabled={!canResend || resendLoading}
+          style={canResend ? otp.resendBtnActive : otp.resendBtnIdle}>
           {resendLoading
             ? <ActivityIndicator size="small" color={GREEN} />
-            : <Text style={[otp.resendBtn, !canResend && otp.resendBtnDim]}>
+            : <Text style={[otp.resendText, canResend && otp.resendTextActive]}>
                 Resend Code
               </Text>
           }
         </TouchableOpacity>
       </View>
+
     </View>
   );
 }
@@ -1293,98 +1335,214 @@ const st = StyleSheet.create({
 const otp = StyleSheet.create({
   container: {
     alignItems:   'center',
-    paddingTop:   8,
+    paddingTop:   4,
     marginBottom: 8,
   },
-  iconCircle: {
-    width:           72,
-    height:          72,
-    borderRadius:    36,
-    backgroundColor: '#F0FBF5',
+
+  // Icon — double ring
+  iconOuter: {
+    width:           88,
+    height:          88,
+    borderRadius:    44,
+    backgroundColor: 'rgba(44,110,73,0.07)',
     alignItems:      'center',
     justifyContent:  'center',
-    marginBottom:    20,
+    marginBottom:    24,
   },
+  iconInner: {
+    width:           64,
+    height:          64,
+    borderRadius:    32,
+    backgroundColor: '#EBF6F0',
+    alignItems:      'center',
+    justifyContent:  'center',
+  },
+
+  // Heading
   title: {
-    fontSize:      28,
+    fontSize:      26,
     fontWeight:    '800',
     color:         DARK,
     letterSpacing: -0.6,
     marginBottom:  8,
+    textAlign:     'center',
   },
   sub: {
-    fontSize:  14,
-    color:     LABEL_COLOR,
-    marginBottom: 2,
-  },
-  phone: {
-    fontSize:   16,
-    fontWeight: '700',
-    color:      DARK,
-    letterSpacing: -0.2,
+    fontSize:     13.5,
+    color:        LABEL_COLOR,
+    marginBottom: 10,
+    textAlign:    'center',
   },
 
-  // Boxes
+  // Phone pill
+  phonePill: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               6,
+    backgroundColor:   '#F0FBF5',
+    borderRadius:      999,
+    paddingVertical:   6,
+    paddingHorizontal: 14,
+    marginBottom:      28,
+  },
+  phoneNum: {
+    fontSize:      14,
+    fontWeight:    '700',
+    color:         DARK,
+    letterSpacing: 0.5,
+  },
+
+  // Boxes row
   boxRow: {
     flexDirection:  'row',
-    gap:            10,
+    gap:            9,
     justifyContent: 'center',
-    marginVertical: 30,
-  },
-  box: {
-    width:           46,
-    height:          60,
-    borderRadius:    14,
-    backgroundColor: GRAY_BG,
-    textAlign:       'center',
-    fontSize:        26,
-    fontWeight:      '700',
-    color:           DARK,
-    borderWidth:     2,
-    borderColor:     'transparent',
-  },
-  boxFilled: {
-    borderColor:     DARK,
-    backgroundColor: '#FFFFFF',
+    marginBottom:   16,
   },
 
-  // Timer
-  timerWrap: {
-    alignItems:   'center',
-    marginBottom: 16,
-    width:        '80%',
+  // Each box wrapper (border lives here, not on TextInput)
+  boxWrap: {
+    width:           48,
+    height:          62,
+    borderRadius:    16,
+    backgroundColor: '#F5F6F8',
+    borderWidth:     1.5,
+    borderColor:     '#EAECF0',
+    alignItems:      'center',
+    justifyContent:  'center',
+    // no shadow when empty
   },
-  timerText: {
-    fontSize:     13,
-    color:        LABEL_COLOR,
-    marginBottom: 8,
+  boxWrapFilled: {
+    backgroundColor: '#FFFFFF',
+    borderColor:     DARK,
+    shadowColor:     '#000',
+    shadowOffset:    { width: 0, height: 2 },
+    shadowOpacity:   0.07,
+    shadowRadius:    6,
+    elevation:       3,
+  },
+  boxWrapFocused: {
+    borderColor:     GREEN,
+    borderWidth:     1.5,
+    backgroundColor: '#FFFFFF',
+    shadowColor:     GREEN,
+    shadowOffset:    { width: 0, height: 0 },
+    shadowOpacity:   0.18,
+    shadowRadius:    8,
+    elevation:       2,
+  },
+  boxInput: {
+    width:       '100%',
+    height:      '100%',
+    textAlign:   'center',
+    fontSize:    26,
+    fontWeight:  '700',
+    color:       DARK,
+    letterSpacing: -0.5,
+    includeFontPadding: false,
+  },
+
+  // Progress dots under boxes
+  dotsRow: {
+    flexDirection:  'row',
+    gap:            6,
+    justifyContent: 'center',
+    marginBottom:   20,
+  },
+  dot: {
+    width:           6,
+    height:          6,
+    borderRadius:    3,
+    backgroundColor: '#E2E8F0',
+  },
+  dotFilled: {
+    backgroundColor: GREEN,
+    width:           16,
+    borderRadius:    3,
+  },
+
+  // Timer card
+  timerCard: {
+    width:             '85%',
+    backgroundColor:   '#F8FAFC',
+    borderRadius:      14,
+    paddingHorizontal: 16,
+    paddingVertical:   12,
+    marginBottom:      16,
+    alignItems:        'center',
+    gap:               8,
+  },
+  timerLabelRow: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    gap:           5,
+  },
+  timerLabel: {
+    fontSize:   13,
+    color:      '#64748B',
   },
   timerCount: {
     fontWeight: '700',
     color:      DARK,
   },
-  timerBar: {
+  timerTrack: {
     width:           '100%',
     height:          3,
-    backgroundColor: '#E5E7EB',
-    borderRadius:    2,
+    backgroundColor: '#E2E8F0',
+    borderRadius:    999,
     overflow:        'hidden',
   },
   timerFill: {
     height:          '100%',
     backgroundColor: GREEN,
-    borderRadius:    2,
+    borderRadius:    999,
+  },
+
+  // Expired badge
+  expiredBadge: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               5,
+    backgroundColor:   '#FFFBEB',
+    borderRadius:      999,
+    paddingVertical:   6,
+    paddingHorizontal: 12,
+    marginBottom:      16,
+  },
+  expiredText: {
+    fontSize:   12.5,
+    fontWeight: '600',
+    color:      '#B45309',
   },
 
   // Resend
   resendRow: {
     flexDirection: 'row',
     alignItems:    'center',
-    marginTop:     8,
+    flexWrap:      'wrap',
+    justifyContent:'center',
+    marginTop:     2,
   },
-  resendLabel:   { fontSize: 13.5, color: LABEL_COLOR },
-  resendBtn:     { fontSize: 13.5, fontWeight: '700', color: GREEN },
-  resendBtnDim:  { color: '#CBD5E1' },
+  resendLabel: {
+    fontSize: 13.5,
+    color:    LABEL_COLOR,
+  },
+  resendBtnIdle: {
+    paddingVertical:   4,
+    paddingHorizontal: 2,
+  },
+  resendBtnActive: {
+    paddingVertical:   4,
+    paddingHorizontal: 2,
+  },
+  resendText: {
+    fontSize:   13.5,
+    fontWeight: '600',
+    color:      '#CBD5E1',
+  },
+  resendTextActive: {
+    color: GREEN,
+  },
 });
 
 // ── Emergency contact styles ──────────────────────────────────────────────────
