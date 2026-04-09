@@ -72,44 +72,42 @@ export function HomeHeader({
       {/* ── Right: watch connect + notification ─────────────────── */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 
-        {/* Watch connect button */}
+        {/* Watch icon button — mirrors the notification bell exactly */}
         <TouchableOpacity
           onPress={onWatchPress}
           activeOpacity={0.75}
           style={{
-            flexDirection:    'row',
-            alignItems:       'center',
-            gap:              6,
-            height:           38,
-            paddingHorizontal:12,
-            borderRadius:     19,
-            backgroundColor:  watchConnected ? '#F0FDF4' : '#F4F4F4',
-            borderWidth:      1,
-            borderColor:      watchConnected
-              ? 'rgba(34,197,94,0.25)'
-              : 'rgba(0,0,0,0.07)',
+            width:           42,
+            height:          42,
+            borderRadius:    21,
+            backgroundColor: '#FFFFFF',
+            alignItems:      'center',
+            justifyContent:  'center',
+            shadowColor:     '#000',
+            shadowOffset:    { width: 0, height: 2 },
+            shadowOpacity:   0.07,
+            shadowRadius:    8,
+            elevation:       3,
           }}>
-          {/* Live dot — only when connected */}
-          {watchConnected && (
-            <View style={{
-              width: 6, height: 6,
-              borderRadius: 3,
-              backgroundColor: '#22C55E',
-            }} />
-          )}
           <Ionicons
             name="watch-outline"
-            size={16}
-            color={watchConnected ? '#16A34A' : '#6B7280'}
+            size={20}
+            color={watchConnected ? '#16A34A' : '#1C1C1E'}
           />
-          <Text style={{
-            fontSize:      12,
-            fontWeight:    '600',
-            color:         watchConnected ? '#16A34A' : '#6B7280',
-            letterSpacing: 0.1,
-          }}>
-            {watchConnected ? 'Live' : 'Connect'}
-          </Text>
+          {/* Green live dot when connected */}
+          {watchConnected && (
+            <View style={{
+              position:        'absolute',
+              top:             9,
+              right:           9,
+              width:           7,
+              height:          7,
+              borderRadius:    4,
+              backgroundColor: '#22C55E',
+              borderWidth:     1.5,
+              borderColor:     '#FFFFFF',
+            }} />
+          )}
         </TouchableOpacity>
 
         {/* Notification bell */}
