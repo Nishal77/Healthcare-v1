@@ -1,151 +1,358 @@
+/**
+ * DoshaBalanceCard
+ * Replicates the reference list UI — icon tile · bold value + label · circular ring.
+ * Each row maps to one Ayurvedic dosha: Vata · Pitta · Kapha.
+ * The circular ring is drawn with react-native-svg using stroke-dashoffset.
+ */
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Text, TouchableOpacity, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 
-// Dosha color system aligned with Ayurvedic tradition
-const DOSHA = {
-  vata:  { color: '#4B5569', bg: '#F1F2F5', label: 'Vata',  sub: 'Ether · Air'   },
-  pitta: { color: '#C4860A', bg: '#FEF8EE', label: 'Pitta', sub: 'Fire · Water'   },
-  kapha: { color: '#2C6E49', bg: '#F0F7F3', label: 'Kapha', sub: 'Earth · Water'  },
-} as const;
+// ─── Dosha definitions ────────────────────────────────────────────────────────
 
-interface DoshaBarProps {
-  type: keyof typeof DOSHA;
+const DOSHAS = [
+  {
+    key:       'vata',
+    label:     'Vata',
+    elements:  'Ether · Air',
+    icon:      'wind-outline' as const,
+    iconColor: '#6366F1',
+    iconBg:    '#EEF2FF',
+    ringColor: '#6366F1',
+    value:     (v: number) => `${v}%`,
+    insight:   'Governs movement, breath & nervous system',
+  },
+  {
+    key:       'pitta',
+    label:     'Pitta',
+    elements:  'Fire · Water',
+    icon:      'flame-outline' as const,
+    iconColor: '#F59E0B',
+    iconBg:    '#FFFBEB',
+    ringColor: '#F59E0B',
+    value:     (v: number) => `${v}%`,
+    insight:   'Governs digestion, metabolism & transformation',
+  },
+  {
+    key:       'kapha',
+    label:     'Kapha',
+    elements:  'Earth · Water',
+    icon:      'leaf-outline' as const,
+    iconColor: '#10B981',
+    iconBg:    '#ECFDF5',
+    ringColor: '#10B981',
+    value:     (v: number) => `${v}%`,
+    insight:   'Governs structure, lubrication & immunity',
+  },
+] as const;
+
+// ─── Animated circular ring ───────────────────────────────────────────────────
+
+const R          = 20;
+const STROKE     = 3.5;
+const CIRCUMFERENCE = 2 * Math.PI * R;
+
+function CircleRing({
+  percentage,
+  color,
+  delay = 0,
+}: {
   percentage: number;
-  isDominant: boolean;
-}
+  color:      string;
+  delay?:     number;
+}) {
+  const anim = useRef(new Animated.Value(0)).current;
 
-function DoshaBar({ type, percentage, isDominant }: DoshaBarProps) {
-  const d = DOSHA[type];
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue:         percentage / 100,
+      duration:        900,
+      delay,
+      useNativeDriver: false,
+    }).start();
+  }, [percentage]);
+
+  const SIZE = (R + STROKE) * 2 + 4;
+
+  // We animate the dashoffset from full circumference (0%) to target
+  const dashOffset = anim.interpolate({
+    inputRange:  [0, 1],
+    outputRange: [CIRCUMFERENCE, CIRCUMFERENCE * (1 - percentage / 100)],
+  });
+
   return (
-    <View style={{ gap: 6 }}>
-      {/* Label row */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: '#0F1923' }}>{d.label}</Text>
-          <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '500' }}>{d.sub}</Text>
-          {isDominant && (
-            <View style={{ backgroundColor: d.bg, borderRadius: 5, paddingHorizontal: 5, paddingVertical: 2 }}>
-              <Text style={{ fontSize: 9, fontWeight: '800', color: d.color, letterSpacing: 0.5 }}>
-                HIGH
-              </Text>
-            </View>
-          )}
-        </View>
-        <Text style={{ fontSize: 13, fontWeight: '800', color: d.color, letterSpacing: -0.3 }}>
+    <View style={{
+      width:           SIZE,
+      height:          SIZE,
+      alignItems:      'center',
+      justifyContent:  'center',
+    }}>
+      <Svg width={SIZE} height={SIZE}>
+        {/* Track */}
+        <Circle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={R}
+          stroke="#F0F0F0"
+          strokeWidth={STROKE}
+          fill="none"
+        />
+        {/* Animated progress */}
+        <AnimatedCircle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={R}
+          stroke={color}
+          strokeWidth={STROKE}
+          fill="none"
+          strokeDasharray={CIRCUMFERENCE}
+          strokeDashoffset={dashOffset as any}
+          strokeLinecap="round"
+          rotation="-90"
+          origin={`${SIZE / 2}, ${SIZE / 2}`}
+        />
+      </Svg>
+      {/* Percentage label inside the ring */}
+      <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{
+          fontSize:      9,
+          fontWeight:    '800',
+          color,
+          letterSpacing: -0.3,
+        }}>
           {percentage}%
         </Text>
-      </View>
-
-      {/* Progress track */}
-      <View style={{ height: 6, backgroundColor: '#F0EFEC', borderRadius: 3, overflow: 'hidden' }}>
-        <View
-          style={{
-            width: `${percentage}%`,
-            height: '100%',
-            backgroundColor: d.color,
-            borderRadius: 3,
-            opacity: isDominant ? 1 : 0.6,
-          }}
-        />
       </View>
     </View>
   );
 }
 
+// Animated SVG Circle — wrap Animated.createAnimatedComponent
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+// ─── Single dosha row — mirrors the reference exactly ─────────────────────────
+
+function DoshaRow({
+  dosha,
+  percentage,
+  isDominant,
+  delay,
+}: {
+  dosha:      typeof DOSHAS[number];
+  percentage: number;
+  isDominant: boolean;
+  delay:      number;
+}) {
+  const fadeIn = useRef(new Animated.Value(0)).current;
+  const slideX = useRef(new Animated.Value(-12)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeIn, { toValue: 1, duration: 400, delay, useNativeDriver: true }),
+      Animated.spring(slideX, { toValue: 0, delay, useNativeDriver: true, damping: 20, stiffness: 200 }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={{
+      opacity:       fadeIn,
+      transform:     [{ translateX: slideX }],
+      flexDirection: 'row',
+      alignItems:    'center',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+    }}>
+
+      {/* Left: icon tile */}
+      <View style={{
+        width:           46,
+        height:          46,
+        borderRadius:    14,
+        backgroundColor: dosha.iconBg,
+        alignItems:      'center',
+        justifyContent:  'center',
+        marginRight:     14,
+        // Subtle inner top highlight
+        borderWidth:     1,
+        borderColor:     `${dosha.iconColor}20`,
+      }}>
+        <Ionicons name={dosha.icon} size={22} color={dosha.iconColor} />
+      </View>
+
+      {/* Middle: bold value + label */}
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{
+            fontSize:      22,
+            fontWeight:    '800',
+            color:         '#0D1117',
+            letterSpacing: -0.6,
+            lineHeight:    26,
+          }}>
+            {dosha.label}
+          </Text>
+          {isDominant && (
+            <View style={{
+              backgroundColor: dosha.iconBg,
+              borderRadius:    6,
+              paddingHorizontal: 7,
+              paddingVertical: 3,
+              borderWidth:     1,
+              borderColor:     `${dosha.iconColor}30`,
+            }}>
+              <Text style={{
+                fontSize:      9,
+                fontWeight:    '800',
+                color:         dosha.iconColor,
+                letterSpacing: 0.6,
+              }}>
+                HIGH
+              </Text>
+            </View>
+          )}
+        </View>
+        <Text style={{ fontSize: 12.5, color: '#9CA3AF', marginTop: 2, fontWeight: '500' }}>
+          {dosha.elements}
+        </Text>
+      </View>
+
+      {/* Right: circular ring */}
+      <CircleRing percentage={percentage} color={dosha.ringColor} delay={delay + 100} />
+    </Animated.View>
+  );
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
+
 interface DoshaBalanceCardProps {
-  vata?: number;
-  pitta?: number;
-  kapha?: number;
+  vata?:    number;
+  pitta?:   number;
+  kapha?:   number;
   insight?: string;
 }
 
 export function DoshaBalanceCard({
-  vata = 32,
-  pitta = 45,
-  kapha = 23,
+  vata    = 32,
+  pitta   = 45,
+  kapha   = 23,
   insight = 'Pitta is slightly elevated. Favour cooling foods, avoid spicy meals after 6 PM, and take a 15-min evening walk.',
 }: DoshaBalanceCardProps) {
-  const dominant = pitta >= vata && pitta >= kapha ? 'pitta' : vata >= kapha ? 'vata' : 'kapha';
+  const values     = { vata, pitta, kapha };
+  const dominant   = pitta >= vata && pitta >= kapha ? 'pitta' : vata >= kapha ? 'vata' : 'kapha';
+  const dominantD  = DOSHAS.find(d => d.key === dominant)!;
 
   return (
-    <View
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: 22,
-        padding: 18,
-        borderWidth: 1,
-        borderColor: '#ECEAE6',
-        gap: 16,
+    <View style={{
+      backgroundColor: '#FFFFFF',
+      borderRadius:    24,
+      overflow:        'hidden',
+      shadowColor:     '#000',
+      shadowOffset:    { width: 0, height: 4 },
+      shadowOpacity:   0.06,
+      shadowRadius:    16,
+      elevation:       3,
+      borderWidth:     1,
+      borderColor:     'rgba(0,0,0,0.055)',
+    }}>
+
+      {/* ── Card header ──────────────────────────────────────────── */}
+      <View style={{
+        flexDirection:     'row',
+        alignItems:        'center',
+        justifyContent:    'space-between',
+        paddingHorizontal: 16,
+        paddingTop:        18,
+        paddingBottom:     4,
       }}>
-
-      {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              backgroundColor: '#F0F7F3',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Ionicons name="leaf" size={17} color="#2C6E49" />
-          </View>
-          <View>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: '#0F1923', letterSpacing: -0.3 }}>
-              Dosha Balance
-            </Text>
-            <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '500', marginTop: 1 }}>
-              Prakriti Analysis
-            </Text>
-          </View>
-        </View>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-            backgroundColor: '#F0F7F3',
-            borderRadius: 8,
-            paddingHorizontal: 8,
-            paddingVertical: 5,
+        <View>
+          <Text style={{
+            fontSize:      16,
+            fontWeight:    '700',
+            color:         '#0D1117',
+            letterSpacing: -0.4,
           }}>
-          <Ionicons name="sparkles" size={10} color="#2C6E49" />
-          <Text style={{ fontSize: 10, fontWeight: '700', color: '#2C6E49', letterSpacing: 0.5 }}>
-            AI
+            Dosha Balance
+          </Text>
+          <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+            Prakriti Analysis · Today
+          </Text>
+        </View>
+
+        {/* AI badge */}
+        <View style={{
+          flexDirection:     'row',
+          alignItems:        'center',
+          gap:               5,
+          backgroundColor:   '#F0FDF4',
+          borderRadius:      20,
+          paddingHorizontal: 10,
+          paddingVertical:   5,
+          borderWidth:       1,
+          borderColor:       'rgba(34,197,94,0.2)',
+        }}>
+          <Ionicons name="sparkles" size={10} color="#16A34A" />
+          <Text style={{ fontSize: 10, fontWeight: '700', color: '#16A34A', letterSpacing: 0.4 }}>
+            AI ANALYSIS
           </Text>
         </View>
       </View>
 
-      {/* Three dosha bars */}
-      <View style={{ gap: 13 }}>
-        <DoshaBar type="vata"  percentage={vata}  isDominant={dominant === 'vata'}  />
-        <DoshaBar type="pitta" percentage={pitta} isDominant={dominant === 'pitta'} />
-        <DoshaBar type="kapha" percentage={kapha} isDominant={dominant === 'kapha'} />
+      {/* ── Dosha rows — separated by hairlines ──────────────────── */}
+      {DOSHAS.map((dosha, i) => (
+        <View key={dosha.key}>
+          {i > 0 && (
+            <View style={{
+              height:           0.5,
+              backgroundColor:  'rgba(0,0,0,0.07)',
+              marginHorizontal: 16,
+            }} />
+          )}
+          <DoshaRow
+            dosha={dosha}
+            percentage={values[dosha.key as keyof typeof values]}
+            isDominant={dominant === dosha.key}
+            delay={i * 120}
+          />
+        </View>
+      ))}
+
+      {/* ── AI Insight footer ─────────────────────────────────────── */}
+      <View style={{
+        marginHorizontal:  16,
+        marginBottom:      16,
+        marginTop:         4,
+        backgroundColor:   dominantD.iconBg,
+        borderRadius:      16,
+        padding:           14,
+        flexDirection:     'row',
+        alignItems:        'flex-start',
+        gap:               10,
+        borderWidth:       1,
+        borderColor:       `${dominantD.iconColor}18`,
+      }}>
+        <View style={{
+          width:           32,
+          height:          32,
+          borderRadius:    10,
+          backgroundColor: '#FFFFFF',
+          alignItems:      'center',
+          justifyContent:  'center',
+          flexShrink:      0,
+        }}>
+          <Ionicons name="bulb-outline" size={16} color={dominantD.iconColor} />
+        </View>
+        <Text style={{
+          flex:       1,
+          fontSize:   12.5,
+          lineHeight: 19,
+          color:      '#374151',
+          fontWeight: '500',
+        }}>
+          {insight}
+        </Text>
       </View>
 
-      {/* Divider + Insight */}
-      <View style={{ borderTopWidth: 1, borderTopColor: '#F0EFEC', paddingTop: 14 }}>
-        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-          <View
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 8,
-              backgroundColor: '#FEF8EE',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 1,
-            }}>
-            <Ionicons name="bulb-outline" size={13} color="#C4860A" />
-          </View>
-          <Text style={{ flex: 1, fontSize: 12, lineHeight: 19, color: '#4B5563', fontWeight: '500' }}>
-            {insight}
-          </Text>
-        </View>
-      </View>
     </View>
   );
 }
