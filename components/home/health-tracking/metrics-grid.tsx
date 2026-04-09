@@ -1,93 +1,125 @@
 /**
- * MetricsGrid
+ * MetricsGrid — 2×2 activity cards
  *
- * Design rules (from pixel analysis of reference):
- *  • Gradient background per card: top = ultra-light tint, bottom = richer tint
- *  • NO shadow, NO border — gradient is the only depth signal
- *  • Bare icon (no tile/box) + label top-left
- *  • 42px 700-weight value — hero element
- *  • Sleep: 6 thick amber-gradient bars, right-aligned bottom
- *  • Calories / Water: large 70px ring chart, right-aligned bottom
- *  • Steps: rising sparkline, right-aligned bottom
+ * Design (matches reference image):
+ *  • White card bg, soft shadow — no gradient tint on the card itself
+ *  • Bare icon + label top-left
+ *  • Calories / Water: large donut ring RIGHT-aligned, value+unit INSIDE the hole
+ *  • Sleep: 7-bar chart with S M T W T F S day labels, right-aligned
+ *  • Steps: rising sparkline, right-aligned
+ *  • Bold large value + context label bottom-left
  */
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentProps } from 'react';
 import { Text, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient as SvgGrad, Polyline, Stop } from 'react-native-svg';
+import Svg, { Circle, Polyline } from 'react-native-svg';
 
-// ── Ring chart ─────────────────────────────────────────────────────────────────
+// ── Donut ring with value centered inside ─────────────────────────────────────
 function RingChart({
   pct,
   color,
   trackColor,
-  gradId,
-  size   = 72,
-  stroke = 9,
+  size    = 82,
+  stroke  = 9,
+  value,
+  unit,
 }: {
   pct:        number;
   color:      string;
   trackColor: string;
-  gradId:     string;
   size?:      number;
   stroke?:    number;
+  value:      string;
+  unit:       string;
 }) {
   const r  = (size - stroke) / 2;
   const c  = 2 * Math.PI * r;
   const cx = size / 2;
+  const hasValue = value !== '—' && pct > 0;
 
   return (
-    <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
-      <Defs>
-        <SvgGrad id={gradId} x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0%"   stopColor={color} stopOpacity="0.45" />
-          <Stop offset="100%" stopColor={color} stopOpacity="1"    />
-        </SvgGrad>
-      </Defs>
-      <Circle cx={cx} cy={cx} r={r} fill="none" stroke={trackColor} strokeWidth={stroke} />
-      {pct > 0 && (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      {/* SVG ring */}
+      <Svg
+        width={size}
+        height={size}
+        style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }}>
         <Circle
           cx={cx} cy={cx} r={r}
           fill="none"
-          stroke={`url(#${gradId})`}
+          stroke={trackColor}
           strokeWidth={stroke}
-          strokeDasharray={c}
-          strokeDashoffset={c - Math.min(pct / 100, 1) * c}
-          strokeLinecap="round"
         />
-      )}
-    </Svg>
+        {hasValue && (
+          <Circle
+            cx={cx} cy={cx} r={r}
+            fill="none"
+            stroke={color}
+            strokeWidth={stroke}
+            strokeDasharray={c}
+            strokeDashoffset={c * (1 - Math.min(pct / 100, 1))}
+            strokeLinecap="round"
+          />
+        )}
+      </Svg>
+
+      {/* Value inside hole */}
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{
+          fontSize:      hasValue ? 14 : 13,
+          fontWeight:    '700',
+          color:         hasValue ? '#1A1A1A' : '#D1D5DB',
+          letterSpacing: -0.4,
+          lineHeight:    16,
+        }}>
+          {value}
+        </Text>
+        <Text style={{ fontSize: 8, color: '#9CA3AF', fontWeight: '500', marginTop: 1 }}>
+          {unit}
+        </Text>
+      </View>
+    </View>
   );
 }
 
-// ── Sleep bars — 6 thick bars, light → dark amber ─────────────────────────────
-const SLEEP_H = [0.38, 0.55, 0.70, 0.84, 1.00, 0.88];
-const SLEEP_C = ['#F9D585', '#F5C140', '#EEAA18', '#E5960C', '#D97706', '#C46A06'];
+// ── Sleep bars with S M T W T F S labels ──────────────────────────────────────
+const SLEEP_H  = [0.38, 0.52, 0.68, 0.82, 1.00, 0.90, 0.76];
+const SLEEP_C  = ['#F9D585', '#F5C140', '#EEAA18', '#E5960C', '#D97706', '#C46A06', '#EEAA18'];
+const DAY_LABS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function SleepBars() {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 5, height: 52 }}>
-      {SLEEP_H.map((h, i) => (
-        <View
-          key={i}
-          style={{
-            width: 12,
-            height: h * 52,
-            borderRadius: 5,
-            backgroundColor: SLEEP_C[i],
-          }}
-        />
-      ))}
+    <View style={{ alignItems: 'center', gap: 3 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, height: 52 }}>
+        {SLEEP_H.map((h, i) => (
+          <View
+            key={i}
+            style={{
+              width:           10,
+              height:          Math.round(h * 52),
+              borderRadius:    4,
+              backgroundColor: SLEEP_C[i],
+            }}
+          />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        {DAY_LABS.map((d, i) => (
+          <Text key={i} style={{ width: 10, fontSize: 7, color: '#B0B7C3', textAlign: 'center', fontWeight: '500' }}>
+            {d}
+          </Text>
+        ))}
+      </View>
     </View>
   );
 }
 
 // ── Steps sparkline ────────────────────────────────────────────────────────────
-const STEP_PTS = [10, 16, 13, 22, 18, 28, 25, 34, 30, 40, 48];
+const STEP_PTS = [8, 14, 11, 20, 16, 26, 22, 32, 28, 38, 46];
 
 function Sparkline({ color }: { color: string }) {
-  const W = 90; const H = 52;
+  const W = 88; const H = 52;
   const min = Math.min(...STEP_PTS);
   const max = Math.max(...STEP_PTS);
   const r   = max - min || 1;
@@ -101,7 +133,7 @@ function Sparkline({ color }: { color: string }) {
         points={pts}
         fill="none"
         stroke={color}
-        strokeWidth={3}
+        strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -109,86 +141,92 @@ function Sparkline({ color }: { color: string }) {
   );
 }
 
-// ── Card token ────────────────────────────────────────────────────────────────
-interface CardDef {
+// ── Single card ───────────────────────────────────────────────────────────────
+interface CardConfig {
   icon:       ComponentProps<typeof Ionicons>['name'];
   iconColor:  string;
-  gradTop:    string;    // lighter — top of card
-  gradBot:    string;    // richer  — bottom of card
   label:      string;
   chart:      'ring' | 'bars' | 'sparkline';
-  ringColor:  string;
-  ringTrack:  string;
-  gradId:     string;
+  accentColor: string;
+  trackColor:  string;
 }
 
-// ── Single card ───────────────────────────────────────────────────────────────
 interface MetricCardProps {
-  def:     CardDef;
-  value:   string;
-  unit:    string;
-  pct?:    number;
-  hasData: boolean;
+  cfg:       CardConfig;
+  ringValue: string;   // value shown inside the ring
+  ringUnit:  string;
+  bigValue:  string;   // large number bottom-left
+  bigUnit:   string;   // context label below big value
+  pct:       number;
+  hasData:   boolean;
 }
 
-function MetricCard({ def: d, value, unit, pct = 0, hasData }: MetricCardProps) {
+function MetricCard({ cfg: c, ringValue, ringUnit, bigValue, bigUnit, pct, hasData }: MetricCardProps) {
   return (
-    <View style={{ flex: 1, borderRadius: 24, overflow: 'hidden', minHeight: 168 }}>
-      <LinearGradient
-        colors={[d.gradTop, d.gradBot]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={{ flex: 1, padding: 16 }}>
+    <View style={{
+      flex:            1,
+      borderRadius:    22,
+      backgroundColor: '#FFFFFF',
+      padding:         14,
+      minHeight:       172,
+      // Soft premium shadow
+      shadowColor:     '#0A0A0A',
+      shadowOffset:    { width: 0, height: 2 },
+      shadowOpacity:   0.07,
+      shadowRadius:    10,
+      elevation:       3,
+    }}>
 
-        {/* Icon + label — bare icon, no tile */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 16 }}>
-          <Ionicons name={d.icon} size={22} color={d.iconColor} />
-          <Text style={{
-            fontSize: 15,
-            fontWeight: '600',
-            color: '#1C1C1E',
-            letterSpacing: -0.2,
-          }}>
-            {d.label}
-          </Text>
-        </View>
+      {/* Header: bare icon + label */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <Ionicons name={c.icon} size={20} color={c.iconColor} />
+        <Text style={{
+          fontSize:      14,
+          fontWeight:    '600',
+          color:         '#1C1C1E',
+          letterSpacing: -0.1,
+        }}>
+          {c.label}
+        </Text>
+      </View>
 
-        {/* Value + chart */}
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+      {/* Chart — right-aligned, fills remaining vertical space */}
+      <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
+        {c.chart === 'ring' && (
+          <RingChart
+            pct={hasData ? pct : 0}
+            color={c.accentColor}
+            trackColor={c.trackColor}
+            value={hasData ? ringValue : '—'}
+            unit={ringUnit}
+          />
+        )}
+        {c.chart === 'bars'      && <SleepBars />}
+        {c.chart === 'sparkline' && <Sparkline color={c.accentColor} />}
+      </View>
 
-          {/* Value block */}
-          <View style={{ gap: 4 }}>
-            <Text style={{
-              fontSize: 42,
-              fontWeight: '700',
-              color: hasData ? '#1A1A1A' : '#C8C8C8',
-              letterSpacing: -1.5,
-              lineHeight: 46,
-              includeFontPadding: false,
-            }}>
-              {hasData ? value : '—'}
-            </Text>
-            <Text style={{ fontSize: 13, fontWeight: '400', color: '#8A8A8E' }}>
-              {unit}
-            </Text>
-          </View>
+      {/* Bottom: big value + context label */}
+      <View style={{ marginTop: 10 }}>
+        <Text style={{
+          fontSize:          32,
+          fontWeight:        '700',
+          color:             hasData ? '#1A1A1A' : '#D1D5DB',
+          letterSpacing:     -1,
+          lineHeight:        36,
+          includeFontPadding: false,
+        }}>
+          {hasData ? bigValue : '—'}
+        </Text>
+        <Text style={{
+          fontSize:   11,
+          color:      '#9CA3AF',
+          marginTop:  3,
+          fontWeight: '500',
+        }}>
+          {bigUnit}
+        </Text>
+      </View>
 
-          {/* Chart */}
-          <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-            {d.chart === 'ring' && (
-              <RingChart
-                pct={hasData ? pct : 0}
-                color={d.ringColor}
-                trackColor={d.ringTrack}
-                gradId={d.gradId}
-              />
-            )}
-            {d.chart === 'bars'      && <SleepBars />}
-            {d.chart === 'sparkline' && <Sparkline color={d.ringColor} />}
-          </View>
-        </View>
-
-      </LinearGradient>
     </View>
   );
 }
@@ -214,58 +252,60 @@ export function MetricsGrid({
   const waterPct = Math.min(Math.round((waterLiters / 2.5)  * 100), 100);
   const stepsPct = Math.min(Math.round((steps       / 8000) * 100), 100);
 
+  // Format helpers
+  const fmtCal   = calories    > 0 ? calories.toLocaleString()                        : '—';
+  const fmtWater = waterLiters > 0 ? Math.round(waterLiters * 1000).toLocaleString()  : '—';
+  const fmtSleep = sleepHours  > 0 ? sleepHours.toFixed(2)                            : '—';
+  const fmtSteps = steps       > 0 ? steps.toLocaleString()                           : '—';
+
   return (
     <View style={{ gap: 12 }}>
 
-      {/* Row 1 */}
+      {/* Row 1 — Calories · Water */}
       <View style={{ flexDirection: 'row', gap: 12 }}>
-        {/* Calories */}
         <MetricCard
-          def={{
+          cfg={{
             icon: 'flame', iconColor: '#E8490A',
-            gradTop: '#FFFFFF', gradBot: '#FCDDD5',
             label: 'Calories', chart: 'ring',
-            ringColor: '#E8490A', ringTrack: '#F9C4B2', gradId: 'calG',
+            accentColor: '#22C55E', trackColor: '#DCFCE7',
           }}
-          value={calories > 0 ? calories.toLocaleString() : '0'}
-          unit="kcal" pct={calPct} hasData={hasData}
+          ringValue={fmtCal}  ringUnit="kcal"
+          bigValue={fmtCal}   bigUnit="kcal · Daily rates"
+          pct={calPct}        hasData={hasData}
         />
-        {/* Water */}
         <MetricCard
-          def={{
+          cfg={{
             icon: 'water', iconColor: '#2196F3',
-            gradTop: '#FFFFFF', gradBot: '#C9E8FB',
             label: 'Water', chart: 'ring',
-            ringColor: '#2196F3', ringTrack: '#B3D9F7', gradId: 'watG',
+            accentColor: '#3B82F6', trackColor: '#DBEAFE',
           }}
-          value={waterLiters > 0 ? Math.round(waterLiters * 1000).toLocaleString() : '0'}
-          unit="ml" pct={waterPct} hasData={hasData}
+          ringValue={fmtWater}  ringUnit="ml"
+          bigValue={fmtWater}   bigUnit="ml · Daily goal"
+          pct={waterPct}        hasData={hasData}
         />
       </View>
 
-      {/* Row 2 */}
+      {/* Row 2 — Sleep · Steps */}
       <View style={{ flexDirection: 'row', gap: 12 }}>
-        {/* Sleep */}
         <MetricCard
-          def={{
+          cfg={{
             icon: 'moon', iconColor: '#D97706',
-            gradTop: '#FFFFFF', gradBot: '#FDE9A8',
             label: 'Sleep', chart: 'bars',
-            ringColor: '#D97706', ringTrack: '#FDE68A', gradId: 'slpG',
+            accentColor: '#D97706', trackColor: '#FDE68A',
           }}
-          value={sleepHours > 0 ? sleepHours.toFixed(2) : '0.00'}
-          unit="hrs" hasData={hasData}
+          ringValue={fmtSleep}  ringUnit="hrs"
+          bigValue={fmtSleep}   bigUnit="Hours"
+          pct={0}               hasData={hasData}
         />
-        {/* Steps */}
         <MetricCard
-          def={{
+          cfg={{
             icon: 'footsteps', iconColor: '#2C9E5A',
-            gradTop: '#FFFFFF', gradBot: '#C3F0D2',
             label: 'Steps', chart: 'sparkline',
-            ringColor: '#2C9E5A', ringTrack: '#BBF7D0', gradId: 'stpG',
+            accentColor: '#16A34A', trackColor: '#DCFCE7',
           }}
-          value={steps > 0 ? steps.toLocaleString() : '0'}
-          unit={`${stepsPct}% of 8k goal`} hasData={hasData}
+          ringValue={fmtSteps}                      ringUnit="steps"
+          bigValue={fmtSteps}                       bigUnit={`${stepsPct}% of 8k goal`}
+          pct={stepsPct}                            hasData={hasData}
         />
       </View>
 

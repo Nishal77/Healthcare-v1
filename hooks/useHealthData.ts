@@ -120,15 +120,20 @@ async function readHealthKit(hk: HKInterface): Promise<HealthData | null> {
   const doshaRaw = getDoshaBars(steps, sleepHours || 7, heartRate, spo2 || 98);
   const insight  = buildDoshaInsight(doshaRaw.vata, doshaRaw.pitta, doshaRaw.kapha, alerts);
 
+  // Stress derived from HRV: low HRV → high stress
+  const stressLevel = hrv > 0 ? Math.max(0, Math.round(100 - hrv * 1.4)) : 0;
+
   return {
     heartRate,
-    spo2:        spo2  || 98,
+    spo2:            spo2  || 98,
     hrv,
     steps,
-    waterLiters: 0,
+    waterLiters:     0,
     sleepHours,
     calories,
     bodyTemp,
+    respiratoryRate: 0,   // HealthKit respiratory rate requires separate permission
+    stressLevel,
     nadiType:         getNadiType(heartRate, hrv || 42),
     heartRateStatus:  getHeartRateStatus(heartRate),
     spo2Status:       getSpo2Status(spo2 || 98),
@@ -207,13 +212,15 @@ async function readHealthConnect(): Promise<HealthData | null> {
 
   return {
     heartRate,
-    spo2:        spo2 || 98,
-    hrv:         0,
+    spo2:            spo2 || 98,
+    hrv:             0,
     steps,
-    waterLiters: 0,
+    waterLiters:     0,
     sleepHours,
     calories,
-    bodyTemp:    0,
+    bodyTemp:        0,
+    respiratoryRate: 0,
+    stressLevel:     0,
     nadiType:         getNadiType(heartRate, 42),
     heartRateStatus:  getHeartRateStatus(heartRate),
     spo2Status:       getSpo2Status(spo2 || 98),

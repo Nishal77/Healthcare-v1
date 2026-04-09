@@ -64,11 +64,13 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         hasData={!!data}
       />
 
-      {/* 3-col row: Blood O₂ · HRV · Body Temp */}
+      {/* 3-col row: Blood O₂ · HRV · Body Temp + Resp Rate · Stress */}
       <WatchMetricsRow
         spo2={data?.spo2 ?? 0}
         hrv={data?.hrv ?? 0}
         bodyTemp={data?.bodyTemp ?? 0}
+        respiratoryRate={data?.respiratoryRate ?? 0}
+        stressLevel={data?.stressLevel ?? 0}
         hasData={!!data}
       />
 

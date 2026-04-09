@@ -40,6 +40,8 @@ export interface HealthData {
   sleepHours: number;
   calories: number;
   bodyTemp: number;
+  respiratoryRate: number;   // breaths per minute — 0 when unavailable
+  stressLevel: number;       // 0–100 score derived from HRV — 0 when unavailable
   nadiType: string;
   heartRateStatus: MetricStatus;
   spo2Status: MetricStatus;
