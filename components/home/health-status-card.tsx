@@ -4,9 +4,67 @@
  * dosha framework with AI-generated remedy recommendations.
  */
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useRef } from 'react';
-import { Animated, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Defs, LinearGradient as SvgLinear, Rect, Stop } from 'react-native-svg';
+
+// ─── Marquee ticker ───────────────────────────────────────────────────────────
+// Scrolls text left continuously when it overflows its container.
+
+function MarqueeText({ text, style }: { text: string; style?: object }) {
+  const translateX  = useRef(new Animated.Value(0)).current;
+  const [textW,  setTextW]  = useState(0);
+  const [trackW, setTrackW] = useState(0);
+  const animRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  useEffect(() => {
+    if (textW === 0 || trackW === 0) return;
+    // Only animate when text actually overflows
+    if (textW <= trackW) return;
+
+    const SPEED   = 38;          // px per second
+    const PAUSE   = 1200;        // ms pause at start & end
+    const travel  = textW - trackW + 20;
+    const duration = (travel / SPEED) * 1000;
+
+    translateX.setValue(0);
+
+    animRef.current = Animated.loop(
+      Animated.sequence([
+        Animated.delay(PAUSE),
+        Animated.timing(translateX, {
+          toValue:        -travel,
+          duration,
+          easing:         Easing.linear,
+          useNativeDriver:true,
+        }),
+        Animated.delay(PAUSE),
+        Animated.timing(translateX, {
+          toValue:        0,
+          duration:       400,
+          easing:         Easing.out(Easing.cubic),
+          useNativeDriver:true,
+        }),
+      ])
+    );
+    animRef.current.start();
+
+    return () => animRef.current?.stop();
+  }, [textW, trackW]);
+
+  return (
+    <View
+      style={{ flex: 1, overflow: 'hidden' }}
+      onLayout={e => setTrackW(e.nativeEvent.layout.width)}>
+      <Animated.Text
+        style={[style, { transform: [{ translateX }] }]}
+        numberOfLines={1}
+        onLayout={e => setTextW(e.nativeEvent.layout.width)}>
+        {text}
+      </Animated.Text>
+    </View>
+  );
+}
 
 // ─── Prediction variants ──────────────────────────────────────────────────────
 
@@ -320,28 +378,32 @@ export function HealthStatusCard() {
                 </Text>
               </View>
 
-              {/* Row 2: remedy names + timeframe pill */}
+              {/* Row 2: scrolling remedy text + timeframe pill */}
               <View style={{
                 flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                alignItems:    'center',
+                gap:           10,
               }}>
-                <Text style={{
-                  fontSize: 13, fontWeight: '700', color: '#2C6E49',
-                  flex: 1, marginRight: 10,
-                }} numberOfLines={1}>
-                  {D.remedy}
-                </Text>
+                {/* Marquee — scrolls left when text overflows */}
+                <MarqueeText
+                  text={D.remedy}
+                  style={{
+                    fontSize:      13,
+                    fontWeight:    '700',
+                    color:         '#2C6E49',
+                    letterSpacing: -0.1,
+                  }}
+                />
+
+                {/* Fixed pill — never moves */}
                 <View style={{
-                  backgroundColor: '#0D1117',
-                  borderRadius: 20,
-                  paddingHorizontal: 12,
-                  paddingVertical: 5,
-                  flexShrink: 0,
+                  backgroundColor:  '#0D1117',
+                  borderRadius:     20,
+                  paddingHorizontal:12,
+                  paddingVertical:  5,
+                  flexShrink:       0,
                 }}>
-                  <Text style={{
-                    fontSize: 11, fontWeight: '700', color: '#FFFFFF',
-                  }}>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFFFFF' }}>
                     In {D.timeframe}
                   </Text>
                 </View>
