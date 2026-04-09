@@ -12,8 +12,14 @@ import { DayMacros }                    from './statistics/day-macros';
 import { WeekChart }                    from './statistics/week-chart';
 import { MonthChart }                   from './statistics/month-chart';
 import { PeriodDropdown, type Period }  from './statistics/period-dropdown';
+import type { DailySummary, WeekDay }  from '@/src/api/endpoints/food-log';
 
-export function StatisticsCard() {
+interface Props {
+  summary?:  DailySummary | null;
+  weekData?: WeekDay[];
+}
+
+export function StatisticsCard({ summary, weekData }: Props) {
   const [period, setPeriod] = useState<Period>('Week');
 
   return (
@@ -64,8 +70,8 @@ export function StatisticsCard() {
       </View>
 
       {/* ── Content — swaps based on selected period ─────────────────── */}
-      {period === 'Day'   && <DayMacros  />}
-      {period === 'Week'  && <WeekChart  />}
+      {period === 'Day'   && <DayMacros  summary={summary} />}
+      {period === 'Week'  && <WeekChart  weekData={weekData} />}
       {period === 'Month' && <MonthChart />}
     </View>
   );

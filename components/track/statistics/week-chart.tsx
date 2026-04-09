@@ -14,13 +14,14 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
+import type { WeekDay } from '@/src/api/endpoints/food-log';
 
 // ─── Chart data ───────────────────────────────────────────────────────────────
 
 const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-/** Each day: fats (orange), carbs (teal), protein (blue) in kcal */
-const WEEK_DATA = [
+/** Fallback placeholder data shown before real data loads */
+const PLACEHOLDER_DATA = [
   { fats: 190, carbs: 110, protein:   0 },
   { fats: 310, carbs: 190, protein:   0 },
   { fats: 760, carbs: 590, protein: 680 },
@@ -46,12 +47,21 @@ function yPos(value: number): number {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function WeekChart() {
+interface Props {
+  weekData?: WeekDay[];
+}
+
+export function WeekChart({ weekData }: Props) {
   const [chartW, setChartW] = useState(0);
 
   function onLayout(e: LayoutChangeEvent) {
     setChartW(e.nativeEvent.layout.width - YAXIS_W);
   }
+
+  // Map real weekData → chart bars (calories shown as fats segment, rest 0)
+  const chartData = weekData && weekData.length === 7
+    ? weekData.map(d => ({ fats: d.calories, carbs: d.waterMl > 0 ? Math.round(d.waterMl / 10) : 0, protein: d.exerciseMin * 10 }))
+    : PLACEHOLDER_DATA;
 
   const gap   = chartW > 0 ? (chartW - BAR_W * 7) / 6 : 0;
   const goalY = yPos(GOAL);
@@ -118,7 +128,7 @@ export function WeekChart() {
               </SvgText>
 
               {/* Stacked bars */}
-              {WEEK_DATA.map((d, i) => {
+              {chartData.map((d, i) => {
                 const x  = i * (BAR_W + gap);
                 const hF = (d.fats    / Y_MAX) * CHART_H;
                 const hC = (d.carbs   / Y_MAX) * CHART_H;

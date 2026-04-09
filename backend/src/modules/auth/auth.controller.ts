@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { IS_PUBLIC_KEY } from '../../common/guards/jwt-auth.guard';
 import { SetMetadata } from '@nestjs/common';
@@ -29,6 +29,19 @@ export class AuthController {
   @ApiOperation({ summary: 'Authenticate and receive tokens' })
   login(@Body() dto: LoginDto, @Req() req: FastifyRequest) {
     return this.authService.login(dto, req.ip);
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Return the authenticated user's profile" })
+  me(@CurrentUser() user: User) {
+    return {
+      id:        user.id,
+      email:     user.email,
+      role:      user.role,
+      firstName: user.firstName,
+      lastName:  user.lastName,
+    };
   }
 
   @Post('logout')

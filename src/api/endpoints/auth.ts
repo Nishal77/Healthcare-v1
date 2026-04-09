@@ -5,8 +5,13 @@ export const authApi = {
   login: (payload: LoginPayload) =>
     apiRequest<AuthTokens>('/auth/login', { method: 'POST', body: payload }),
 
+  /** Backend returns tokens (not user) on register — same as login. */
   register: (payload: RegisterPayload) =>
-    apiRequest<AuthUser>('/auth/register', { method: 'POST', body: payload }),
+    apiRequest<AuthTokens>('/auth/register', { method: 'POST', body: payload }),
+
+  /** Fetch the authenticated user's profile. Requires a valid access token. */
+  me: (token: string) =>
+    apiRequest<AuthUser>('/auth/me', { token }),
 
   refreshToken: (refreshToken: string) =>
     apiRequest<AuthTokens>('/auth/refresh', {

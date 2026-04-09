@@ -1,66 +1,50 @@
 /**
  * EatingGuide
- * Today's food log with a recommended meal card + meal entry list.
+ * Today's food log — renders live FoodLogEntry[] from the useFoodLog hook.
  */
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import type { DailySummary, FoodLogEntry } from '@/src/api/endpoints/food-log';
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Static recommendation card ───────────────────────────────────────────────
 
 const RECOMMENDATION = {
-  icon:     'leaf-outline'  as const,
+  icon:     'leaf-outline' as const,
   iconColor:'#16A34A',
-  label:    'Today\'s Pick',
+  label:    "Today's Pick",
   title:    'Quinoa Power Bowl',
   subtitle: 'High protein · complex carbs · ~520 kcal',
 };
 
-interface MealEntry {
-  time:     string;
-  mealType: string;
-  food:     string;
-  kcal:     number;
-  icon:     React.ComponentProps<typeof Ionicons>['name'];
-  iconColor:string;
-  iconBg:   string;
-}
+// ─── Entry type → visual config ───────────────────────────────────────────────
 
-const MEALS: MealEntry[] = [
-  {
-    time:     '08:30',
-    mealType: 'Breakfast',
-    food:     'Oats & Banana Bowl',
-    kcal:     380,
-    icon:     'sunny-outline',
-    iconColor:'#F59E0B',
-    iconBg:   '#FFFBEB',
-  },
-  {
-    time:     '13:00',
-    mealType: 'Lunch',
-    food:     'Grilled Chicken Wrap',
-    kcal:     540,
-    icon:     'restaurant-outline',
-    iconColor:'#F97316',
-    iconBg:   '#FFF7ED',
-  },
-  {
-    time:     '16:30',
-    mealType: 'Snack',
-    food:     'Mixed Nuts & Apple',
-    kcal:     210,
-    icon:     'nutrition-outline',
-    iconColor:'#10B981',
-    iconBg:   '#ECFDF5',
-  },
-];
+const TYPE_STYLE: Record<string, {
+  icon:  React.ComponentProps<typeof Ionicons>['name'];
+  color: string;
+  bg:    string;
+}> = {
+  meal:     { icon: 'restaurant-outline', color: '#F97316', bg: '#FFF7ED' },
+  water:    { icon: 'water-outline',      color: '#38BDF8', bg: '#F0F9FF' },
+  exercise: { icon: 'barbell-outline',    color: '#8B5CF6', bg: '#F5F3FF' },
+  mood:     { icon: 'happy-outline',      color: '#F59E0B', bg: '#FFFBEB' },
+  medicine: { icon: 'medical-outline',    color: '#EF4444', bg: '#FFF0F0' },
+  note:     { icon: 'create-outline',     color: '#6B7280', bg: '#F5F6F8' },
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Today's date label e.g. "Tuesday, 8 Apr" */
-function todayLabel(): string {
-  return new Date().toLocaleDateString('en-US', {
+function formatTime(iso: string): string {
+  const d  = new Date(iso);
+  const h  = d.getHours();
+  const m  = String(d.getMinutes()).padStart(2, '0');
+  const am = h < 12 ? 'AM' : 'PM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${m} ${am}`;
+}
+
+function dateLabel(date: Date): string {
+  return date.toLocaleDateString('en-US', {
     weekday: 'long',
     day:     'numeric',
     month:   'short',
@@ -69,34 +53,35 @@ function todayLabel(): string {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function MealCard({ meal }: { meal: MealEntry }) {
+function EntryCard({ entry }: { entry: FoodLogEntry }) {
+  const style = TYPE_STYLE[entry.entryType] ?? TYPE_STYLE.note;
   return (
     <TouchableOpacity
       activeOpacity={0.82}
       style={{
-        flexDirection:  'row',
-        alignItems:     'center',
-        backgroundColor:'#F5F6F8',
-        borderRadius:   18,
+        flexDirection:    'row',
+        alignItems:       'center',
+        backgroundColor:  '#F5F6F8',
+        borderRadius:     18,
         paddingVertical:  15,
         paddingHorizontal:16,
-        marginBottom:   10,
-        gap: 14,
+        marginBottom:     10,
+        gap:              14,
       }}>
 
       {/* Icon tile */}
       <View style={{
         width: 42, height: 42,
-        borderRadius: 13,
-        backgroundColor: meal.iconBg,
+        borderRadius:    13,
+        backgroundColor: style.bg,
         alignItems:      'center',
         justifyContent:  'center',
-        flexShrink: 0,
+        flexShrink:      0,
       }}>
-        <Ionicons name={meal.icon} size={19} color={meal.iconColor} />
+        <Ionicons name={style.icon} size={19} color={style.color} />
       </View>
 
-      {/* Food name + meal type */}
+      {/* Title + detail */}
       <View style={{ flex: 1 }}>
         <Text style={{
           fontSize:     14,
@@ -105,37 +90,80 @@ function MealCard({ meal }: { meal: MealEntry }) {
           letterSpacing:-0.2,
           marginBottom: 2,
         }}>
-          {meal.food}
+          {entry.title}
         </Text>
-        <Text style={{ fontSize: 11.5, color: '#9CA3AF' }}>
-          {meal.mealType} · {meal.kcal} kcal
+        <Text style={{ fontSize: 11.5, color: '#9CA3AF' }} numberOfLines={1}>
+          {entry.detail
+            ? entry.detail
+            : entry.displayValue || entry.entryType}
         </Text>
       </View>
 
-      {/* Time badge */}
-      <View style={{
-        backgroundColor: '#EBEBEF',
-        borderRadius:    20,
-        paddingHorizontal:9,
-        paddingVertical:  4,
-      }}>
-        <Text style={{
-          fontSize:   11.5,
-          fontWeight: '600',
-          color:      '#6B7280',
-          fontVariant:['tabular-nums'],
+      {/* Right side: display value + time */}
+      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+        {!!entry.displayValue && (
+          <View style={{
+            backgroundColor:  '#F0FBF5',
+            borderRadius:     20,
+            paddingHorizontal:8,
+            paddingVertical:  3,
+          }}>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: '#2C6E49' }}>
+              {entry.displayValue}
+            </Text>
+          </View>
+        )}
+        <View style={{
+          backgroundColor:  '#EBEBEF',
+          borderRadius:     20,
+          paddingHorizontal:9,
+          paddingVertical:  3,
         }}>
-          {meal.time}
-        </Text>
+          <Text style={{
+            fontSize:   11,
+            fontWeight: '600',
+            color:      '#6B7280',
+            fontVariant:['tabular-nums'],
+          }}>
+            {formatTime(entry.loggedAt)}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
 }
 
+function EmptyState() {
+  return (
+    <View style={{
+      alignItems:     'center',
+      justifyContent: 'center',
+      paddingVertical: 32,
+      gap: 8,
+    }}>
+      <Ionicons name="leaf-outline" size={34} color="#D1D5DB" />
+      <Text style={{ fontSize: 14, color: '#9CA3AF', fontWeight: '500' }}>
+        Nothing logged yet
+      </Text>
+      <Text style={{ fontSize: 12, color: '#C4C9D4' }}>
+        Tap the + button to add your first entry
+      </Text>
+    </View>
+  );
+}
+
+// ─── Props ────────────────────────────────────────────────────────────────────
+
+interface Props {
+  entries:  FoodLogEntry[];
+  summary:  DailySummary | null;
+  date?:    Date;
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export function EatingGuide() {
-  const totalKcal = MEALS.reduce((s, m) => s + m.kcal, 0);
+export function EatingGuide({ entries, summary, date = new Date() }: Props) {
+  const totalKcal = summary?.totalCalories ?? 0;
 
   return (
     <View style={{ paddingHorizontal: 20, marginBottom: 4 }}>
@@ -177,11 +205,11 @@ export function EatingGuide() {
           color:      '#9CA3AF',
           marginTop:  3,
         }}>
-          {todayLabel()}
+          {dateLabel(date)}
         </Text>
       </View>
 
-      {/* ── Recommendation card (same style as original tip card) ─── */}
+      {/* ── Recommendation card ───────────────────────────────────── */}
       <TouchableOpacity
         activeOpacity={0.82}
         style={{
@@ -228,7 +256,7 @@ export function EatingGuide() {
         <Ionicons name="chevron-forward" size={16} color="#C4C9D4" />
       </TouchableOpacity>
 
-      {/* ── Meal entries ────────────────────────────────────────────── */}
+      {/* ── Log entries ─────────────────────────────────────────────── */}
       <Text style={{
         fontSize:     13,
         fontWeight:   '600',
@@ -237,11 +265,17 @@ export function EatingGuide() {
         marginBottom:  10,
       }}>
         LOGGED TODAY
+        {entries.length > 0 && (
+          <Text style={{ fontWeight: '400', color: '#C4C9D4' }}>
+            {'  '}{entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+          </Text>
+        )}
       </Text>
 
-      {MEALS.map(meal => (
-        <MealCard key={meal.mealType} meal={meal} />
-      ))}
+      {entries.length === 0
+        ? <EmptyState />
+        : entries.map(entry => <EntryCard key={entry.id} entry={entry} />)
+      }
 
     </View>
   );

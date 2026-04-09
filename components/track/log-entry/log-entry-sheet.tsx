@@ -231,12 +231,52 @@ const rowLabel = {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-interface Props {
-  visible: boolean;
-  onClose: () => void;
+import type { CreateFoodLogPayload } from '@/src/api/endpoints/food-log';
+
+// ─── Payload builder ──────────────────────────────────────────────────────────
+
+function buildPayload(opt: Option, value: string): CreateFoodLogPayload | null {
+  const num = parseFloat(value);
+
+  switch (opt.id) {
+    case 'water':
+      return { entryType: 'water',    title: 'Water',    numericValue: num || 0, unit: 'ml',    displayValue: `${num || 0} ml` };
+    case 'coffee':
+      return { entryType: 'water',    title: 'Coffee',   numericValue: num || 0, unit: 'ml',    displayValue: `${num || 0} ml` };
+    case 'meal':
+      return { entryType: 'meal',     title: 'Meal',     detail: value,          displayValue: value };
+    case 'snack':
+      return { entryType: 'meal',     title: 'Snack',    detail: value,          displayValue: value };
+    case 'running':
+      return { entryType: 'exercise', title: 'Running',  numericValue: num || 0, unit: 'min',   displayValue: `${num || 0} min` };
+    case 'gym':
+      return { entryType: 'exercise', title: 'Gym',      numericValue: num || 0, unit: 'min',   displayValue: `${num || 0} min` };
+    case 'yoga':
+      return { entryType: 'exercise', title: 'Yoga',     numericValue: num || 0, unit: 'min',   displayValue: `${num || 0} min` };
+    case 'cycling':
+      return { entryType: 'exercise', title: 'Cycling',  numericValue: num || 0, unit: 'min',   displayValue: `${num || 0} min` };
+    case 'steps':
+      return { entryType: 'exercise', title: 'Steps',    numericValue: num || 0, unit: 'steps', displayValue: `${num || 0} steps` };
+    case 'mood':
+      return { entryType: 'mood',     title: 'Mood',     moodEmoji: value || '😊', displayValue: value || '😊' };
+    case 'sleep':
+      return { entryType: 'note',     title: 'Sleep',    numericValue: num || 0, unit: 'hrs',   displayValue: `${num || 0} hrs` };
+    case 'weight':
+      return { entryType: 'note',     title: 'Weight',   numericValue: num || 0, unit: 'kg',    displayValue: `${num || 0} kg` };
+    case 'meds':
+      return { entryType: 'medicine', title: value || 'Medicine', displayValue: 'Taken ✓' };
+    default:
+      return null;
+  }
 }
 
-export function LogEntrySheet({ visible, onClose }: Props) {
+interface Props {
+  visible:  boolean;
+  onClose:  () => void;
+  onLog?:   (payloads: CreateFoodLogPayload[]) => Promise<void>;
+}
+
+export function LogEntrySheet({ visible, onClose, onLog }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [values,   setValues  ] = useState<Record<string, string>>({});
 
@@ -269,7 +309,18 @@ export function LogEntrySheet({ visible, onClose }: Props) {
     setValues(prev => ({ ...prev, [id]: v }));
   }
 
-  function handleLog() {
+  async function handleLog() {
+    const payloads = selectedOpts
+      .map(opt => buildPayload(opt, values[opt.id] ?? ''))
+      .filter((p): p is CreateFoodLogPayload => p !== null);
+
+    try {
+      await onLog?.(payloads);
+    } catch {
+      // errors are handled upstream; don't close on failure
+      return;
+    }
+
     setSelected(new Set());
     setValues({});
     onClose();

@@ -12,6 +12,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { MedicalRecordsModule } from './modules/medical-records/medical-records.module';
 import { HealthSyncModule } from './modules/health-sync/health-sync.module';
+import { FoodLogModule } from './modules/food-log/food-log.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { HealthSyncModule } from './modules/health-sync/health-sync.module';
     AppointmentsModule,
     MedicalRecordsModule,
     HealthSyncModule,
+    FoodLogModule,
   ],
 })
 export class AppModule {}
