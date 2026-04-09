@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useHealthData }    from '../../../hooks/useHealthData';
 import { useWatchBluetooth } from '../../../hooks/useWatchBluetooth';
 import { buildDoshaInsight, getDoshaBars } from '../../../src/health/dosha-engine';
+import type { HealthData } from '../../../src/health/types';
 import { DoshaBalanceCard }    from './dosha-balance-card';
 import { HealthSectionHeader } from './health-section-header';
 import { HeartRateCard }       from './heart-rate-card';
@@ -10,10 +11,29 @@ import { MetricsGrid }         from './metrics-grid';
 import { PredictiveInsightCard } from './predictive-insight-card';
 import { WatchMetricsRow }     from './watch-metrics-row';
 
+// ── Preview data shown when no watch is connected ─────────────────────────────
+// Gives the UI a premium, filled-in look for first-time / unconnected users.
+const PREVIEW: HealthData = {
+  heartRate:       72,
+  spo2:            98,
+  hrv:             52,
+  steps:           6842,
+  waterLiters:     1.8,
+  sleepHours:      7.2,
+  calories:        1450,
+  bodyTemp:        98.2,
+  respiratoryRate: 16,
+  stressLevel:     32,
+  nadiType:        'Vata-Pitta',
+  heartRateStatus: 'normal',
+  spo2Status:      'optimal',
+  doshaAlerts:     [],
+  lastUpdated:     new Date(),
+};
+
 interface HealthDashboardProps {
   onSeeAll?:    () => void;
   onLearnMore?: () => void;
-  // Watch sheet is now triggered from the header — dashboard no longer renders it
 }
 
 export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps) {
@@ -25,16 +45,16 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
     if (ble.connectionState === 'disconnected') health.reset();
   }, [ble.connectionState]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const data        = health.data;
-  const isConnected = ble.connectionState === 'connected';
+  const isLive = ble.connectionState === 'connected' && !!health.data;
 
-  const dosha = data
-    ? getDoshaBars(data.steps, data.sleepHours, data.heartRate, data.spo2)
-    : { vata: 32, pitta: 45, kapha: 23 };
+  // Real data when watch is live; preview data otherwise (always looks filled-in)
+  const d: HealthData = health.data ?? PREVIEW;
 
-  const doshaInsight = data
-    ? buildDoshaInsight(dosha.vata, dosha.pitta, dosha.kapha, data.doshaAlerts)
-    : 'Connect your watch to get real-time Dosha analysis powered by your biometrics.';
+  const dosha = getDoshaBars(d.steps, d.sleepHours, d.heartRate, d.spo2);
+
+  const doshaInsight = isLive
+    ? buildDoshaInsight(dosha.vata, dosha.pitta, dosha.kapha, d.doshaAlerts)
+    : 'Your Pitta is slightly elevated. Try cooling foods — cucumber, coconut water — and avoid midday sun.';
 
   return (
     <View style={{ paddingHorizontal: 20, gap: 12 }}>
@@ -43,35 +63,35 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
         onSeeAll={onSeeAll}
         onDisconnect={ble.disconnect}
         connectionState={ble.connectionState}
-        lastUpdated={data?.lastUpdated ?? null}
+        lastUpdated={d.lastUpdated}
         deviceName={ble.connectedDevice?.name ?? null}
       />
 
-      {/* Heart Rate — full width */}
+      {/* Heart Rate — full width, same white card style as grid */}
       <HeartRateCard
-        bpm={data?.heartRate ?? 0}
-        status={data?.heartRateStatus ?? 'normal'}
-        nadiType={data?.nadiType ?? '—'}
-        hasData={!!data}
+        bpm={d.heartRate}
+        status={d.heartRateStatus}
+        nadiType={d.nadiType}
+        isLive={isLive}
       />
 
-      {/* 2 × 2 metrics grid: Steps · Calories · Sleep · Water */}
+      {/* 2 × 2 metrics grid: Calories · Water · Sleep · Steps */}
       <MetricsGrid
-        steps={data?.steps ?? 0}
-        waterLiters={data?.waterLiters ?? 0}
-        calories={data?.calories ?? 0}
-        sleepHours={data?.sleepHours ?? 0}
-        hasData={!!data}
+        steps={d.steps}
+        waterLiters={d.waterLiters}
+        calories={d.calories}
+        sleepHours={d.sleepHours}
+        hasData
       />
 
-      {/* 3-col row: Blood O₂ · HRV · Body Temp + Resp Rate · Stress */}
+      {/* Wearable row: Blood O₂ · HRV · Body Temp + Resp Rate · Stress */}
       <WatchMetricsRow
-        spo2={data?.spo2 ?? 0}
-        hrv={data?.hrv ?? 0}
-        bodyTemp={data?.bodyTemp ?? 0}
-        respiratoryRate={data?.respiratoryRate ?? 0}
-        stressLevel={data?.stressLevel ?? 0}
-        hasData={!!data}
+        spo2={d.spo2}
+        hrv={d.hrv}
+        bodyTemp={d.bodyTemp}
+        respiratoryRate={d.respiratoryRate}
+        stressLevel={d.stressLevel}
+        hasData
       />
 
       <DoshaBalanceCard
@@ -82,11 +102,7 @@ export function HealthDashboard({ onSeeAll, onLearnMore }: HealthDashboardProps)
       />
 
       <PredictiveInsightCard
-        goalsCompleted={
-          isConnected && data
-            ? Math.min(data.doshaAlerts.length === 0 ? 3 : 1, 5)
-            : 0
-        }
+        goalsCompleted={isLive ? Math.min(d.doshaAlerts.length === 0 ? 3 : 1, 5) : 2}
         onLearnMore={onLearnMore}
       />
 
