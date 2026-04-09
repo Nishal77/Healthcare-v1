@@ -1,8 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  SetMetadata,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { IS_PUBLIC_KEY } from '../../common/guards/jwt-auth.guard';
-import { SetMetadata } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
@@ -49,5 +57,23 @@ export class AuthController {
   @ApiOperation({ summary: 'Invalidate refresh token' })
   logout(@CurrentUser() user: User) {
     return this.authService.logout(user.id);
+  }
+
+  // ── OTP ────────────────────────────────────────────────────────────────────
+
+  @Public()
+  @Post('send-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send 6-digit OTP to a phone number' })
+  sendOtp(@Body() body: { phone: string }) {
+    return this.authService.sendOtp(body.phone);
+  }
+
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP entered by the user' })
+  verifyOtp(@Body() body: { phone: string; otp: string }) {
+    return this.authService.verifyOtp(body.phone, body.otp);
   }
 }

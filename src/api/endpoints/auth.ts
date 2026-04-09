@@ -21,4 +21,18 @@ export const authApi = {
 
   logout: (token: string) =>
     apiRequest<void>('/auth/logout', { method: 'POST', token }),
+
+  /** Send a 6-digit OTP to the given phone number. */
+  sendOtp: (phone: string) =>
+    apiRequest<{ expiresIn: number }>('/auth/send-otp', {
+      method: 'POST',
+      body: { phone },
+    }),
+
+  /** Verify the OTP entered by the user. Throws on mismatch / expiry. */
+  verifyOtp: (phone: string, otp: string) =>
+    apiRequest<{ verified: boolean }>('/auth/verify-otp', {
+      method: 'POST',
+      body: { phone, otp },
+    }),
 };
