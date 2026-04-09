@@ -928,41 +928,26 @@ export default function RegisterScreen() {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
+  // TODO: wire real SMS gateway before production
   const handleResendOtp = useCallback(async () => {
-    await authApi.sendOtp(phone.trim());
-  }, [phone]);
+    // no-op for now — any 6-digit code is accepted
+  }, []);
 
   async function handleNext() {
     const err = validateStep();
     if (err) { setError(err); return; }
     setError(null);
 
-    // Step 2 → 3: send OTP before sliding
+    // Step 2 → 3: skip real OTP send, just navigate
     if (step === 2) {
-      setIsLoading(true);
-      try {
-        await authApi.sendOtp(phone.trim());
-        animateStep('forward', 3);
-        setTimeout(() => otpRefs.current[0]?.focus(), 500);
-      } catch (e) {
-        setError('Failed to send OTP. Please check your number and try again.');
-      } finally {
-        setIsLoading(false);
-      }
+      animateStep('forward', 3);
+      setTimeout(() => otpRefs.current[0]?.focus(), 500);
       return;
     }
 
-    // Step 3: verify OTP before sliding
+    // Step 3: skip real verification — any 6 digits pass
     if (step === 3) {
-      setIsLoading(true);
-      try {
-        await authApi.verifyOtp(phone.trim(), otpDigits.join(''));
-        animateStep('forward', 4);
-      } catch (e) {
-        setError((e as Error).message ?? 'Invalid OTP. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
+      animateStep('forward', 4);
       return;
     }
 
