@@ -880,6 +880,24 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError    ] = useState<string | null>(null);
 
+  // ── Auto-clear error whenever the user edits any field ────────────────────
+  // This prevents stale errors (e.g. "Passwords do not match" persisting after
+  // the user has fixed the fields) from confusing the user.
+  useEffect(() => {
+    if (error) setError(null);
+  // We intentionally omit `error` from deps to avoid an infinite loop.
+  // This fires only when actual field values change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    firstName, lastName, email, password, confirmPw,
+    dob, gender, phone,
+    otpDigits.join(''),
+    heightCm, weightKg, bloodGroup, activityLevel,
+    dosha, healthConcerns.join(','), dietPreference, lifestyle,
+    conditions.join(','), medications, allergies, ayurvedicTreatment,
+    ecName, ecRelation, ecPhone,
+  ]);
+
   // Slide animation
   const slideX = useRef(new Animated.Value(0)).current;
 
