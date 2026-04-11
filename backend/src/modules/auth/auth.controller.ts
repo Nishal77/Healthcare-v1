@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   SetMetadata,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
@@ -43,12 +44,16 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: "Return the authenticated user's profile" })
   me(@CurrentUser() user: User) {
+    if (!user) throw new UnauthorizedException('Not authenticated');
     return {
-      id:        user.id,
-      email:     user.email,
-      role:      user.role,
-      firstName: user.firstName,
-      lastName:  user.lastName,
+      id:            user.id,
+      email:         user.email,
+      role:          user.role,
+      firstName:     user.firstName,
+      lastName:      user.lastName,
+      emailVerified: user.emailVerified,
+      isActive:      user.isActive,
+      createdAt:     user.createdAt,
     };
   }
 
@@ -56,6 +61,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Invalidate refresh token' })
   logout(@CurrentUser() user: User) {
+    if (!user) throw new UnauthorizedException('Not authenticated');
     return this.authService.logout(user.id);
   }
 

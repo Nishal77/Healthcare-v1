@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { DataSourceOptions, LogLevel } from 'typeorm';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EmailModule } from './modules/email/email.module';
@@ -85,6 +87,15 @@ import { FoodLogModule } from './modules/food-log/food-log.module';
     MedicalRecordsModule,
     HealthSyncModule,
     FoodLogModule,
+  ],
+  providers: [
+    // ─── Global JWT guard ─────────────────────────────────────────────
+    // Protects every route automatically. Public routes opt-out with @Public()
+    // which sets IS_PUBLIC_KEY metadata that the guard reads via Reflector.
+    {
+      provide:  APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}

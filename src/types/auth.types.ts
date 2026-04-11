@@ -1,11 +1,14 @@
 export type UserRole = 'patient' | 'provider' | 'admin';
 
 export interface AuthUser {
-  id:        string;
-  email:     string;
-  role:      UserRole;
-  firstName: string;
-  lastName:  string;
+  id:            string;
+  email:         string;
+  role:          UserRole;
+  firstName:     string;
+  lastName:      string;
+  emailVerified: boolean;
+  isActive:      boolean;
+  createdAt:     string;
 }
 
 export interface LoginPayload {
