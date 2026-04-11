@@ -1,3 +1,9 @@
+// Force IPv4 for ALL DNS lookups — must be the very first statement.
+// Supabase (and some other cloud DBs) resolve to IPv6 by default; many home
+// routers have no IPv6 route, causing EHOSTUNREACH on port 5432.
+import { setDefaultResultOrder } from 'node:dns';
+setDefaultResultOrder('ipv4first');
+
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
