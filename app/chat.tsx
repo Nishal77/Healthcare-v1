@@ -31,6 +31,7 @@ import { MessageBubble, TypingIndicator } from '../components/chat/message-bubbl
 import type { Message }  from '../components/chat/message-bubble';
 import { QuickChips }    from '../components/chat/quick-chips';
 import { SuggestedTopics } from '../components/chat/suggested-topics';
+import { useAuth }         from '@/hooks/useAuth';
 
 // ── AI response engine (replace with real API call) ──────────────────────────
 const AI_RESPONSES: Record<string, string> = {
@@ -86,6 +87,8 @@ export default function ChatScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const params  = useLocalSearchParams<{ query?: string }>();
+  const { user } = useAuth();
+  const chatUserName = user ? `${user.firstName} ${user.lastName}`.trim() : 'Guest';
 
   const [messages,    setMessages]    = useState<Message[]>([]);
   const [inputText,   setInputText]   = useState(params.query ?? '');
@@ -236,7 +239,7 @@ export default function ChatScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             bounces={false}>
-            <ChatGreeting name="Nishal N Poojary" />
+            <ChatGreeting name={chatUserName} />
             <SuggestedTopics onSelect={sendMessage} />
             <View style={{ height: 20 }} />
             <QuickChips onSelect={sendMessage} />

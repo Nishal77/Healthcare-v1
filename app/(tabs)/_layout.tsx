@@ -4,6 +4,7 @@ import { Animated, Dimensions, View } from 'react-native';
 import { CustomTabBar }                  from '@/components/custom-tab-bar';
 import { ProfileSidebar, SIDEBAR_W }     from '@/components/profile-sidebar/profile-sidebar';
 import { SidebarProvider, useSidebar }   from '@/context/sidebar-context';
+import { useAuth }                       from '@/hooks/useAuth';
 
 const SCREEN_W   = Dimensions.get('window').width;
 const MAIN_SHIFT = SIDEBAR_W * 0.55;   // how far right the whole app slides
@@ -11,10 +12,17 @@ const MAIN_SHIFT = SIDEBAR_W * 0.55;   // how far right the whole app slides
 // Inner layout — reads context, applies animation to the full tab navigator
 function TabsWithSidebar() {
   const { isOpen, progress, closeSidebar } = useSidebar();
+  const { user } = useAuth();
 
   const mainTranslateX   = progress.interpolate({ inputRange: [0, 1], outputRange: [0, MAIN_SHIFT] });
   const mainScale        = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.88]       });
   const mainBorderRadius = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 20]         });
+
+  const fullName = user
+    ? `${user.firstName} ${user.lastName}`.trim()
+    : 'Guest';
+  const handle = user ? `@${user.email.split('@')[0]}` : '@guest';
+  const email  = user?.email ?? '';
 
   return (
     <View style={{ flex: 1, backgroundColor: '#111111' }}>
@@ -24,9 +32,9 @@ function TabsWithSidebar() {
         visible={isOpen}
         onClose={closeSidebar}
         progress={progress}
-        name="Nishal N Poojary"
-        handle="@nishal.poojary"
-        email="nishal@vedarogya.in"
+        name={fullName}
+        handle={handle}
+        email={email}
       />
 
       {/* Entire app — tab screens + tab bar — all shift together */}

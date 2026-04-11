@@ -2,25 +2,32 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileHeader } from '@/components/profile/profile-header';
-import { SettingsMenu } from '@/components/profile/settings-menu';
+import { SettingsMenu }  from '@/components/profile/settings-menu';
+import { useAuth }       from '@/hooks/useAuth';
 
 export default function AccountScreen() {
-  const insets = useSafeAreaInsets();
+  const insets      = useSafeAreaInsets();
+  const { user }    = useAuth();
+
+  const fullName = user
+    ? `${user.firstName} ${user.lastName}`.trim()
+    : 'Guest';
+
+  // Derive a handle from the email prefix (e.g. "nishal.poojary@gmail.com" → "@nishal.poojary")
+  const handle = user
+    ? `@${user.email.split('@')[0]}`
+    : '@guest';
+
+  const email = user?.email ?? '';
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 
-      {/*
-       * Fixed white bar that sits on top of the scroll content.
-       * Covers the Dynamic Island / status bar so nothing bleeds through
-       * when the user scrolls upward.
-       */}
+      {/* Fixed white bar covers the Dynamic Island on scroll */}
       <View
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
+          top: 0, left: 0, right: 0,
           height: insets.top,
           backgroundColor: '#FFFFFF',
           zIndex: 100,
@@ -36,9 +43,9 @@ export default function AccountScreen() {
         bounces={false}>
 
         <ProfileHeader
-          name="Nishal N Poojary"
-          handle="@nishal.poojary"
-          email="nishal@vedarogya.in"
+          name={fullName}
+          handle={handle}
+          email={email}
           tier="Premium Member"
         />
 

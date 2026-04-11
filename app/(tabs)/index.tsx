@@ -6,12 +6,18 @@ import { HealthDashboard }     from '@/components/home/health-tracking/health-da
 import { HeroSection }         from '@/components/home/hero-section';
 import { WatchConnectSheet }   from '@/components/home/watch-connect-sheet';
 import { useSidebar }          from '@/context/sidebar-context';
+import { useAuth }             from '@/hooks/useAuth';
 import { useWatchBluetooth }   from '@/hooks/useWatchBluetooth';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { openSidebar } = useSidebar();
+  const { user } = useAuth();
   const ble = useWatchBluetooth();
+
+  const fullName = user
+    ? `${user.firstName} ${user.lastName}`.trim()
+    : 'Guest';
 
   const [watchSheetOpen, setWatchSheetOpen] = useState(false);
   const isConnected = ble.connectionState === 'connected';
@@ -37,7 +43,7 @@ export default function HomeScreen() {
         bounces={false}>
 
         <HeroSection
-          userName="Nishal N Poojary"
+          userName={fullName}
           onAvatarPress={openSidebar}
           watchConnected={isConnected}
           onWatchPress={() => setWatchSheetOpen(true)}
