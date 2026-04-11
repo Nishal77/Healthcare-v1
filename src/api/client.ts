@@ -1,4 +1,8 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+// EXPO_PUBLIC_API_URL should NOT include the /api/v1 suffix — it's added here.
+// On a physical device, replace localhost with your Mac's local IP:
+//   export EXPO_PUBLIC_API_URL=http://192.168.x.x:3000
+const API_BASE_URL =
+  (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000') + '/api/v1';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

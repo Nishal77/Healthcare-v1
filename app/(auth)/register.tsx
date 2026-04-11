@@ -966,26 +966,48 @@ export default function RegisterScreen() {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
-  // TODO: wire real SMS gateway before production
   const handleResendOtp = useCallback(async () => {
-    // no-op for now — any 6-digit code is accepted
-  }, []);
+    try {
+      await authApi.sendOtp(email.trim(), firstName.trim());
+    } catch (e: any) {
+      console.warn('[OTP] resend failed:', e?.message);
+    }
+  }, [email, firstName]);
 
   async function handleNext() {
     const err = validateStep();
     if (err) { setError(err); return; }
     setError(null);
 
-    // Step 2 → 3: skip real OTP send, just navigate
+    // Step 2 → 3: send OTP to the user's email
     if (step === 2) {
+      setIsLoading(true);
+      try {
+        await authApi.sendOtp(email.trim(), firstName.trim());
+      } catch (e: any) {
+        // Non-fatal in dev — the OTP code is always printed in the backend console
+        // so you can copy it directly even if email delivery fails
+        console.warn('[OTP] send failed (check backend console for code):', e?.message);
+      } finally {
+        setIsLoading(false);
+      }
       animateStep('forward', 3);
       setTimeout(() => otpRefs.current[0]?.focus(), 500);
       return;
     }
 
-    // Step 3: skip real verification — any 6 digits pass
+    // Step 3 → 4: verify the OTP the user typed
     if (step === 3) {
-      animateStep('forward', 4);
+      const code = otpDigits.join('');
+      setIsLoading(true);
+      try {
+        await authApi.verifyOtp(email.trim(), code);
+        animateStep('forward', 4);
+      } catch (e: any) {
+        setError(e?.message ?? 'Incorrect code. Please check your email and try again.');
+      } finally {
+        setIsLoading(false);
+      }
       return;
     }
 

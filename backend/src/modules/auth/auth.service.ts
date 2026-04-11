@@ -74,14 +74,22 @@ export class AuthService {
     // Keyed by email (phone will use a separate key when added)
     this.otpStore.set(email.toLowerCase(), { hash, expiresAt });
 
-    // Send email OTP (non-blocking — fire and forget, errors are logged not thrown)
+    // Always log the code in dev so developers can copy it from the terminal
+    console.log('\n' + '═'.repeat(48));
+    console.log('  🔐  VEDAROGYA OTP  —  DEV MODE');
+    console.log('═'.repeat(48));
+    console.log(`  Email   : ${email}`);
+    console.log(`  Code    : ${code}`);
+    console.log(`  Expires : 5 minutes`);
+    console.log('═'.repeat(48) + '\n');
+
+    // Send email OTP (non-blocking — fire and forget, errors logged not thrown)
     this.emailService
       .sendOtpEmail(email, code, firstName)
       .catch(err =>
-        console.error(`[OTP] Failed to send email to ${email}: ${err.message}`),
+        console.error(`[OTP] ❌ Email delivery failed for ${email}: ${err.message}`),
       );
 
-    console.log(`[OTP DEV] Email: ${email} → Code: ${code}`);
     return { expiresIn: 120 };
   }
 
