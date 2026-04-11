@@ -488,10 +488,9 @@ function Step3({ digits, setDigits, refs, email, phone, onResend }: S3Props) {
     }
   }
 
-  const mm          = Math.floor(seconds / 60);
-  const ss          = seconds % 60;
-  const pct         = seconds / 120;
-  const filledCount = digits.filter(d => d).length;
+  const mm  = Math.floor(seconds / 60);
+  const ss  = seconds % 60;
+  const pct = seconds / 120;
 
   return (
     <View style={otp.container}>
@@ -739,9 +738,10 @@ interface S7Props {
   ecName:     string; setEcName:     (v: string) => void;
   ecRelation: string; setEcRelation: (v: string) => void;
   ecPhone:    string; setEcPhone:    (v: string) => void;
+  onSubmit:   () => void;
 }
 
-function Step7({ ecName, setEcName, ecRelation, setEcRelation, ecPhone, setEcPhone }: S7Props) {
+function Step7({ ecName, setEcName, ecRelation, setEcRelation, ecPhone, setEcPhone, onSubmit }: S7Props) {
   return (
     <View style={st.block}>
       <View style={ec.card}>
@@ -758,6 +758,7 @@ function Step7({ ecName, setEcName, ecRelation, setEcRelation, ecPhone, setEcPho
         value={ecName}
         onChange={setEcName}
         capitalize="words"
+        returnKey="next"
       />
 
       <SelectPill
@@ -775,6 +776,7 @@ function Step7({ ecName, setEcName, ecRelation, setEcRelation, ecPhone, setEcPho
         keyboardType="phone-pad"
         contentType="telephoneNumber"
         returnKey="done"
+        onSubmit={onSubmit}
       />
     </View>
   );
@@ -974,7 +976,10 @@ export default function RegisterScreen() {
     }
   }, [email, firstName]);
 
-  async function handleNext() {
+  const handleNext = useCallback(async () => {
+    // Prevent double-tap while a request is in flight
+    if (isLoading) return;
+
     const err = validateStep();
     if (err) { setError(err); return; }
     setError(null);
@@ -985,8 +990,7 @@ export default function RegisterScreen() {
       try {
         await authApi.sendOtp(email.trim(), firstName.trim());
       } catch (e: any) {
-        // Non-fatal in dev — the OTP code is always printed in the backend console
-        // so you can copy it directly even if email delivery fails
+        // Non-fatal in dev — OTP code is always printed in the backend console
         console.warn('[OTP] send failed (check backend console for code):', e?.message);
       } finally {
         setIsLoading(false);
@@ -1011,13 +1015,13 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Steps 4–6: just slide
+    // Steps 4–6: just slide forward
     if (step < TOTAL_STEPS) {
       animateStep('forward', step + 1);
       return;
     }
 
-    // Step 7: final registration — send all 7 steps in one request
+    // ── Step 7: final — send all data, persist session, redirect ──────────────
     setIsLoading(true);
     try {
       await register({
@@ -1051,13 +1055,19 @@ export default function RegisterScreen() {
         emergencyContactRelation: ecRelation,
         emergencyContactPhone:    ecPhone.trim(),
       });
+      // Tokens + user are persisted inside register() → redirect to home
       router.replace('/(tabs)');
     } catch (e) {
       setError((e as Error).message ?? 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, isLoading, otpDigits, email, firstName, phone, dob, gender,
+      heightCm, weightKg, bloodGroup, activityLevel,
+      dosha, healthConcerns, dietPreference, lifestyle,
+      conditions, medications, allergies, ayurvedicTreatment,
+      ecName, ecRelation, ecPhone, password, register]);
 
   function handleBack() {
     setError(null);
@@ -1180,6 +1190,7 @@ export default function RegisterScreen() {
                 ecName={ecName}         setEcName={setEcName}
                 ecRelation={ecRelation} setEcRelation={setEcRelation}
                 ecPhone={ecPhone}       setEcPhone={setEcPhone}
+                onSubmit={handleNext}
               />
             )}
           </Animated.View>

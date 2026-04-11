@@ -1,11 +1,15 @@
 /**
- * storage.ts — Pure JS key-value store backed by expo-file-system.
+ * storage.ts — Pure JS key-value store backed by expo-file-system (legacy API).
+ *
+ * Importing from 'expo-file-system/legacy' silences the SDK-54 deprecation
+ * warning while keeping the same simple read/write API.
  *
  * Works in Expo Go, development builds, and production builds without
  * any native module linking. Data is persisted to the app's document directory.
  */
 
-import * as FileSystem from 'expo-file-system';
+// eslint-disable-next-line import/no-unresolved
+import * as FileSystem from 'expo-file-system/legacy';
 
 const STORE_DIR = `${FileSystem.documentDirectory ?? ''}vedarogya_store/`;
 
@@ -16,8 +20,8 @@ async function ensureDir(): Promise<void> {
   }
 }
 
+/** Sanitise the key so it becomes a safe filename. */
 function keyToPath(key: string): string {
-  // Sanitise the key so it's a safe filename
   return STORE_DIR + key.replace(/[^a-zA-Z0-9_\-]/g, '_');
 }
 
