@@ -49,7 +49,7 @@ export class FoodLog {
   title!: string;
 
   /** Longer description ("Brown rice · dal · sabzi · salad") */
-  @Column({ length: 300, nullable: true })
+  @Column({ type: 'varchar', length: 300, nullable: true })
   detail?: string;
 
   /**
@@ -57,7 +57,7 @@ export class FoodLog {
    *   "320 kcal" | "500 ml" | "Taken ✓" | "😊 Good"
    * Stored as-is so the UI can render it directly.
    */
-  @Column({ length: 80, nullable: true })
+  @Column({ type: 'varchar', length: 80, nullable: true })
   displayValue?: string;
 
   /**
@@ -68,11 +68,11 @@ export class FoodLog {
   numericValue?: number | null;
 
   /** Unit of numericValue: 'kcal', 'ml', 'min', 'steps', 'kg', 'hrs' */
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   unit?: string | null;
 
   /** Emoji for mood entries: '😊', '😔', '😐' … */
-  @Column({ length: 8, nullable: true })
+  @Column({ type: 'varchar', length: 8, nullable: true })
   moodEmoji?: string | null;
 
   // ── Time ──────────────────────────────────────────────────────────────────
