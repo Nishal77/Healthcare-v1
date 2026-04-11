@@ -2,11 +2,11 @@
  * useAuth — Global authentication context
  *
  * Provides: user state, login, register (all 7 steps), logout.
- * Persists access_token + refresh_token + user in AsyncStorage.
+ * Persists access_token + refresh_token + user via expo-file-system
+ * (works in Expo Go without any native module linking).
  * Hydrates on first mount so the app knows if a session already exists.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
   useCallback,
@@ -15,6 +15,7 @@ import React, {
   useState,
 } from 'react';
 import { authApi } from '@/src/api/endpoints/auth';
+import { storageGet, storageRemove, storageSet } from '@/src/storage';
 import type { AuthUser, RegisterPayload } from '@/src/types/auth.types';
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
@@ -30,9 +31,9 @@ interface AuthState {
   accessToken: string   | null;
   isLoading:   boolean;
   isSignedIn:  boolean;
-  login:    (email: string, password: string)  => Promise<void>;
-  register: (payload: RegisterPayload)          => Promise<void>;
-  logout:   ()                                  => Promise<void>;
+  login:    (email: string, password: string) => Promise<void>;
+  register: (payload: RegisterPayload)         => Promise<void>;
+  logout:   ()                                 => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -49,8 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function hydrate() {
       try {
         const [storedToken, storedUser] = await Promise.all([
-          AsyncStorage.getItem(KEY_ACCESS),
-          AsyncStorage.getItem(KEY_USER),
+          storageGet(KEY_ACCESS),
+          storageGet(KEY_USER),
         ]);
         if (storedToken && storedUser) {
           setAccessToken(storedToken);
@@ -72,9 +73,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authUser: AuthUser,
   ) => {
     await Promise.all([
-      AsyncStorage.setItem(KEY_ACCESS,  access),
-      AsyncStorage.setItem(KEY_REFRESH, refresh),
-      AsyncStorage.setItem(KEY_USER,    JSON.stringify(authUser)),
+      storageSet(KEY_ACCESS,  access),
+      storageSet(KEY_REFRESH, refresh),
+      storageSet(KEY_USER,    JSON.stringify(authUser)),
     ]);
     setAccessToken(access);
     setUser(authUser);
@@ -100,9 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try { await authApi.logout(accessToken); } catch { /* best-effort */ }
     }
     await Promise.all([
-      AsyncStorage.removeItem(KEY_ACCESS),
-      AsyncStorage.removeItem(KEY_REFRESH),
-      AsyncStorage.removeItem(KEY_USER),
+      storageRemove(KEY_ACCESS),
+      storageRemove(KEY_REFRESH),
+      storageRemove(KEY_USER),
     ]);
     setAccessToken(null);
     setUser(null);

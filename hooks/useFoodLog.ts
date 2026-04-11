@@ -12,8 +12,8 @@
  * Falls back to demo data when the backend is unreachable (dev / no network).
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { storageGet } from '../src/storage';
 import {
   type CreateFoodLogPayload,
   type DailySummary,
@@ -57,11 +57,7 @@ export function toTrackEntry(e: FoodLogEntry) {
 }
 
 async function getToken(): Promise<string | null> {
-  try {
-    return await AsyncStorage.getItem('access_token');
-  } catch {
-    return null;
-  }
+  return storageGet('access_token');
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────────

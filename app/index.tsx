@@ -8,7 +8,6 @@
  *     - Seen onboarding → /(auth)/login
  *     - First time → /onboarding
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import {
@@ -19,6 +18,7 @@ import {
   View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { storageGet, storageSet } from '@/src/storage';
 import { useAuth } from '@/hooks/useAuth';
 
 const KEY_SEEN_ONBOARDING = 'vedarogya_seen_onboarding';
@@ -57,7 +57,7 @@ export default function SplashScreen() {
       }
 
       try {
-        const seen = await AsyncStorage.getItem(KEY_SEEN_ONBOARDING);
+        const seen = await storageGet(KEY_SEEN_ONBOARDING);
         router.replace(seen ? '/(auth)/login' : '/onboarding');
       } catch {
         router.replace('/onboarding');

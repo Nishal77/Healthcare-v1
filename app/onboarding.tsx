@@ -8,9 +8,9 @@
  *  • Top ~52 % — solid blue (#2563EB) with Vedarogya brand + sparkle
  *  • Bottom ~48 % — white with title, subtitle, CTAs pinned to bottom
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
+import { storageSet } from '@/src/storage';
 import {
   Dimensions,
   FlatList,
@@ -35,7 +35,7 @@ const WHITE_H = H - BLUE_H;
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 async function markSeen() {
-  try { await AsyncStorage.setItem(KEY_SEEN, '1'); } catch { /* ignore */ }
+  try { await storageSet(KEY_SEEN, '1'); } catch { /* ignore */ }
 }
 
 // ─── Shared blue header with brand at top ─────────────────────────────────────

@@ -16,7 +16,7 @@ const DOSHAS = [
     key:       'vata',
     label:     'Vata',
     elements:  'Ether · Air',
-    icon:      'wind-outline' as const,
+    icon:      'partly-sunny-outline' as const,
     iconColor: '#6366F1',
     iconBg:    '#EEF2FF',
     ringColor: '#6366F1',
