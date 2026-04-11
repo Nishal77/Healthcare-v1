@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { EmailService } from '../email/email.service';
 import { AyurvedicProfile } from '../patients/entities/ayurvedic-profile.entity';
 import { EmergencyContact } from '../patients/entities/emergency-contact.entity';
 import { MedicalHistory } from '../patients/entities/medical-history.entity';
@@ -50,34 +51,56 @@ export class AuthService {
     private readonly jwtService:    JwtService,
     private readonly config:        ConfigService,
     private readonly auditLog:      AuditLogService,
+    private readonly emailService:  EmailService,
   ) {}
 
-  // ── OTP (dev bypass — wire real SMS before production) ────────────────────
+  // ── OTP ───────────────────────────────────────────────────────────────────
 
-  async sendOtp(phone: string): Promise<{ expiresIn: number }> {
+  /**
+   * Generates a 6-digit OTP, stores a bcrypt hash, and delivers it via email.
+   * Phone SMS delivery will be added in a future iteration.
+   *
+   * @param email  Recipient email address
+   * @param firstName  Used to personalise the email greeting
+   */
+  async sendOtp(
+    email: string,
+    firstName?: string,
+  ): Promise<{ expiresIn: number }> {
     const code      = Math.floor(100_000 + Math.random() * 900_000).toString();
     const hash      = await bcrypt.hash(code, 8);
     const expiresAt = Date.now() + 5 * 60 * 1_000; // 5 minutes
 
-    this.otpStore.set(phone, { hash, expiresAt });
+    // Keyed by email (phone will use a separate key when added)
+    this.otpStore.set(email.toLowerCase(), { hash, expiresAt });
 
-    // TODO: send via SMS gateway in production
-    console.log(`[OTP DEV] Phone: ${phone} → Code: ${code}`);
+    // Send email OTP (non-blocking — fire and forget, errors are logged not thrown)
+    this.emailService
+      .sendOtpEmail(email, code, firstName)
+      .catch(err =>
+        console.error(`[OTP] Failed to send email to ${email}: ${err.message}`),
+      );
 
+    console.log(`[OTP DEV] Email: ${email} → Code: ${code}`);
     return { expiresIn: 120 };
   }
 
-  async verifyOtp(phone: string, otp: string): Promise<{ verified: boolean }> {
-    const stored = this.otpStore.get(phone);
+  /**
+   * Verifies the OTP submitted by the user.
+   * Keyed by email address for now; phone key will be added separately.
+   */
+  async verifyOtp(email: string, otp: string): Promise<{ verified: boolean }> {
+    const key    = email.toLowerCase();
+    const stored = this.otpStore.get(key);
 
     if (!stored) {
       throw new BadRequestException(
-        'No OTP found for this number. Please request a new code.',
+        'No OTP found. Please request a new code.',
       );
     }
 
     if (Date.now() > stored.expiresAt) {
-      this.otpStore.delete(phone);
+      this.otpStore.delete(key);
       throw new BadRequestException('OTP has expired. Please request a new code.');
     }
 
@@ -86,7 +109,7 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect OTP. Please try again.');
     }
 
-    this.otpStore.delete(phone); // one-time use
+    this.otpStore.delete(key); // one-time use
     return { verified: true };
   }
 

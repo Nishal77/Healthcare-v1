@@ -64,16 +64,16 @@ export class AuthController {
   @Public()
   @Post('send-otp')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send 6-digit OTP to a phone number' })
-  sendOtp(@Body() body: { phone: string }) {
-    return this.authService.sendOtp(body.phone);
+  @ApiOperation({ summary: 'Send 6-digit OTP to the user email (SMS coming soon)' })
+  sendOtp(@Body() body: { email: string; firstName?: string }) {
+    return this.authService.sendOtp(body.email, body.firstName);
   }
 
   @Public()
   @Post('verify-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify OTP entered by the user' })
-  verifyOtp(@Body() body: { phone: string; otp: string }) {
-    return this.authService.verifyOtp(body.phone, body.otp);
+  verifyOtp(@Body() body: { email: string; otp: string }) {
+    return this.authService.verifyOtp(body.email, body.otp);
   }
 }

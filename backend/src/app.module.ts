@@ -8,6 +8,7 @@ import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EmailModule } from './modules/email/email.module';
 import { PatientsModule } from './modules/patients/patients.module';
 import { UsersModule } from './modules/users/users.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
@@ -73,6 +74,7 @@ import { FoodLogModule } from './modules/food-log/food-log.module';
     }),
 
     // ─── Feature modules ─────────────────────────────────────────────────
+    EmailModule,
     AuditLogModule,
     AuthModule,
     UsersModule,

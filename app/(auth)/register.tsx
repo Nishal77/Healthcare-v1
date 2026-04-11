@@ -455,11 +455,12 @@ interface S3Props {
   digits:    string[];
   setDigits: (d: string[]) => void;
   refs:      React.MutableRefObject<(TextInput | null)[]>;
+  email:     string;
   phone:     string;
   onResend:  () => Promise<void>;
 }
 
-function Step3({ digits, setDigits, refs, phone, onResend }: S3Props) {
+function Step3({ digits, setDigits, refs, email, phone, onResend }: S3Props) {
   const [seconds,       setSeconds]       = useState(120);
   const [canResend,     setCanResend]     = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -483,9 +484,9 @@ function Step3({ digits, setDigits, refs, phone, onResend }: S3Props) {
     }
   }
 
-  const mm       = Math.floor(seconds / 60);
-  const ss       = seconds % 60;
-  const pct      = seconds / 120;
+  const mm          = Math.floor(seconds / 60);
+  const ss          = seconds % 60;
+  const pct         = seconds / 120;
   const filledCount = digits.filter(d => d).length;
 
   return (
@@ -494,16 +495,33 @@ function Step3({ digits, setDigits, refs, phone, onResend }: S3Props) {
       {/* ── Icon — double-ring glow ──────────────────────────────── */}
       <View style={otp.iconOuter}>
         <View style={otp.iconInner}>
-          <Ionicons name="phone-portrait-outline" size={30} color={GREEN} />
+          <Ionicons name="shield-checkmark-outline" size={28} color={GREEN} />
         </View>
       </View>
 
       {/* ── Heading ──────────────────────────────────────────────── */}
-      <Text style={otp.title}>Verify Your Phone</Text>
-      <Text style={otp.sub}>We sent a 6-digit code to</Text>
-      <View style={otp.phonePill}>
-        <Ionicons name="call-outline" size={13} color={GREEN} />
-        <Text style={otp.phoneNum}>{phone}</Text>
+      <Text style={otp.title}>Verify Your Identity</Text>
+      <Text style={otp.sub}>
+        Check your email and phone for the 6-digit code
+      </Text>
+
+      {/* ── Delivery channels ────────────────────────────────────── */}
+      <View style={otp.channelRow}>
+        {/* Email — active */}
+        <View style={otp.channelPill}>
+          <Ionicons name="mail-outline" size={13} color={GREEN} />
+          <Text style={otp.channelText} numberOfLines={1}>
+            {email.length > 22 ? email.slice(0, 20) + '…' : email}
+          </Text>
+        </View>
+        {/* Phone — coming soon */}
+        <View style={otp.channelPillDim}>
+          <Ionicons name="call-outline" size={13} color="#94A3B8" />
+          <Text style={otp.channelTextDim} numberOfLines={1}>{phone}</Text>
+          <View style={otp.soonBadge}>
+            <Text style={otp.soonText}>Soon</Text>
+          </View>
+        </View>
       </View>
 
       {/* ── OTP boxes ────────────────────────────────────────────── */}
@@ -1128,6 +1146,7 @@ export default function RegisterScreen() {
                 digits={otpDigits}
                 setDigits={setOtpDigits}
                 refs={otpRefs}
+                email={email}
                 phone={phone}
                 onResend={handleResendOtp}
               />
@@ -1420,6 +1439,55 @@ const otp = StyleSheet.create({
     fontWeight:    '700',
     color:         DARK,
     letterSpacing: 0.5,
+  },
+
+  // Channel row (email + phone)
+  channelRow: {
+    flexDirection:   'row',
+    gap:             8,
+    marginBottom:    28,
+    flexWrap:        'wrap',
+    justifyContent:  'center',
+  },
+  channelPill: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               6,
+    backgroundColor:   '#F0FBF5',
+    borderRadius:      999,
+    paddingVertical:   7,
+    paddingHorizontal: 12,
+  },
+  channelText: {
+    fontSize:   13,
+    fontWeight: '600',
+    color:      DARK,
+    maxWidth:   160,
+  },
+  channelPillDim: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               6,
+    backgroundColor:   '#F8FAFC',
+    borderRadius:      999,
+    paddingVertical:   7,
+    paddingHorizontal: 12,
+  },
+  channelTextDim: {
+    fontSize: 13,
+    color:    '#94A3B8',
+    maxWidth: 120,
+  },
+  soonBadge: {
+    backgroundColor:   '#E2E8F0',
+    borderRadius:      999,
+    paddingHorizontal: 6,
+    paddingVertical:   2,
+  },
+  soonText: {
+    fontSize:   10,
+    fontWeight: '700',
+    color:      '#64748B',
   },
 
   // Boxes row
