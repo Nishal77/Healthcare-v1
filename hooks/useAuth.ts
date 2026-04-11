@@ -2,11 +2,11 @@
  * useAuth — Global authentication context
  *
  * Provides: user state, login, register (all 7 steps), logout.
- * Persists access_token + refresh_token + user in AsyncStorage.
+ * Persists access_token + refresh_token + user in SecureStore (encrypted on-device).
  * Hydrates on first mount so the app knows if a session already exists.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import React, {
   createContext,
   useCallback,
@@ -49,8 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function hydrate() {
       try {
         const [storedToken, storedUser] = await Promise.all([
-          AsyncStorage.getItem(KEY_ACCESS),
-          AsyncStorage.getItem(KEY_USER),
+          SecureStore.getItemAsync(KEY_ACCESS),
+          SecureStore.getItemAsync(KEY_USER),
         ]);
         if (storedToken && storedUser) {
           setAccessToken(storedToken);
@@ -72,9 +72,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authUser: AuthUser,
   ) => {
     await Promise.all([
-      AsyncStorage.setItem(KEY_ACCESS,  access),
-      AsyncStorage.setItem(KEY_REFRESH, refresh),
-      AsyncStorage.setItem(KEY_USER,    JSON.stringify(authUser)),
+      SecureStore.setItemAsync(KEY_ACCESS,  access),
+      SecureStore.setItemAsync(KEY_REFRESH, refresh),
+      SecureStore.setItemAsync(KEY_USER,    JSON.stringify(authUser)),
     ]);
     setAccessToken(access);
     setUser(authUser);
@@ -100,9 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try { await authApi.logout(accessToken); } catch { /* best-effort */ }
     }
     await Promise.all([
-      AsyncStorage.removeItem(KEY_ACCESS),
-      AsyncStorage.removeItem(KEY_REFRESH),
-      AsyncStorage.removeItem(KEY_USER),
+      SecureStore.deleteItemAsync(KEY_ACCESS),
+      SecureStore.deleteItemAsync(KEY_REFRESH),
+      SecureStore.deleteItemAsync(KEY_USER),
     ]);
     setAccessToken(null);
     setUser(null);
