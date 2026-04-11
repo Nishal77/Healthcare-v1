@@ -999,10 +999,40 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Step 7: final registration
+    // Step 7: final registration — send all 7 steps in one request
     setIsLoading(true);
     try {
-      await register(email.trim(), password, firstName.trim(), lastName.trim());
+      await register({
+        // Step 1
+        email:     email.trim().toLowerCase(),
+        password,
+        firstName: firstName.trim(),
+        lastName:  lastName.trim(),
+        role:      'patient',
+        // Step 2
+        phone:       phone.trim(),
+        dateOfBirth: dob,
+        gender,
+        // Step 4
+        heightCm,
+        weightKg,
+        bloodGroup,
+        activityLevel,
+        // Step 5
+        prakriti:       dosha,
+        healthConcerns,
+        dietPreference,
+        lifestyle,
+        // Step 6
+        existingConditions:   conditions,
+        currentMedications:   medications.trim(),
+        knownAllergies:       allergies.trim(),
+        onAyurvedicTreatment: ayurvedicTreatment,
+        // Step 7
+        emergencyContactName:     ecName.trim(),
+        emergencyContactRelation: ecRelation,
+        emergencyContactPhone:    ecPhone.trim(),
+      });
       router.replace('/(tabs)');
     } catch (e) {
       setError((e as Error).message ?? 'Registration failed. Please try again.');

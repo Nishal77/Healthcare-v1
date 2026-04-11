@@ -11,10 +11,11 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 /**
- * HIPAA: PHI entity — all access must be logged via AuditLogService.
- * Columns containing PHI are marked with a comment for future encryption migration.
+ * HIPAA: PHI entity.
+ * All access must be logged via AuditLogService.
+ * Columns containing PHI are marked — target for field-level encryption in v2.
  */
-@Entity('patients')
+@Entity('patient_profiles')
 export class Patient {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -23,37 +24,41 @@ export class Patient {
   @Column()
   userId!: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user!: User;
 
-  // PHI: date of birth
+  // ── Personal Details (Step 2) ─────────────────────────────────────────────
+
+  /** PHI: phone number */
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ default: false })
+  phoneVerified!: boolean;
+
+  /** PHI: date of birth — stored as ISO date string (YYYY-MM-DD) */
   @Column({ type: 'date', nullable: true })
   dateOfBirth?: string;
 
   @Column({ nullable: true })
   gender?: string;
 
-  @Column({ nullable: true })
-  bloodType?: string;
+  // ── Body Metrics (Step 4) ─────────────────────────────────────────────────
 
-  // PHI: allergies
-  @Column({ type: 'simple-array', nullable: true })
-  allergies?: string[];
+  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true })
+  heightCm?: number;
 
-  // PHI: emergency contact
-  @Column({ nullable: true })
-  emergencyContactName?: string;
+  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true })
+  weightKg?: number;
 
   @Column({ nullable: true })
-  emergencyContactPhone?: string;
-
-  // PHI: insurance
-  @Column({ nullable: true })
-  insuranceProvider?: string;
+  bloodGroup?: string;
 
   @Column({ nullable: true })
-  insurancePolicyNumber?: string;
+  activityLevel?: string;
+
+  // ── Timestamps ────────────────────────────────────────────────────────────
 
   @CreateDateColumn()
   createdAt!: Date;

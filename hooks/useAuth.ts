@@ -1,7 +1,7 @@
 /**
  * useAuth — Global authentication context
  *
- * Provides: user state, login, register, logout.
+ * Provides: user state, login, register (all 7 steps), logout.
  * Persists access_token + refresh_token + user in AsyncStorage.
  * Hydrates on first mount so the app knows if a session already exists.
  */
@@ -15,7 +15,7 @@ import React, {
   useState,
 } from 'react';
 import { authApi } from '@/src/api/endpoints/auth';
-import type { AuthUser } from '@/src/types/auth.types';
+import type { AuthUser, RegisterPayload } from '@/src/types/auth.types';
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
 
@@ -27,12 +27,12 @@ const KEY_USER    = 'auth_user';
 
 interface AuthState {
   user:        AuthUser | null;
-  accessToken: string  | null;
+  accessToken: string   | null;
   isLoading:   boolean;
   isSignedIn:  boolean;
-  login:    (email: string, password: string)                                        => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
-  logout:   () => Promise<void>;
+  login:    (email: string, password: string)  => Promise<void>;
+  register: (payload: RegisterPayload)          => Promise<void>;
+  logout:   ()                                  => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -87,21 +87,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await persist(tokens.accessToken, tokens.refreshToken, me);
   }, [persist]);
 
-  // ── Register ──────────────────────────────────────────────────────────────
-  const register = useCallback(async (
-    email:     string,
-    password:  string,
-    firstName: string,
-    lastName:  string,
-  ) => {
-    const tokens = await authApi.register({
-      email,
-      password,
-      firstName,
-      lastName,
-      role: 'patient',
-    });
-    const me = await authApi.me(tokens.accessToken);
+  // ── Register — sends all 7 steps to the backend in one request ────────────
+  const register = useCallback(async (payload: RegisterPayload) => {
+    const tokens = await authApi.register(payload);
+    const me     = await authApi.me(tokens.accessToken);
     await persist(tokens.accessToken, tokens.refreshToken, me);
   }, [persist]);
 
