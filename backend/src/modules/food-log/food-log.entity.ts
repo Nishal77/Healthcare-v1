@@ -50,7 +50,7 @@ export class FoodLog {
 
   /** Longer description ("Brown rice · dal · sabzi · salad") */
   @Column({ length: 300, nullable: true })
-  detail!: string;
+  detail?: string;
 
   /**
    * Human-readable display value shown on the right badge:
@@ -58,22 +58,22 @@ export class FoodLog {
    * Stored as-is so the UI can render it directly.
    */
   @Column({ length: 80, nullable: true })
-  displayValue!: string;
+  displayValue?: string;
 
   /**
    * Machine-readable quantity for aggregation (calories totals, water total …).
    * NULL for non-numeric entries (mood, medicine notes).
    */
   @Column({ type: 'float', nullable: true })
-  numericValue!: number | null;
+  numericValue?: number | null;
 
   /** Unit of numericValue: 'kcal', 'ml', 'min', 'steps', 'kg', 'hrs' */
   @Column({ length: 20, nullable: true })
-  unit!: string | null;
+  unit?: string | null;
 
   /** Emoji for mood entries: '😊', '😔', '😐' … */
   @Column({ length: 8, nullable: true })
-  moodEmoji!: string | null;
+  moodEmoji?: string | null;
 
   // ── Time ──────────────────────────────────────────────────────────────────
   /** The actual moment of the activity (user-supplied or current time). */

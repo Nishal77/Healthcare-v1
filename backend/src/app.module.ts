@@ -43,11 +43,14 @@ import { FoodLogModule } from './modules/food-log/food-log.module';
         };
 
         if (url) {
-          // Supabase / any DATABASE_URL — SSL required by Supabase
+          // Supabase / any DATABASE_URL
+          // extra.family:4 forces IPv4 — Supabase resolves to IPv6 on some
+          // networks which causes EHOSTUNREACH when the router has no IPv6 path.
           return {
             ...shared,
             url,
-            ssl: { rejectUnauthorized: false },
+            ssl:   { rejectUnauthorized: false },
+            extra: { family: 4 },
           };
         }
 
@@ -60,6 +63,7 @@ import { FoodLogModule } from './modules/food-log/food-log.module';
           username: config.get<string>('database.user'),
           password: config.get<string>('database.password'),
           ssl:      config.get<boolean>('database.ssl') ? { rejectUnauthorized: false } : false,
+          extra:    { family: 4 },
         };
       },
     }),

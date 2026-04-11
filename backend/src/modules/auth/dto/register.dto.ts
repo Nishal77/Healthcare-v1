@@ -1,16 +1,14 @@
 import {
+  ArrayMinSize,
   IsArray,
+  IsEmail,
   IsIn,
-  IsNumberString,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
   MinLength,
-  IsEmail,
-  IsNotEmpty,
-  ArrayMinSize,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import type { UserRole } from '../../users/entities/user.entity';
 
 // ── Step 1 — Account Setup ────────────────────────────────────────────────────
