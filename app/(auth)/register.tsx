@@ -281,6 +281,10 @@ function OtpBoxes({ digits, setDigits, refs }: OtpBoxesProps) {
               textContentType={i === 0 ? 'oneTimeCode' : 'none'}
               caretHidden
             />
+            {/* dash placeholder when empty */}
+            {!d && !isFocused && (
+              <View style={otp.dashPlaceholder} pointerEvents="none" />
+            )}
           </View>
         );
       })}
@@ -492,78 +496,52 @@ function Step3({ digits, setDigits, refs, email, phone, onResend }: S3Props) {
   return (
     <View style={otp.container}>
 
-      {/* ── Icon — double-ring glow ──────────────────────────────── */}
-      <View style={otp.iconOuter}>
-        <View style={otp.iconInner}>
-          <Ionicons name="shield-checkmark-outline" size={28} color={GREEN} />
-        </View>
+      {/* ── App icon badge ───────────────────────────────────────── */}
+      <View style={otp.iconBadge}>
+        <Ionicons name="lock-closed" size={22} color="#FFFFFF" />
       </View>
 
       {/* ── Heading ──────────────────────────────────────────────── */}
-      <Text style={otp.title}>Verify Your Identity</Text>
+      <Text style={otp.title}>Enter Code</Text>
       <Text style={otp.sub}>
-        Check your email and phone for the 6-digit code
+        {"We've sent a 6-digit verification code to your\nregistered email and phone number."}
       </Text>
 
-      {/* ── Delivery channels ────────────────────────────────────── */}
-      <View style={otp.channelRow}>
-        {/* Email — active */}
-        <View style={otp.channelPill}>
-          <Ionicons name="mail-outline" size={13} color={GREEN} />
-          <Text style={otp.channelText} numberOfLines={1}>
-            {email.length > 22 ? email.slice(0, 20) + '…' : email}
-          </Text>
-        </View>
-        {/* Phone — coming soon */}
-        <View style={otp.channelPillDim}>
-          <Ionicons name="call-outline" size={13} color="#94A3B8" />
-          <Text style={otp.channelTextDim} numberOfLines={1}>{phone}</Text>
-          <View style={otp.soonBadge}>
-            <Text style={otp.soonText}>Soon</Text>
-          </View>
-        </View>
+      {/* ── Secure badge ─────────────────────────────────────────── */}
+      <View style={otp.secureBadge}>
+        <Ionicons name="shield-checkmark-outline" size={12} color={GREEN} />
+        <Text style={otp.secureText}>Secured with end-to-end encryption</Text>
       </View>
 
-      {/* ── OTP boxes ────────────────────────────────────────────── */}
-      <OtpBoxes digits={digits} setDigits={setDigits} refs={refs} />
-
-      {/* ── Progress dots ────────────────────────────────────────── */}
-      <View style={otp.dotsRow}>
-        {digits.map((_, i) => (
-          <View
-            key={i}
-            style={[otp.dot, i < filledCount && otp.dotFilled]}
-          />
-        ))}
+      {/* ── OTP digit inputs ─────────────────────────────────────── */}
+      <View style={otp.boxGroup}>
+        <OtpBoxes digits={digits} setDigits={setDigits} refs={refs} />
       </View>
 
-      {/* ── Timer ────────────────────────────────────────────────── */}
+      {/* ── Timer / expired ──────────────────────────────────────── */}
       {!canResend ? (
-        <View style={otp.timerCard}>
-          <View style={otp.timerLabelRow}>
-            <Ionicons name="time-outline" size={13} color="#94A3B8" />
-            <Text style={otp.timerLabel}>
-              Code expires in{' '}
-              <Text style={otp.timerCount}>
-                {mm}:{ss.toString().padStart(2, '0')}
-              </Text>
+        <View style={otp.timerRow}>
+          <Ionicons name="time-outline" size={13} color="#94A3B8" />
+          <Text style={otp.timerLabel}>
+            {"Expires in "}
+            <Text style={otp.timerCount}>
+              {mm}:{ss.toString().padStart(2, '0')}
             </Text>
-          </View>
-          {/* thin progress bar */}
-          <View style={otp.timerTrack}>
-            <View style={[otp.timerFill, { width: `${pct * 100}%` as any }]} />
+          </Text>
+          <View style={otp.timerPill}>
+            <View style={[otp.timerPillFill, { width: `${pct * 100}%` as any }]} />
           </View>
         </View>
       ) : (
         <View style={otp.expiredBadge}>
           <Ionicons name="alert-circle-outline" size={13} color="#F59E0B" />
-          <Text style={otp.expiredText}>Code expired</Text>
+          <Text style={otp.expiredText}>Code expired — request a new one</Text>
         </View>
       )}
 
       {/* ── Resend ───────────────────────────────────────────────── */}
       <View style={otp.resendRow}>
-        <Text style={otp.resendLabel}>{"Didn't receive it?  "}</Text>
+        <Text style={otp.resendLabel}>{"Didn't receive it? "}</Text>
         <TouchableOpacity
           onPress={canResend ? handleResend : undefined}
           activeOpacity={canResend ? 0.7 : 1}
@@ -1384,219 +1362,149 @@ const st = StyleSheet.create({
 const otp = StyleSheet.create({
   container: {
     alignItems:   'center',
-    paddingTop:   4,
+    paddingTop:   8,
     marginBottom: 8,
+    width:        '100%',
   },
 
-  // Icon — double ring
-  iconOuter: {
-    width:           88,
-    height:          88,
-    borderRadius:    44,
-    backgroundColor: 'rgba(44,110,73,0.07)',
+  // ── Dark badge icon (like image reference) ──────────────────────────
+  iconBadge: {
+    width:           52,
+    height:          52,
+    borderRadius:    16,
+    backgroundColor: DARK,
     alignItems:      'center',
     justifyContent:  'center',
-    marginBottom:    24,
-  },
-  iconInner: {
-    width:           64,
-    height:          64,
-    borderRadius:    32,
-    backgroundColor: '#EBF6F0',
-    alignItems:      'center',
-    justifyContent:  'center',
+    marginBottom:    28,
+    shadowColor:     '#000',
+    shadowOffset:    { width: 0, height: 4 },
+    shadowOpacity:   0.18,
+    shadowRadius:    12,
+    elevation:       6,
   },
 
-  // Heading
+  // ── Heading ─────────────────────────────────────────────────────────
   title: {
-    fontSize:      26,
+    fontSize:      30,
     fontWeight:    '800',
     color:         DARK,
-    letterSpacing: -0.6,
-    marginBottom:  8,
-    textAlign:     'center',
+    letterSpacing: -0.8,
+    marginBottom:  12,
+    textAlign:     'left',
+    alignSelf:     'flex-start',
+    paddingLeft:   4,
   },
   sub: {
-    fontSize:     13.5,
+    fontSize:     14,
     color:        LABEL_COLOR,
-    marginBottom: 10,
-    textAlign:    'center',
+    lineHeight:   21,
+    marginBottom: 18,
+    textAlign:    'left',
+    alignSelf:    'flex-start',
+    paddingLeft:  4,
   },
 
-  // Phone pill
-  phonePill: {
+  // ── Secure badge ────────────────────────────────────────────────────
+  secureBadge: {
     flexDirection:     'row',
     alignItems:        'center',
-    gap:               6,
+    gap:               5,
     backgroundColor:   '#F0FBF5',
     borderRadius:      999,
-    paddingVertical:   6,
-    paddingHorizontal: 14,
-    marginBottom:      28,
+    paddingVertical:   5,
+    paddingHorizontal: 11,
+    marginBottom:      32,
+    alignSelf:         'flex-start',
+    marginLeft:        4,
   },
-  phoneNum: {
-    fontSize:      14,
-    fontWeight:    '700',
-    color:         DARK,
-    letterSpacing: 0.5,
-  },
-
-  // Channel row (email + phone)
-  channelRow: {
-    flexDirection:   'row',
-    gap:             8,
-    marginBottom:    28,
-    flexWrap:        'wrap',
-    justifyContent:  'center',
-  },
-  channelPill: {
-    flexDirection:     'row',
-    alignItems:        'center',
-    gap:               6,
-    backgroundColor:   '#F0FBF5',
-    borderRadius:      999,
-    paddingVertical:   7,
-    paddingHorizontal: 12,
-  },
-  channelText: {
-    fontSize:   13,
+  secureText: {
+    fontSize:   11.5,
     fontWeight: '600',
-    color:      DARK,
-    maxWidth:   160,
-  },
-  channelPillDim: {
-    flexDirection:     'row',
-    alignItems:        'center',
-    gap:               6,
-    backgroundColor:   '#F8FAFC',
-    borderRadius:      999,
-    paddingVertical:   7,
-    paddingHorizontal: 12,
-  },
-  channelTextDim: {
-    fontSize: 13,
-    color:    '#94A3B8',
-    maxWidth: 120,
-  },
-  soonBadge: {
-    backgroundColor:   '#E2E8F0',
-    borderRadius:      999,
-    paddingHorizontal: 6,
-    paddingVertical:   2,
-  },
-  soonText: {
-    fontSize:   10,
-    fontWeight: '700',
-    color:      '#64748B',
+    color:      GREEN,
   },
 
-  // Boxes row
+  // ── Digit input group ───────────────────────────────────────────────
+  boxGroup: {
+    width:        '100%',
+    marginBottom: 28,
+  },
   boxRow: {
     flexDirection:  'row',
-    gap:            9,
+    gap:            10,
     justifyContent: 'center',
-    marginBottom:   16,
+    paddingHorizontal: 4,
   },
 
-  // Each box wrapper (border lives here, not on TextInput)
+  // Underline-style box (no rounded card, just a bottom stroke)
   boxWrap: {
-    width:           48,
-    height:          62,
-    borderRadius:    16,
-    backgroundColor: '#F5F6F8',
-    borderWidth:     1.5,
-    borderColor:     '#EAECF0',
-    alignItems:      'center',
-    justifyContent:  'center',
-    // no shadow when empty
+    width:              44,
+    height:             60,
+    alignItems:         'center',
+    justifyContent:     'center',
+    borderBottomWidth:  2,
+    borderBottomColor:  '#D1D5DB',
+    position:           'relative',
   },
   boxWrapFilled: {
-    backgroundColor: '#FFFFFF',
-    borderColor:     DARK,
-    shadowColor:     '#000',
-    shadowOffset:    { width: 0, height: 2 },
-    shadowOpacity:   0.07,
-    shadowRadius:    6,
-    elevation:       3,
+    borderBottomColor: DARK,
   },
   boxWrapFocused: {
-    borderColor:     GREEN,
-    borderWidth:     1.5,
-    backgroundColor: '#FFFFFF',
-    shadowColor:     GREEN,
-    shadowOffset:    { width: 0, height: 0 },
-    shadowOpacity:   0.18,
-    shadowRadius:    8,
-    elevation:       2,
+    borderBottomColor: GREEN,
+    borderBottomWidth: 2.5,
   },
   boxInput: {
-    width:       '100%',
-    height:      '100%',
-    textAlign:   'center',
-    fontSize:    26,
-    fontWeight:  '700',
-    color:       DARK,
-    letterSpacing: -0.5,
+    position:   'absolute',
+    top:        0,
+    left:       0,
+    right:      0,
+    bottom:     0,
+    textAlign:  'center',
+    fontSize:   28,
+    fontWeight: '700',
+    color:      DARK,
+    letterSpacing: 0,
     includeFontPadding: false,
   },
+  // horizontal dash shown when cell is empty and not focused
+  dashPlaceholder: {
+    width:           18,
+    height:          2,
+    borderRadius:    1,
+    backgroundColor: '#CBD5E1',
+    marginTop:       8,
+  },
 
-  // Progress dots under boxes
-  dotsRow: {
+  // ── Timer inline row ─────────────────────────────────────────────────
+  timerRow: {
     flexDirection:  'row',
+    alignItems:     'center',
     gap:            6,
-    justifyContent: 'center',
     marginBottom:   20,
-  },
-  dot: {
-    width:           6,
-    height:          6,
-    borderRadius:    3,
-    backgroundColor: '#E2E8F0',
-  },
-  dotFilled: {
-    backgroundColor: GREEN,
-    width:           16,
-    borderRadius:    3,
-  },
-
-  // Timer card
-  timerCard: {
-    width:             '85%',
-    backgroundColor:   '#F8FAFC',
-    borderRadius:      14,
-    paddingHorizontal: 16,
-    paddingVertical:   12,
-    marginBottom:      16,
-    alignItems:        'center',
-    gap:               8,
-  },
-  timerLabelRow: {
-    flexDirection: 'row',
-    alignItems:    'center',
-    gap:           5,
+    alignSelf:      'flex-start',
+    paddingLeft:    4,
   },
   timerLabel: {
-    fontSize:   13,
-    color:      '#64748B',
+    fontSize: 13,
+    color:    '#64748B',
   },
   timerCount: {
     fontWeight: '700',
     color:      DARK,
   },
-  timerTrack: {
-    width:           '100%',
+  timerPill: {
+    width:           56,
     height:          3,
     backgroundColor: '#E2E8F0',
     borderRadius:    999,
     overflow:        'hidden',
   },
-  timerFill: {
+  timerPillFill: {
     height:          '100%',
     backgroundColor: GREEN,
     borderRadius:    999,
   },
 
-  // Expired badge
+  // ── Expired ──────────────────────────────────────────────────────────
   expiredBadge: {
     flexDirection:     'row',
     alignItems:        'center',
@@ -1605,7 +1513,9 @@ const otp = StyleSheet.create({
     borderRadius:      999,
     paddingVertical:   6,
     paddingHorizontal: 12,
-    marginBottom:      16,
+    marginBottom:      20,
+    alignSelf:         'flex-start',
+    marginLeft:        4,
   },
   expiredText: {
     fontSize:   12.5,
@@ -1613,13 +1523,13 @@ const otp = StyleSheet.create({
     color:      '#B45309',
   },
 
-  // Resend
+  // ── Resend ───────────────────────────────────────────────────────────
   resendRow: {
-    flexDirection: 'row',
-    alignItems:    'center',
-    flexWrap:      'wrap',
-    justifyContent:'center',
-    marginTop:     2,
+    flexDirection:  'row',
+    alignItems:     'center',
+    flexWrap:       'wrap',
+    alignSelf:      'flex-start',
+    paddingLeft:    4,
   },
   resendLabel: {
     fontSize: 13.5,
@@ -1641,6 +1551,26 @@ const otp = StyleSheet.create({
   resendTextActive: {
     color: GREEN,
   },
+
+  // ── Legacy unused (kept to avoid TS errors if referenced elsewhere) ──
+  phonePill:      { display: 'none' } as any,
+  phoneNum:       { display: 'none' } as any,
+  channelRow:     { display: 'none' } as any,
+  channelPill:    { display: 'none' } as any,
+  channelText:    { display: 'none' } as any,
+  channelPillDim: { display: 'none' } as any,
+  channelTextDim: { display: 'none' } as any,
+  soonBadge:      { display: 'none' } as any,
+  soonText:       { display: 'none' } as any,
+  dotsRow:        { display: 'none' } as any,
+  dot:            { display: 'none' } as any,
+  dotFilled:      { display: 'none' } as any,
+  timerCard:      { display: 'none' } as any,
+  timerLabelRow:  { display: 'none' } as any,
+  timerTrack:     { display: 'none' } as any,
+  timerFill:      { display: 'none' } as any,
+  iconOuter:      { display: 'none' } as any,
+  iconInner:      { display: 'none' } as any,
 });
 
 // ── Emergency contact styles ──────────────────────────────────────────────────
