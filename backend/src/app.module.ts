@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import type { DataSourceOptions } from 'typeorm';
+import type { DataSourceOptions, LogLevel } from 'typeorm';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
@@ -32,12 +32,14 @@ import { FoodLogModule } from './modules/food-log/food-log.module';
         const isDev = config.get('app.nodeEnv') === 'development';
         const url   = config.get<string | undefined>('database.url');
 
+        const logging: LogLevel[] = isDev ? ['query', 'error'] : ['error'];
+
         const shared = {
           type:             'postgres' as const,
           autoLoadEntities: true,
           // HIPAA: Never use synchronize in production — use migrations.
           synchronize: isDev,
-          logging:     isDev ? ['query', 'error'] : ['error'],
+          logging,
         };
 
         if (url) {
@@ -49,15 +51,15 @@ import { FoodLogModule } from './modules/food-log/food-log.module';
           };
         }
 
-        // Local dev fallback
+        // Local dev fallback (individual host/port/db vars)
         return {
           ...shared,
-          host:     config.get('database.host'),
-          port:     config.get('database.port'),
-          database: config.get('database.name'),
-          username: config.get('database.user'),
-          password: config.get('database.password'),
-          ssl:      config.get('database.ssl') ? { rejectUnauthorized: false } : false,
+          host:     config.get<string>('database.host'),
+          port:     config.get<number>('database.port'),
+          database: config.get<string>('database.name'),
+          username: config.get<string>('database.user'),
+          password: config.get<string>('database.password'),
+          ssl:      config.get<boolean>('database.ssl') ? { rejectUnauthorized: false } : false,
         };
       },
     }),
