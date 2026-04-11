@@ -994,7 +994,13 @@ export default function RegisterScreen() {
     }
   }, [email, firstName]);
 
-  const handleNext = useCallback(async () => {
+  // NOTE: plain async function — NOT useCallback.
+  // Using useCallback here caused a stale-closure bug where confirmPw / lastName
+  // were read from the deps snapshot rather than the live state, making the
+  // "Passwords do not match" error appear even when passwords were identical.
+  // Since handleNext is only called from the CTA button and the Step7 onSubmit
+  // arrow wrapper below, memoisation gives no benefit and was actively harmful.
+  async function handleNext() {
     // Prevent double-tap while a request is in flight
     if (isLoading) return;
 
@@ -1080,12 +1086,7 @@ export default function RegisterScreen() {
     } finally {
       setIsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, isLoading, otpDigits, email, firstName, phone, dob, gender,
-      heightCm, weightKg, bloodGroup, activityLevel,
-      dosha, healthConcerns, dietPreference, lifestyle,
-      conditions, medications, allergies, ayurvedicTreatment,
-      ecName, ecRelation, ecPhone, password, register]);
+  }
 
   function handleBack() {
     setError(null);
@@ -1208,7 +1209,7 @@ export default function RegisterScreen() {
                 ecName={ecName}         setEcName={setEcName}
                 ecRelation={ecRelation} setEcRelation={setEcRelation}
                 ecPhone={ecPhone}       setEcPhone={setEcPhone}
-                onSubmit={handleNext}
+                onSubmit={() => { void handleNext(); }}
               />
             )}
           </Animated.View>
